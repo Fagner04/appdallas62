@@ -52,8 +52,8 @@ export function BarberScheduleView() {
           Agenda do Barbeiro
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid md:grid-cols-2 gap-6">
+      <CardContent className="space-y-6 p-4 sm:p-6">
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6">
           {/* Calendar */}
           <div className="space-y-4">
             <Calendar
@@ -120,7 +120,7 @@ export function BarberScheduleView() {
                   return (
                     <div
                       key={appointment.id}
-                      className="p-4 rounded-lg border border-border hover:bg-muted/50 transition-smooth space-y-3"
+                      className="p-3 sm:p-4 rounded-lg border border-border hover:bg-muted/50 transition-smooth space-y-3"
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-3">

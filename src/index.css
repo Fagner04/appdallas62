@@ -159,4 +159,22 @@ All colors MUST be HSL.
   .hover-lift {
     @apply transition-smooth hover:-translate-y-1 hover:shadow-elegant;
   }
+  
+  /* Mobile improvements */
+  @media (max-width: 640px) {
+    .animate-fade-in {
+      animation: fadeIn 0.3s ease-in;
+    }
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }

@@ -105,10 +105,10 @@ export function ClientBookingCalendar() {
           Agendar Novo Serviço
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid md:grid-cols-2 gap-6">
+      <CardContent className="space-y-6 p-4 sm:p-6">
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6">
           {/* Calendar */}
-          <div className="space-y-4">
+          <div className="space-y-4 order-2 lg:order-1">
             <Label>Selecione a Data</Label>
             {selectedBarber && allBlockedTimes.length > 0 && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-2 rounded-md">
@@ -133,7 +133,7 @@ export function ClientBookingCalendar() {
           </div>
 
           {/* Booking form */}
-          <div className="space-y-4">
+          <div className="space-y-4 order-1 lg:order-2">
             <div className="space-y-2">
               <Label htmlFor="service">Serviço</Label>
               <Select value={selectedService} onValueChange={setSelectedService}>
@@ -193,7 +193,7 @@ export function ClientBookingCalendar() {
                     Nenhum horário disponível nesta data
                   </div>
                 ) : (
-                  <div className="grid grid-cols-3 gap-2 max-h-[200px] overflow-y-auto p-2 border rounded-md">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[200px] overflow-y-auto p-2 border rounded-md">
                     {availableSlots.map((slot) => (
                       <Button
                         key={slot}

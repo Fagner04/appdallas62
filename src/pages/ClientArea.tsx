@@ -87,8 +87,8 @@ export default function ClientArea() {
       <div className="space-y-8 animate-fade-in">
         {/* Header com perfil - Design moderno */}
         <div className="relative overflow-hidden rounded-xl shadow-elegant bg-card border">
-          <div className="p-6">
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+          <div className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
               <AvatarUpload 
                 avatarUrl={profile?.avatar_url} 
                 userName={user?.name}
@@ -96,20 +96,20 @@ export default function ClientArea() {
               />
                <div className="flex-1 space-y-3">
                 <div>
-                  <h1 className="text-3xl font-bold mb-1">
+                  <h1 className="text-2xl sm:text-3xl font-bold mb-1">
                     Olá, {user?.name}! 👋
                   </h1>
-                  <p className="text-muted-foreground">Bem-vindo à sua área pessoal</p>
+                  <p className="text-sm sm:text-base text-muted-foreground">Bem-vindo à sua área pessoal</p>
                 </div>
-                <div className="flex flex-wrap gap-3">
-                  <div className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-lg border">
-                    <Mail className="h-4 w-4 text-primary" />
-                    <span className="text-sm font-medium">{profile?.email || user?.email}</span>
+                <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3">
+                  <div className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-lg border text-sm">
+                    <Mail className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="font-medium truncate">{profile?.email || user?.email}</span>
                   </div>
                   {profile?.phone && (
-                    <div className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-lg border">
-                      <Phone className="h-4 w-4 text-primary" />
-                      <span className="text-sm font-medium">{profile.phone}</span>
+                    <div className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-lg border text-sm">
+                      <Phone className="h-4 w-4 text-primary flex-shrink-0" />
+                      <span className="font-medium">{profile.phone}</span>
                     </div>
                   )}
                 </div>
@@ -119,52 +119,52 @@ export default function ClientArea() {
         </div>
 
         {/* Estatísticas rápidas - Cards modernos */}
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           <Card className="hover-lift relative overflow-hidden border-primary/20 shadow-elegant group">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
-            <CardContent className="pt-6 relative">
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-smooth">
-                  <Calendar className="h-6 w-6 text-primary" />
+            <CardContent className="pt-4 sm:pt-6 p-4 sm:p-6 relative">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <div className="p-2 sm:p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-smooth">
+                  <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                 </div>
-                <div className="text-3xl font-bold text-primary">
+                <div className="text-2xl sm:text-3xl font-bold text-primary">
                   {upcomingAppointments.length}
                 </div>
               </div>
-              <h3 className="font-semibold text-lg">Próximos</h3>
-              <p className="text-sm text-muted-foreground">Agendamentos confirmados</p>
+              <h3 className="font-semibold text-base sm:text-lg">Próximos</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">Agendamentos confirmados</p>
             </CardContent>
           </Card>
           
           <Card className="hover-lift relative overflow-hidden border-success/20 shadow-elegant group">
             <div className="absolute inset-0 bg-gradient-to-br from-success/5 to-transparent" />
-            <CardContent className="pt-6 relative">
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 rounded-xl bg-success/10 group-hover:bg-success/20 transition-smooth">
-                  <CheckCircle2 className="h-6 w-6 text-success" />
+            <CardContent className="pt-4 sm:pt-6 p-4 sm:p-6 relative">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <div className="p-2 sm:p-3 rounded-xl bg-success/10 group-hover:bg-success/20 transition-smooth">
+                  <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 text-success" />
                 </div>
-                <div className="text-3xl font-bold text-success">
+                <div className="text-2xl sm:text-3xl font-bold text-success">
                   {allAppointments.filter(a => a.status === 'completed').length}
                 </div>
               </div>
-              <h3 className="font-semibold text-lg">Total de Visitas</h3>
-              <p className="text-sm text-muted-foreground">Serviços concluídos</p>
+              <h3 className="font-semibold text-base sm:text-lg">Total de Visitas</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">Serviços concluídos</p>
             </CardContent>
           </Card>
 
-          <Card className="hover-lift relative overflow-hidden border-accent/20 shadow-elegant group">
+          <Card className="hover-lift relative overflow-hidden border-accent/20 shadow-elegant group sm:col-span-2 lg:col-span-1">
             <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent" />
-            <CardContent className="pt-6 relative">
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 rounded-xl bg-accent/10 group-hover:bg-accent/20 transition-smooth">
-                  <MapPin className="h-6 w-6 text-accent" />
+            <CardContent className="pt-4 sm:pt-6 p-4 sm:p-6 relative">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <div className="p-2 sm:p-3 rounded-xl bg-accent/10 group-hover:bg-accent/20 transition-smooth">
+                  <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-accent" />
                 </div>
-                <div className="text-3xl font-bold text-accent">
+                <div className="text-2xl sm:text-3xl font-bold text-accent">
                   {profile?.loyalty_points || 0}
                 </div>
               </div>
-              <h3 className="font-semibold text-lg">Fidelidade</h3>
-              <p className="text-sm text-muted-foreground">Pontos acumulados</p>
+              <h3 className="font-semibold text-base sm:text-lg">Fidelidade</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">Pontos acumulados</p>
             </CardContent>
           </Card>
         </div>
@@ -202,10 +202,10 @@ export default function ClientArea() {
                 return (
                   <div
                     key={appointment.id}
-                    className="group relative overflow-hidden p-6 rounded-xl border border-primary/10 hover:border-primary/30 bg-gradient-to-br from-card to-muted/5 hover:shadow-elegant transition-smooth"
+                    className="group relative overflow-hidden p-4 sm:p-6 rounded-xl border border-primary/10 hover:border-primary/30 bg-gradient-to-br from-card to-muted/5 hover:shadow-elegant transition-smooth"
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-smooth" />
-                    <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="relative flex flex-col gap-4">
                       <div className="space-y-4">
                         <div className="flex items-center gap-4">
                           <div className="relative">
@@ -223,29 +223,29 @@ export default function ClientArea() {
                             </p>
                           </div>
                         </div>
-                        <div className="flex flex-wrap gap-3">
-                          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20">
-                            <Clock className="h-4 w-4 text-primary" />
+                        <div className="flex flex-wrap gap-2 sm:gap-3">
+                          <div className="flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-sm">
+                            <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
                             <span className="font-semibold text-primary">
                               {formatTime(appointment.appointment_time)}
                             </span>
                           </div>
-                          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-success/10 border border-success/20">
+                          <div className="flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-lg bg-success/10 border border-success/20 text-sm">
                             <span className="font-bold text-success">
                               R$ {appointment.service?.price}
                             </span>
                           </div>
-                          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted border border-border">
-                            <Clock className="h-4 w-4 text-muted-foreground" />
+                          <div className="flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-lg bg-muted border border-border text-sm">
+                            <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
                             <span className="font-medium">{appointment.service?.duration} min</span>
                           </div>
                         </div>
                       </div>
                       <Badge 
                         variant="outline" 
-                        className={`${statusConfig.color} flex items-center gap-2 px-4 py-2 border text-sm font-semibold`}
+                        className={`${statusConfig.color} flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 border text-xs sm:text-sm font-semibold w-fit`}
                       >
-                        <StatusIcon className="h-4 w-4" />
+                        <StatusIcon className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                         {statusConfig.label}
                       </Badge>
                     </div>
@@ -285,33 +285,33 @@ export default function ClientArea() {
                 return (
                 <div
                     key={appointment.id}
-                    className="group flex items-center justify-between p-4 rounded-xl border border-border hover:border-primary/20 hover:bg-gradient-to-r hover:from-muted/50 hover:to-transparent transition-smooth"
+                    className="group flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 rounded-xl border border-border hover:border-primary/20 hover:bg-gradient-to-r hover:from-muted/50 hover:to-transparent transition-smooth gap-3"
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="text-center min-w-[90px] p-3 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/10 group-hover:border-primary/20 transition-smooth">
-                        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                      <div className="text-center min-w-[70px] sm:min-w-[90px] p-2 sm:p-3 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/10 group-hover:border-primary/20 transition-smooth flex-shrink-0">
+                        <div className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wide">
                           {formatBrasiliaDate(toBrasiliaTime(appointment.appointment_date), 'dd/MMM')}
                         </div>
-                        <div className="text-xl font-bold text-primary mt-1">
+                        <div className="text-lg sm:text-xl font-bold text-primary mt-1">
                           {formatTime(appointment.appointment_time)}
                         </div>
                       </div>
-                      <Separator orientation="vertical" className="h-14" />
-                      <div className="space-y-1">
-                        <div className="font-bold text-lg">{appointment.service?.name}</div>
-                        <div className="flex items-center gap-3 text-sm">
-                          <span className="text-muted-foreground">
+                      <Separator orientation="vertical" className="hidden sm:block h-14" />
+                      <div className="space-y-1 flex-1 min-w-0">
+                        <div className="font-bold text-base sm:text-lg truncate">{appointment.service?.name}</div>
+                        <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm flex-wrap">
+                          <span className="text-muted-foreground whitespace-nowrap">
                             {appointment.service?.duration} min
                           </span>
-                          <span className="text-muted-foreground">•</span>
-                          <span className="font-semibold text-success">
+                          <span className="text-muted-foreground hidden sm:inline">•</span>
+                          <span className="font-semibold text-success whitespace-nowrap">
                             R$ {appointment.service?.price}
                           </span>
                         </div>
                       </div>
                     </div>
-                    <Badge variant="outline" className={`${statusConfig.color} flex items-center gap-2 px-3 py-1.5 border font-semibold`}>
-                      <StatusIcon className="h-4 w-4" />
+                    <Badge variant="outline" className={`${statusConfig.color} flex items-center gap-2 px-2 sm:px-3 py-1 sm:py-1.5 border font-semibold text-xs w-fit flex-shrink-0`}>
+                      <StatusIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                       {statusConfig.label}
                     </Badge>
                   </div>
@@ -328,12 +328,12 @@ export default function ClientArea() {
           <DialogTrigger asChild>
             <Button 
               size="lg"
-              className="fixed bottom-8 right-8 h-16 w-16 rounded-full shadow-glow hover:shadow-elegant transition-smooth z-50 gradient-primary"
+              className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 h-14 w-14 sm:h-16 sm:w-16 rounded-full shadow-glow hover:shadow-elegant transition-smooth z-50 gradient-primary"
             >
-              <CalendarPlus className="h-8 w-8 text-white" />
+              <CalendarPlus className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full p-4 sm:p-6">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-2xl">
                 <CalendarPlus className="h-6 w-6 text-primary" />
