@@ -22,6 +22,7 @@ import { useCustomerProfile, useUpcomingAppointments, useCustomerAppointments } 
 import { useAuth } from '@/contexts/AuthContext';
 import { formatBrasiliaDate, toBrasiliaTime } from '@/lib/timezone';
 import { ClientBookingCalendar } from '@/components/ClientBookingCalendar';
+import { AvatarUpload } from '@/components/AvatarUpload';
 
 export default function ClientArea() {
   const { user } = useAuth();
@@ -86,14 +87,11 @@ export default function ClientArea() {
           <div className="absolute inset-0 gradient-primary opacity-90" />
           <div className="relative p-6">
             <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-              <div className="relative">
-                <div className="absolute -inset-1 gradient-primary rounded-full blur opacity-75 animate-pulse" />
-                <Avatar className="relative h-20 w-20 border-4 border-white/20 shadow-elegant">
-                  <AvatarFallback className="bg-white/10 backdrop-blur-sm text-white">
-                    <User className="h-10 w-10" />
-                  </AvatarFallback>
-                </Avatar>
-              </div>
+              <AvatarUpload 
+                avatarUrl={profile?.avatar_url} 
+                userName={user?.name}
+                size="md"
+              />
               <div className="flex-1 space-y-3">
                 <div>
                   <h1 className="text-3xl font-bold text-white mb-1 drop-shadow-lg">

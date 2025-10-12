@@ -10,6 +10,14 @@ export const useCustomerProfile = () => {
     queryFn: async () => {
       if (!user?.id) throw new Error('User not authenticated');
 
+      // Get profile with avatar_url
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('avatar_url')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      // Get customer data
       const { data, error } = await supabase
         .from('customers')
         .select('*')
@@ -36,10 +44,10 @@ export const useCustomerProfile = () => {
           throw insertError;
         }
         
-        return newProfile;
+        return { ...newProfile, avatar_url: profile?.avatar_url };
       }
       
-      return data;
+      return { ...data, avatar_url: profile?.avatar_url };
     },
     enabled: !!user?.id,
     retry: 1,
