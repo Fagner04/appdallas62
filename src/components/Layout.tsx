@@ -120,7 +120,7 @@ export const Layout = ({ children }: LayoutProps) => {
       </aside>
 
       {/* Mobile Header + Sidebar */}
-      <div className="flex flex-1 flex-col">
+      <div className="flex flex-1 flex-col overflow-x-hidden">
         <header className="lg:hidden sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
           <div className="flex h-16 items-center justify-between px-4">
             <h1 className="text-xl font-bold text-foreground">

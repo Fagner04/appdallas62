@@ -128,6 +128,7 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground font-poppins;
+    overflow-x: hidden;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -164,6 +165,17 @@ All colors MUST be HSL.
   @media (max-width: 640px) {
     .animate-fade-in {
       animation: fadeIn 0.3s ease-in;
+    }
+    
+    /* Prevent horizontal scroll */
+    body {
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+    
+    /* Ensure fixed buttons stay within bounds */
+    .fixed {
+      max-width: calc(100vw - 2rem);
     }
   }
   

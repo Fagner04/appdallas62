@@ -264,9 +264,10 @@ export default function ClientArea() {
           <DialogTrigger asChild>
             <Button 
               size="lg"
-              className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 h-14 w-14 sm:h-16 sm:w-16 rounded-full shadow-glow hover:shadow-elegant transition-smooth z-50 gradient-primary"
+              className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 rounded-full shadow-glow hover:shadow-elegant transition-smooth z-40 gradient-primary p-0"
+              aria-label="Novo Agendamento"
             >
-              <CalendarPlus className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+              <CalendarPlus className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-white" />
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full p-4 sm:p-6">
