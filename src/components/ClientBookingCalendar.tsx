@@ -179,65 +179,63 @@ export function ClientBookingCalendar() {
             </div>
 
             {selectedDate && selectedBarber && selectedService && (
-              <>
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    Horários Disponíveis em {formatBrasiliaDate(selectedDate, 'dd/MM/yyyy')}
-                  </Label>
-                  {slotsLoading ? (
-                    <div className="p-4 text-center">
-                      <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
-                    </div>
-                  ) : availableSlots.length === 0 ? (
-                    <div className="p-4 text-center text-muted-foreground border rounded-md">
-                      Nenhum horário disponível nesta data
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-3 gap-2 max-h-[200px] overflow-y-auto p-2 border rounded-md">
-                      {availableSlots.map((slot) => (
-                        <Button
-                          key={slot}
-                          variant={selectedTime === slot ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setSelectedTime(slot)}
-                          className="text-sm"
-                        >
-                          {slot}
-                        </Button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Mostrar horários bloqueados */}
-                {dateBlockedTimes.length > 0 && (
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2 text-destructive">
-                      <Ban className="h-4 w-4" />
-                      Horários Bloqueados
-                    </Label>
-                    <div className="space-y-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md max-h-[200px] overflow-y-auto">
-                      {dateBlockedTimes.map((blocked) => (
-                        <div 
-                          key={blocked.id} 
-                          className="flex flex-col gap-1 p-2 bg-background rounded-md border border-destructive/30"
-                        >
-                          <div className="flex items-center gap-2 text-sm font-medium text-destructive">
-                            <Clock className="h-3 w-3" />
-                            {blocked.start_time} - {blocked.end_time}
-                          </div>
-                          {blocked.reason && (
-                            <p className="text-xs text-muted-foreground pl-5">
-                              Motivo: {blocked.reason}
-                            </p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  Horários Disponíveis em {formatBrasiliaDate(selectedDate, 'dd/MM/yyyy')}
+                </Label>
+                {slotsLoading ? (
+                  <div className="p-4 text-center">
+                    <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+                  </div>
+                ) : availableSlots.length === 0 ? (
+                  <div className="p-4 text-center text-muted-foreground border rounded-md">
+                    Nenhum horário disponível nesta data
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-3 gap-2 max-h-[200px] overflow-y-auto p-2 border rounded-md">
+                    {availableSlots.map((slot) => (
+                      <Button
+                        key={slot}
+                        variant={selectedTime === slot ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setSelectedTime(slot)}
+                        className="text-sm"
+                      >
+                        {slot}
+                      </Button>
+                    ))}
                   </div>
                 )}
-              </>
+              </div>
+            )}
+
+            {/* Mostrar horários bloqueados independente do serviço */}
+            {selectedDate && selectedBarber && dateBlockedTimes.length > 0 && (
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2 text-destructive">
+                  <Ban className="h-4 w-4" />
+                  Horários Bloqueados
+                </Label>
+                <div className="space-y-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md max-h-[200px] overflow-y-auto">
+                  {dateBlockedTimes.map((blocked) => (
+                    <div 
+                      key={blocked.id} 
+                      className="flex flex-col gap-1 p-2 bg-background rounded-md border border-destructive/30"
+                    >
+                      <div className="flex items-center gap-2 text-sm font-medium text-destructive">
+                        <Clock className="h-3 w-3" />
+                        {blocked.start_time} - {blocked.end_time}
+                      </div>
+                      {blocked.reason && (
+                        <p className="text-xs text-muted-foreground pl-5">
+                          Motivo: {blocked.reason}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
 
             <Button

@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { 
   Calendar, 
   Clock, 
@@ -339,6 +339,9 @@ export default function ClientArea() {
                 <CalendarPlus className="h-6 w-6 text-primary" />
                 Novo Agendamento
               </DialogTitle>
+              <DialogDescription>
+                Selecione serviço, barbeiro, data e horário para confirmar seu agendamento.
+              </DialogDescription>
             </DialogHeader>
             <ClientBookingCalendar />
           </DialogContent>
