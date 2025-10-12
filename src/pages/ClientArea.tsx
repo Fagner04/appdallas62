@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { DigitalClock } from '@/components/DigitalClock';
 import { 
   Calendar, 
   Clock, 
@@ -78,9 +77,6 @@ export default function ClientArea() {
   return (
     <Layout>
       <div className="space-y-8 animate-fade-in">
-        {/* Relógio Digital */}
-        <DigitalClock />
-
         {/* Header com perfil */}
         <Card className="shadow-elegant">
           <CardContent className="pt-6">

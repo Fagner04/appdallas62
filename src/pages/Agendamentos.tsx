@@ -18,6 +18,7 @@ import { useServices } from '@/hooks/useServices';
 import { useBlockedTimes, useCreateBlockedTime, useDeleteBlockedTime } from '@/hooks/useBlockedTimes';
 import { useAuth } from '@/contexts/AuthContext';
 import { getTodayBrasilia } from '@/lib/timezone';
+import { DigitalClock } from '@/components/DigitalClock';
 
 export default function Agendamentos() {
   const { user } = useAuth();
@@ -239,6 +240,9 @@ export default function Agendamentos() {
   return (
     <Layout>
       <div className="space-y-6 animate-fade-in">
+        {/* Relógio Digital */}
+        <DigitalClock />
+        
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold mb-2">Agendamentos</h1>
