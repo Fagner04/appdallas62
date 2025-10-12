@@ -145,7 +145,7 @@ export const Layout = ({ children }: LayoutProps) => {
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-72 p-0">
+              <SheetContent side="left" className="w-72 p-0 [&>button]:hidden">
                 <SidebarContent />
               </SheetContent>
             </Sheet>
