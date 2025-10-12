@@ -28,8 +28,6 @@ const getMenuItems = (role?: string) => {
     return [
       { icon: LayoutDashboard, label: 'Minha Área', path: '/cliente' },
       { icon: Calendar, label: 'Meus Agendamentos', path: '/agendamentos' },
-      { icon: Bell, label: 'Notificações', path: '/notificacoes' },
-      { icon: Settings, label: 'Configurações', path: '/configuracoes' },
     ];
   }
 
