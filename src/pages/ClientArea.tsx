@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -19,9 +18,7 @@ import {
   AlertCircle,
   Loader2,
   CalendarPlus,
-  User,
-  ArrowLeft,
-  LogOut
+  User
 } from 'lucide-react';
 import { useCustomerProfile, useUpcomingAppointments, useCustomerAppointments } from '@/hooks/useCustomerData';
 import { useAuth } from '@/contexts/AuthContext';
@@ -30,17 +27,11 @@ import { ClientBookingCalendar } from '@/components/ClientBookingCalendar';
 import { AvatarUpload } from '@/components/AvatarUpload';
 
 export default function ClientArea() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const { data: profile, isLoading: profileLoading } = useCustomerProfile();
   const { data: upcomingAppointments = [], isLoading: upcomingLoading } = useUpcomingAppointments();
   const { data: allAppointments = [], isLoading: allLoading } = useCustomerAppointments();
-
-  const handleLogout = async () => {
-    await logout();
-    navigate('/');
-  };
 
   const getStatusConfig = (status: string) => {
     const configs = {
@@ -94,28 +85,6 @@ export default function ClientArea() {
   return (
     <Layout>
       <div className="space-y-8 animate-fade-in">
-        {/* Botão Voltar */}
-        <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleLogout}
-            className="gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span className="hidden sm:inline">Voltar</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleLogout}
-            className="gap-2 text-muted-foreground hover:text-destructive"
-          >
-            <LogOut className="h-4 w-4" />
-            <span className="hidden sm:inline">Sair</span>
-          </Button>
-        </div>
-
         {/* Header com perfil - Design moderno */}
         <div className="relative overflow-hidden rounded-xl shadow-elegant bg-card border">
           <div className="p-4 sm:p-6">
