@@ -18,6 +18,7 @@ import Notificacoes from "./pages/Notificacoes";
 import Configuracoes from "./pages/Configuracoes";
 import AgendaBarbeiro from "./pages/AgendaBarbeiro";
 import ControleClientes from "./pages/ControleClientes";
+import HistoricoCliente from "./pages/HistoricoCliente";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -137,6 +138,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <ControleClientes />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/historico"
+        element={
+          <ProtectedRoute>
+            <HistoricoCliente />
           </ProtectedRoute>
         }
       />

@@ -14,6 +14,7 @@ import {
   Menu,
   UserCog,
   User,
+  Clock,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -29,6 +30,7 @@ const getMenuItems = (role?: string) => {
     return [
       { icon: LayoutDashboard, label: 'Minha Área', path: '/cliente' },
       { icon: Calendar, label: 'Meus Agendamentos', path: '/agendamentos' },
+      { icon: Clock, label: 'Histórico', path: '/historico' },
     ];
   }
 
