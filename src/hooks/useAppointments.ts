@@ -16,9 +16,9 @@ export interface Appointment {
 }
 
 export interface AppointmentWithDetails extends Appointment {
-  customer: { name: string } | null;
+  customer: { name: string; phone?: string } | null;
   service: { name: string; duration: number; price: number } | null;
-  barber: { id: string } | null;
+  barber: { id: string; name?: string } | null;
 }
 
 export interface CreateAppointmentData {
@@ -49,9 +49,9 @@ export const useAppointments = (date?: string) => {
         .from('appointments')
         .select(`
           *,
-          customer:customers(name),
+          customer:customers(name, phone),
           service:services(name, duration, price),
-          barber:barbers(id)
+          barber:barbers(id, name)
         `)
         .order('appointment_time', { ascending: true });
 
@@ -168,9 +168,11 @@ export const useCreateAppointment = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
-      queryClient.invalidateQueries({ queryKey: ['available-slots'] });
+      queryClient.invalidateQueries({ queryKey: ['available-time-slots'] });
       queryClient.invalidateQueries({ queryKey: ['today-appointments'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['customer-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['upcoming-appointments'] });
       toast.success('Agendamento criado com sucesso!');
     },
     onError: (error) => {

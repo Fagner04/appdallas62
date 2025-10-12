@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Calendar, 
   Clock, 
@@ -13,11 +14,13 @@ import {
   CheckCircle2,
   XCircle,
   AlertCircle,
-  Loader2
+  Loader2,
+  CalendarPlus
 } from 'lucide-react';
 import { useCustomerProfile, useUpcomingAppointments, useCustomerAppointments } from '@/hooks/useCustomerData';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatBrasiliaDate, toBrasiliaTime } from '@/lib/timezone';
+import { ClientBookingCalendar } from '@/components/ClientBookingCalendar';
 
 export default function ClientArea() {
   const { user } = useAuth();
@@ -153,15 +156,28 @@ export default function ClientArea() {
           </Card>
         </div>
 
-        {/* Próximos agendamentos */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Próximos Agendamentos
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        {/* Calendar and appointments tabs */}
+        <Tabs defaultValue="upcoming" className="space-y-6">
+          <TabsList className="grid w-full max-w-[400px] grid-cols-2">
+            <TabsTrigger value="upcoming" className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              Meus Agendamentos
+            </TabsTrigger>
+            <TabsTrigger value="book" className="flex items-center gap-2">
+              <CalendarPlus className="h-4 w-4" />
+              Novo Agendamento
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="upcoming" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  Próximos Agendamentos
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
             {upcomingLoading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -231,11 +247,11 @@ export default function ClientArea() {
                 })}
               </div>
             )}
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
 
-        {/* Histórico de agendamentos */}
-        <Card>
+            {/* Histórico de agendamentos */}
+            <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="h-5 w-5" />
@@ -288,8 +304,14 @@ export default function ClientArea() {
                 })}
               </div>
             )}
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="book">
+            <ClientBookingCalendar />
+          </TabsContent>
+        </Tabs>
       </div>
     </Layout>
   );

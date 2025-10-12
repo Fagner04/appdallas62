@@ -32,7 +32,19 @@ const getMenuItems = (role?: string) => {
     ];
   }
 
-  // Menu for admin/barber
+  // Menu for barbers
+  if (role === 'barber') {
+    return [
+      { icon: Calendar, label: 'Minha Agenda', path: '/agenda-barbeiro' },
+      { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
+      { icon: Calendar, label: 'Agendamentos', path: '/agendamentos' },
+      { icon: Users, label: 'Clientes', path: '/clientes' },
+      { icon: DollarSign, label: 'Caixa do Dia', path: '/caixa' },
+      { icon: Settings, label: 'Configurações', path: '/configuracoes' },
+    ];
+  }
+
+  // Menu for admin
   return [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: Calendar, label: 'Agendamentos', path: '/agendamentos' },

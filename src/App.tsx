@@ -16,6 +16,7 @@ import Caixa from "./pages/Caixa";
 import Relatorios from "./pages/Relatorios";
 import Notificacoes from "./pages/Notificacoes";
 import Configuracoes from "./pages/Configuracoes";
+import AgendaBarbeiro from "./pages/AgendaBarbeiro";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -119,6 +120,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Configuracoes />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/agenda-barbeiro"
+        element={
+          <ProtectedRoute>
+            <AgendaBarbeiro />
           </ProtectedRoute>
         }
       />
