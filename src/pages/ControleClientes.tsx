@@ -1,9 +1,11 @@
 import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Shield, Calendar, DollarSign, Ban, Bell, Eye, Clock } from 'lucide-react';
+import { Shield, Calendar, DollarSign, Ban, Bell, Eye, Clock, Save } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -61,6 +63,16 @@ export default function ControleClientes() {
     },
   ]);
 
+  const [workingHours, setWorkingHours] = useState([
+    { day: 'Segunda', startTime: '09:00', endTime: '18:00', enabled: true },
+    { day: 'Terça', startTime: '09:00', endTime: '18:00', enabled: true },
+    { day: 'Quarta', startTime: '09:00', endTime: '18:00', enabled: true },
+    { day: 'Quinta', startTime: '09:00', endTime: '18:00', enabled: true },
+    { day: 'Sexta', startTime: '09:00', endTime: '18:00', enabled: true },
+    { day: 'Sábado', startTime: '09:00', endTime: '14:00', enabled: true },
+    { day: 'Domingo', startTime: '09:00', endTime: '18:00', enabled: false },
+  ]);
+
   const handleToggle = (featureId: string) => {
     setFeatures((prev) =>
       prev.map((feature) =>
@@ -76,6 +88,18 @@ export default function ControleClientes() {
     toast.success(
       `${feature?.title} ${newState ? 'habilitada' : 'desabilitada'} para clientes`
     );
+  };
+
+  const handleWorkingHourChange = (index: number, field: 'startTime' | 'endTime' | 'enabled', value: string | boolean) => {
+    setWorkingHours((prev) =>
+      prev.map((item, i) =>
+        i === index ? { ...item, [field]: value } : item
+      )
+    );
+  };
+
+  const handleSaveWorkingHours = () => {
+    toast.success('Horários de funcionamento salvos com sucesso!');
   };
 
   return (
@@ -132,6 +156,53 @@ export default function ControleClientes() {
           </CardContent>
         </Card>
 
+        {/* Working Hours */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5" />
+              Horário de Funcionamento
+            </CardTitle>
+            <CardDescription>
+              Configure os horários disponíveis para agendamentos
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-3">
+              {workingHours.map((schedule, index) => (
+                <div key={schedule.day} className="flex items-center justify-between p-3 rounded-lg border border-border">
+                  <span className="font-medium w-24">{schedule.day}</span>
+                  <div className="flex items-center gap-4">
+                    <Input 
+                      type="time" 
+                      value={schedule.startTime}
+                      onChange={(e) => handleWorkingHourChange(index, 'startTime', e.target.value)}
+                      disabled={!schedule.enabled}
+                      className="w-32" 
+                    />
+                    <span className="text-muted-foreground">até</span>
+                    <Input 
+                      type="time" 
+                      value={schedule.endTime}
+                      onChange={(e) => handleWorkingHourChange(index, 'endTime', e.target.value)}
+                      disabled={!schedule.enabled}
+                      className="w-32" 
+                    />
+                    <Switch 
+                      checked={schedule.enabled}
+                      onCheckedChange={(checked) => handleWorkingHourChange(index, 'enabled', checked)}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <Button onClick={handleSaveWorkingHours} className="w-full sm:w-auto">
+              <Save className="mr-2 h-4 w-4" />
+              Salvar Horários
+            </Button>
+          </CardContent>
+        </Card>
+
         <Card className="bg-muted/50">
           <CardHeader>
             <CardTitle className="text-lg">ℹ️ Informações</CardTitle>
@@ -142,6 +213,9 @@ export default function ControleClientes() {
             </p>
             <p>
               • Funcionalidades desabilitadas não aparecerão na área do cliente
+            </p>
+            <p>
+              • Horários de funcionamento definem quando agendamentos podem ser feitos
             </p>
             <p>
               • Recomendamos manter "Agendamentos Online" sempre ativo
