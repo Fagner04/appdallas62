@@ -5,14 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Clock, Scissors } from 'lucide-react';
+import { Loader2, Clock, Scissors, Ban } from 'lucide-react';
 import { useServices } from '@/hooks/useServices';
 import { useBarbers } from '@/hooks/useBarbers';
 import { useAvailableTimeSlots, useCreateAppointment } from '@/hooks/useAppointments';
+import { useBlockedTimes } from '@/hooks/useBlockedTimes';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { format, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { getTodayBrasilia, formatBrasiliaDate } from '@/lib/timezone';
 
@@ -52,6 +53,9 @@ export function ClientBookingCalendar() {
     serviceDuration
   );
 
+  // Buscar horários bloqueados do barbeiro selecionado
+  const { data: blockedTimes = [] } = useBlockedTimes(selectedBarber);
+
   const createAppointment = useCreateAppointment();
 
   const handleBooking = async () => {
@@ -84,6 +88,12 @@ export function ClientBookingCalendar() {
 
   const minDate = new Date();
 
+  // Verificar se uma data tem horários bloqueados
+  const isDateBlocked = (date: Date) => {
+    const dateStr = format(date, 'yyyy-MM-dd');
+    return blockedTimes.some(blocked => blocked.blocked_date === dateStr);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -97,6 +107,12 @@ export function ClientBookingCalendar() {
           {/* Calendar */}
           <div className="space-y-4">
             <Label>Selecione a Data</Label>
+            {selectedBarber && blockedTimes.length > 0 && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-2 rounded-md">
+                <Ban className="h-4 w-4 text-destructive" />
+                <span>Datas com fundo vermelho têm horários bloqueados</span>
+              </div>
+            )}
             <Calendar
               mode="single"
               selected={selectedDate}
@@ -104,6 +120,12 @@ export function ClientBookingCalendar() {
               disabled={(date) => date < minDate}
               locale={ptBR}
               className="rounded-md border"
+              modifiers={{
+                blocked: (date) => selectedBarber ? isDateBlocked(date) : false
+              }}
+              modifiersClassNames={{
+                blocked: "bg-destructive/20 text-destructive font-semibold"
+              }}
             />
           </div>
 
