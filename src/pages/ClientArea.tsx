@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { DigitalClock } from '@/components/DigitalClock';
 import { 
   Calendar, 
   Clock, 
@@ -17,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useCustomerProfile, useUpcomingAppointments, useCustomerAppointments } from '@/hooks/useCustomerData';
 import { useAuth } from '@/contexts/AuthContext';
+import { formatBrasiliaDate, toBrasiliaTime } from '@/lib/timezone';
 
 export default function ClientArea() {
   const { user } = useAuth();
@@ -56,12 +58,7 @@ export default function ClientArea() {
   };
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('pt-BR', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
+    return formatBrasiliaDate(toBrasiliaTime(date), "EEEE, dd 'de' MMMM 'de' yyyy");
   };
 
   const formatTime = (time: string) => {
@@ -81,6 +78,9 @@ export default function ClientArea() {
   return (
     <Layout>
       <div className="space-y-8 animate-fade-in">
+        {/* Relógio Digital */}
+        <DigitalClock />
+
         {/* Header com perfil */}
         <Card className="shadow-elegant">
           <CardContent className="pt-6">
@@ -269,10 +269,7 @@ export default function ClientArea() {
                       <div className="flex items-center gap-4">
                         <div className="text-center min-w-[80px]">
                           <div className="text-sm text-muted-foreground">
-                            {new Date(appointment.appointment_date).toLocaleDateString('pt-BR', {
-                              day: '2-digit',
-                              month: 'short',
-                            })}
+                            {formatBrasiliaDate(toBrasiliaTime(appointment.appointment_date), 'dd/MMM')}
                           </div>
                           <div className="text-lg font-bold text-primary">
                             {formatTime(appointment.appointment_time)}

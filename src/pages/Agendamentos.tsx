@@ -17,10 +17,11 @@ import { useBarbers } from '@/hooks/useBarbers';
 import { useServices } from '@/hooks/useServices';
 import { useBlockedTimes, useCreateBlockedTime, useDeleteBlockedTime } from '@/hooks/useBlockedTimes';
 import { useAuth } from '@/contexts/AuthContext';
+import { getTodayBrasilia } from '@/lib/timezone';
 
 export default function Agendamentos() {
   const { user } = useAuth();
-  const today = new Date().toISOString().split('T')[0];
+  const today = getTodayBrasilia();
   const [selectedDate, setSelectedDate] = useState(today);
   const [open, setOpen] = useState(false);
   const [blockTimeOpen, setBlockTimeOpen] = useState(false);
