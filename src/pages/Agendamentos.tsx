@@ -243,21 +243,22 @@ export default function Agendamentos() {
         {/* Relógio Digital */}
         <DigitalClock />
         
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-bold mb-2">Agendamentos</h1>
-            <p className="text-muted-foreground">Gerencie todos os horários da barbearia</p>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">Agendamentos</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">Gerencie todos os horários da barbearia</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
             {user?.role !== 'customer' && (
               <Dialog open={blockTimeOpen} onOpenChange={setBlockTimeOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" className="gap-2">
-                    <Ban className="h-5 w-5" />
-                    Gerenciar Horários
+                  <Button variant="outline" className="gap-2 flex-1 sm:flex-none text-sm sm:text-base">
+                    <Ban className="h-4 w-4 sm:h-5 sm:w-5" />
+                    <span className="hidden sm:inline">Gerenciar Horários</span>
+                    <span className="sm:hidden">Gerenciar</span>
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="w-[95vw] sm:w-full max-w-lg p-4 sm:p-6">
                   <DialogHeader>
                     <DialogTitle>Bloquear Horário</DialogTitle>
                   </DialogHeader>
@@ -341,12 +342,13 @@ export default function Agendamentos() {
               if (!isOpen) handleDialogClose();
             }}>
               <DialogTrigger asChild>
-                <Button className="gap-2">
-                  <Plus className="h-5 w-5" />
-                  Novo Agendamento
+                <Button className="gap-2 flex-1 sm:flex-none text-sm sm:text-base">
+                  <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="hidden sm:inline">Novo Agendamento</span>
+                  <span className="sm:hidden">Novo</span>
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full max-w-lg p-4 sm:p-6">
                 <DialogHeader>
                   <DialogTitle>
                     {editingAppointment ? 'Editar Agendamento' : 'Criar Novo Agendamento'}
@@ -476,24 +478,26 @@ export default function Agendamentos() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4 mb-4">
-          <Label htmlFor="filter-date">Filtrar por data:</Label>
-          <Input
-            id="filter-date"
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="w-auto"
-          />
-          <Button variant="outline" onClick={() => setSelectedDate(today)}>
-            Hoje
-          </Button>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mb-4">
+          <Label htmlFor="filter-date" className="text-sm sm:text-base">Filtrar por data:</Label>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Input
+              id="filter-date"
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="flex-1 sm:flex-none sm:w-auto text-sm"
+            />
+            <Button variant="outline" onClick={() => setSelectedDate(today)} className="text-sm sm:text-base px-3 sm:px-4">
+              Hoje
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="appointments" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="appointments">Agendamentos</TabsTrigger>
-            <TabsTrigger value="calendar">Calendário Visual</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 h-auto">
+            <TabsTrigger value="appointments" className="text-xs sm:text-sm py-2">Agendamentos</TabsTrigger>
+            <TabsTrigger value="calendar" className="text-xs sm:text-sm py-2">Calendário Visual</TabsTrigger>
           </TabsList>
 
           <TabsContent value="appointments">
@@ -504,7 +508,7 @@ export default function Agendamentos() {
                   Lista de Agendamentos - {formatBrasiliaDate(toBrasiliaTime(selectedDate + 'T12:00:00'), 'dd/MM/yyyy')}
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-3 sm:p-6">
                 {isLoading ? (
                   <div className="text-center py-8">Carregando agendamentos...</div>
                 ) : !appointments || appointments.length === 0 ? (
@@ -513,39 +517,43 @@ export default function Agendamentos() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {appointments.map((appointment) => (
+                     {appointments.map((appointment) => (
                       <div
                         key={appointment.id}
-                        className="flex flex-col md:flex-row md:items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-smooth"
+                        className="flex flex-col gap-3 p-3 sm:p-4 rounded-lg border border-border hover:bg-muted/50 transition-smooth"
                       >
-                        <div className="space-y-2 md:space-y-0 md:flex md:items-center md:gap-6">
-                          <div className="flex items-center gap-2">
-                            <CalendarIcon className="h-4 w-4 text-primary" />
-                            <span className="font-medium">
-                              {new Date(appointment.appointment_date + 'T00:00:00').toLocaleDateString('pt-BR')}
-                            </span>
+                        <div className="space-y-2">
+                          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+                            <div className="flex items-center gap-2">
+                              <CalendarIcon className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
+                              <span className="text-xs sm:text-sm font-medium">
+                                {new Date(appointment.appointment_date + 'T00:00:00').toLocaleDateString('pt-BR')}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
+                              <span className="text-xs sm:text-sm">{appointment.appointment_time.slice(0, 5)}</span>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Clock className="h-4 w-4 text-primary" />
-                            <span>{appointment.appointment_time.slice(0, 5)}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-primary" />
-                            <span>{appointment.customer?.name || 'Cliente'}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Scissors className="h-4 w-4 text-primary" />
-                            <span className="text-sm text-muted-foreground">
-                              {appointment.service?.name || 'Serviço'}
-                            </span>
+                          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+                            <div className="flex items-center gap-2">
+                              <User className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
+                              <span className="text-xs sm:text-sm">{appointment.customer?.name || 'Cliente'}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Scissors className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
+                              <span className="text-xs sm:text-sm text-muted-foreground">
+                                {appointment.service?.name || 'Serviço'}
+                              </span>
+                            </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3 mt-3 md:mt-0">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                           <Select
                             value={appointment.status}
                             onValueChange={(value) => handleStatusChange(appointment.id, value as any)}
                           >
-                            <SelectTrigger className="w-[130px]">
+                            <SelectTrigger className="w-full sm:w-[130px] h-9 text-xs sm:text-sm">
                               <SelectValue>
                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(appointment.status)}`}>
                                   {getStatusLabel(appointment.status)}
@@ -559,20 +567,26 @@ export default function Agendamentos() {
                               <SelectItem value="cancelled">Cancelado</SelectItem>
                             </SelectContent>
                           </Select>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleEdit(appointment)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => openDeleteDialog(appointment.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleEdit(appointment)}
+                              className="flex-1 sm:flex-none h-9"
+                            >
+                              <Pencil className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-0" />
+                              <span className="ml-2 sm:hidden">Editar</span>
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => openDeleteDialog(appointment.id)}
+                              className="flex-1 sm:flex-none h-9"
+                            >
+                              <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-0" />
+                              <span className="ml-2 sm:hidden">Excluir</span>
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     ))}
