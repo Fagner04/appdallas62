@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Settings, User, Clock, Bell, Lock } from 'lucide-react';
+import { User, Clock, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Configuracoes() {
@@ -16,8 +16,8 @@ export default function Configuracoes() {
     <Layout>
       <div className="space-y-6 animate-fade-in">
         <div>
-          <h1 className="text-4xl font-bold mb-2">Configurações</h1>
-          <p className="text-muted-foreground">Personalize o sistema conforme suas necessidades</p>
+          <h1 className="text-4xl font-bold mb-2">Perfil</h1>
+          <p className="text-muted-foreground">Gerencie suas informações e preferências</p>
         </div>
 
         {/* Profile Settings */}
@@ -83,48 +83,6 @@ export default function Configuracoes() {
               </div>
             </div>
             <Button onClick={handleSave}>Salvar Horários</Button>
-          </CardContent>
-        </Card>
-
-        {/* Notification Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bell className="h-5 w-5" />
-              Notificações Automáticas
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 rounded-lg border border-border">
-                <div>
-                  <div className="font-medium">Confirmação de Agendamento</div>
-                  <div className="text-sm text-muted-foreground">Enviar automaticamente após criação</div>
-                </div>
-                <Switch defaultChecked />
-              </div>
-              <div className="flex items-center justify-between p-3 rounded-lg border border-border">
-                <div>
-                  <div className="font-medium">Lembrete 1h Antes</div>
-                  <div className="text-sm text-muted-foreground">Notificar cliente antes do horário</div>
-                </div>
-                <Switch defaultChecked />
-              </div>
-              <div className="flex items-center justify-between p-3 rounded-lg border border-border">
-                <div>
-                  <div className="font-medium">Agradecimento Pós-Visita</div>
-                  <div className="text-sm text-muted-foreground">Enviar após conclusão do serviço</div>
-                </div>
-                <Switch defaultChecked />
-              </div>
-              <div className="flex items-center justify-between p-3 rounded-lg border border-border">
-                <div>
-                  <div className="font-medium">Promoções Mensais</div>
-                  <div className="text-sm text-muted-foreground">Enviar ofertas especiais</div>
-                </div>
-                <Switch />
-              </div>
-            </div>
           </CardContent>
         </Card>
 

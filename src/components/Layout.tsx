@@ -41,7 +41,7 @@ const getMenuItems = (role?: string) => {
       { icon: Users, label: 'Clientes', path: '/clientes' },
       { icon: UserCog, label: 'Controle de Clientes', path: '/controle-clientes' },
       { icon: DollarSign, label: 'Caixa do Dia', path: '/caixa' },
-      { icon: Settings, label: 'Configurações', path: '/configuracoes' },
+      { icon: User, label: 'Perfil', path: '/configuracoes' },
     ];
   }
 
@@ -56,7 +56,7 @@ const getMenuItems = (role?: string) => {
     { icon: DollarSign, label: 'Caixa do Dia', path: '/caixa' },
     { icon: BarChart3, label: 'Relatórios', path: '/relatorios' },
     { icon: Bell, label: 'Notificações', path: '/notificacoes' },
-    { icon: Settings, label: 'Configurações', path: '/configuracoes' },
+    { icon: User, label: 'Perfil', path: '/configuracoes' },
   ];
 };
 
