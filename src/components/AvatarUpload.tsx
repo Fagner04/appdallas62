@@ -61,9 +61,9 @@ export function AvatarUpload({ avatarUrl, userName, size = 'lg' }: AvatarUploadP
           {avatarUrl ? (
             <AvatarImage src={avatarUrl} alt={userName || 'Avatar'} className="object-cover" />
           ) : (
-            <AvatarFallback className="bg-white/10 backdrop-blur-sm text-white">
-              <User className={iconSizes[size]} />
-            </AvatarFallback>
+          <AvatarFallback className="bg-transparent backdrop-blur-sm">
+            <User className={iconSizes[size]} />
+          </AvatarFallback>
           )}
         </Avatar>
         
