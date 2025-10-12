@@ -82,32 +82,31 @@ export default function ClientArea() {
   return (
     <Layout>
       <div className="space-y-8 animate-fade-in">
-        {/* Header com perfil - Design moderno com gradiente */}
-        <div className="relative overflow-hidden rounded-xl shadow-elegant">
-          <div className="absolute inset-0 gradient-primary opacity-90" />
-          <div className="relative p-6">
+        {/* Header com perfil - Design moderno */}
+        <div className="relative overflow-hidden rounded-xl shadow-elegant bg-card border">
+          <div className="p-6">
             <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
               <AvatarUpload 
                 avatarUrl={profile?.avatar_url} 
                 userName={user?.name}
                 size="md"
               />
-              <div className="flex-1 space-y-3">
+               <div className="flex-1 space-y-3">
                 <div>
-                  <h1 className="text-3xl font-bold text-white mb-1 drop-shadow-lg">
+                  <h1 className="text-3xl font-bold mb-1">
                     Olá, {user?.name}! 👋
                   </h1>
-                  <p className="text-white/90">Bem-vindo à sua área pessoal</p>
+                  <p className="text-muted-foreground">Bem-vindo à sua área pessoal</p>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/20">
-                    <Mail className="h-4 w-4 text-white" />
-                    <span className="text-white text-sm font-medium">{profile?.email || user?.email}</span>
+                  <div className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-lg border">
+                    <Mail className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium">{profile?.email || user?.email}</span>
                   </div>
                   {profile?.phone && (
-                    <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/20">
-                      <Phone className="h-4 w-4 text-white" />
-                      <span className="text-white text-sm font-medium">{profile.phone}</span>
+                    <div className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-lg border">
+                      <Phone className="h-4 w-4 text-primary" />
+                      <span className="text-sm font-medium">{profile.phone}</span>
                     </div>
                   )}
                 </div>
