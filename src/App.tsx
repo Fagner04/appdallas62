@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import ClientArea from "./pages/ClientArea";
 import Agendamentos from "./pages/Agendamentos";
@@ -41,10 +42,10 @@ const AppRoutes = () => {
     <Routes>
       <Route 
         path="/" 
-        element={isAuthenticated ? <Navigate to={getDefaultRoute()} replace /> : <Navigate to="/login" replace />} 
+        element={isAuthenticated ? <Navigate to={getDefaultRoute()} replace /> : <Index />} 
       />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      <Route path="/login" element={isAuthenticated ? <Navigate to={getDefaultRoute()} replace /> : <Login />} />
+      <Route path="/register" element={isAuthenticated ? <Navigate to={getDefaultRoute()} replace /> : <Register />} />
       <Route
         path="/cliente"
         element={
