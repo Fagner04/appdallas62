@@ -17,9 +17,32 @@ export const useCustomerProfile = () => {
         .maybeSingle();
 
       if (error) throw error;
+      
+      // Se não existe perfil, criar automaticamente
+      if (!data && user?.id) {
+        const { data: newProfile, error: insertError } = await supabase
+          .from('customers')
+          .insert({
+            user_id: user.id,
+            name: user.name || user.email?.split('@')[0] || 'Cliente',
+            email: user.email || '',
+            phone: '',
+          })
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error('Erro ao criar perfil automático:', insertError);
+          throw insertError;
+        }
+        
+        return newProfile;
+      }
+      
       return data;
     },
     enabled: !!user?.id,
+    retry: 1,
   });
 };
 
