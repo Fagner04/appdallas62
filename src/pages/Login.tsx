@@ -1,14 +1,15 @@
 import { useState } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Scissors } from 'lucide-react';
+import { Scissors, ArrowLeft } from 'lucide-react';
 
 export default function Login() {
   const { login, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -32,6 +33,17 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-soft p-4">
       <Card className="w-full max-w-md shadow-elegant">
+        <div className="p-4 pb-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/')}
+            className="gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Voltar
+          </Button>
+        </div>
         <CardHeader className="space-y-4 text-center">
           <div className="mx-auto w-16 h-16 rounded-full gradient-primary flex items-center justify-center shadow-glow">
             <Scissors className="h-8 w-8 text-white" />
