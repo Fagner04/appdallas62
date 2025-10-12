@@ -17,18 +17,18 @@ export const DigitalClock = () => {
   const dateString = formatBrasiliaDate(currentTime, "EEEE, dd 'de' MMMM 'de' yyyy");
 
   return (
-    <div className="flex items-center justify-center gap-4 p-4">
-      <div className="p-3 rounded-lg bg-primary/10">
-        <Clock className="h-8 w-8 text-primary" />
+    <div className="flex items-center justify-center gap-3 p-3">
+      <div className="p-2 rounded-lg bg-primary/10">
+        <Clock className="h-5 w-5 text-primary" />
       </div>
       <div>
-        <div className="text-4xl font-bold font-mono tracking-wider text-foreground">
+        <div className="text-2xl font-bold font-mono tracking-wider text-foreground">
           {timeString}
         </div>
-        <div className="text-sm text-muted-foreground mt-1 capitalize">
+        <div className="text-xs text-muted-foreground mt-0.5 capitalize">
           {dateString}
         </div>
-        <div className="text-xs text-muted-foreground mt-1">
+        <div className="text-[10px] text-muted-foreground mt-0.5">
           Horário de Brasília
         </div>
       </div>
