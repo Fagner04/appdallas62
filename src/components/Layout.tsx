@@ -52,6 +52,7 @@ const getMenuItems = (role?: string) => {
     { icon: Scissors, label: 'Serviços', path: '/servicos' },
     { icon: UserCog, label: 'Barbeiros', path: '/barbeiros' },
     { icon: Users, label: 'Clientes', path: '/clientes' },
+    { icon: Settings, label: 'Controle de Clientes', path: '/controle-clientes' },
     { icon: DollarSign, label: 'Caixa do Dia', path: '/caixa' },
     { icon: BarChart3, label: 'Relatórios', path: '/relatorios' },
     { icon: Bell, label: 'Notificações', path: '/notificacoes' },
