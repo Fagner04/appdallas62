@@ -15,7 +15,8 @@ import {
   XCircle,
   AlertCircle,
   Loader2,
-  CalendarPlus
+  CalendarPlus,
+  User
 } from 'lucide-react';
 import { useCustomerProfile, useUpcomingAppointments, useCustomerAppointments } from '@/hooks/useCustomerData';
 import { useAuth } from '@/contexts/AuthContext';
@@ -81,34 +82,34 @@ export default function ClientArea() {
     <Layout>
       <div className="space-y-8 animate-fade-in">
         {/* Header com perfil - Design moderno com gradiente */}
-        <div className="relative overflow-hidden rounded-2xl shadow-elegant">
+        <div className="relative overflow-hidden rounded-xl shadow-elegant">
           <div className="absolute inset-0 gradient-primary opacity-90" />
-          <div className="relative p-8">
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+          <div className="relative p-6">
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
               <div className="relative">
                 <div className="absolute -inset-1 gradient-primary rounded-full blur opacity-75 animate-pulse" />
-                <Avatar className="relative h-28 w-28 border-4 border-white/20 shadow-elegant">
-                  <AvatarFallback className="text-4xl font-bold bg-white/10 backdrop-blur-sm text-white">
-                    {user?.name?.charAt(0) || 'U'}
+                <Avatar className="relative h-20 w-20 border-4 border-white/20 shadow-elegant">
+                  <AvatarFallback className="bg-white/10 backdrop-blur-sm text-white">
+                    <User className="h-10 w-10" />
                   </AvatarFallback>
                 </Avatar>
               </div>
-              <div className="flex-1 space-y-4">
+              <div className="flex-1 space-y-3">
                 <div>
-                  <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">
+                  <h1 className="text-3xl font-bold text-white mb-1 drop-shadow-lg">
                     Olá, {user?.name}! 👋
                   </h1>
-                  <p className="text-white/90 text-lg">Bem-vindo à sua área pessoal</p>
+                  <p className="text-white/90">Bem-vindo à sua área pessoal</p>
                 </div>
-                <div className="flex flex-wrap gap-4">
-                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20">
+                <div className="flex flex-wrap gap-3">
+                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/20">
                     <Mail className="h-4 w-4 text-white" />
-                    <span className="text-white font-medium">{profile?.email || user?.email}</span>
+                    <span className="text-white text-sm font-medium">{profile?.email || user?.email}</span>
                   </div>
                   {profile?.phone && (
-                    <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20">
+                    <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/20">
                       <Phone className="h-4 w-4 text-white" />
-                      <span className="text-white font-medium">{profile.phone}</span>
+                      <span className="text-white text-sm font-medium">{profile.phone}</span>
                     </div>
                   )}
                 </div>
