@@ -244,90 +244,92 @@ export default function Agendamentos() {
             <p className="text-muted-foreground">Gerencie todos os horários da barbearia</p>
           </div>
           <div className="flex gap-2">
-            <Dialog open={blockTimeOpen} onOpenChange={setBlockTimeOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="gap-2">
-                  <Ban className="h-5 w-5" />
-                  Gerenciar Horários
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Bloquear Horário</DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleBlockTimeSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="block-barber">Barbeiro</Label>
-                    <Select 
-                      value={blockFormData.barber_id} 
-                      onValueChange={(value) => setBlockFormData({ ...blockFormData, barber_id: value })}
-                      required
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o barbeiro" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {barbers?.map((barber) => (
-                          <SelectItem key={barber.id} value={barber.id}>
-                            {barber.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="block-date">Data</Label>
-                    <Input
-                      id="block-date"
-                      type="date"
-                      value={blockFormData.blocked_date}
-                      onChange={(e) => setBlockFormData({ ...blockFormData, blocked_date: e.target.value })}
-                      min={today}
-                      required
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="start-time">Hora Início</Label>
-                      <Input
-                        id="start-time"
-                        type="time"
-                        value={blockFormData.start_time}
-                        onChange={(e) => setBlockFormData({ ...blockFormData, start_time: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="end-time">Hora Fim</Label>
-                      <Input
-                        id="end-time"
-                        type="time"
-                        value={blockFormData.end_time}
-                        onChange={(e) => setBlockFormData({ ...blockFormData, end_time: e.target.value })}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="reason">Motivo (opcional)</Label>
-                    <Textarea
-                      id="reason"
-                      value={blockFormData.reason}
-                      onChange={(e) => setBlockFormData({ ...blockFormData, reason: e.target.value })}
-                      placeholder="Ex: Folga, Evento pessoal, Curso..."
-                      rows={3}
-                    />
-                  </div>
-
-                  <Button type="submit" className="w-full" disabled={createBlockedTime.isPending}>
-                    Bloquear Horário
+            {user?.role !== 'customer' && (
+              <Dialog open={blockTimeOpen} onOpenChange={setBlockTimeOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="gap-2">
+                    <Ban className="h-5 w-5" />
+                    Gerenciar Horários
                   </Button>
-                </form>
-              </DialogContent>
-            </Dialog>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Bloquear Horário</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleBlockTimeSubmit} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="block-barber">Barbeiro</Label>
+                      <Select 
+                        value={blockFormData.barber_id} 
+                        onValueChange={(value) => setBlockFormData({ ...blockFormData, barber_id: value })}
+                        required
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o barbeiro" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {barbers?.map((barber) => (
+                            <SelectItem key={barber.id} value={barber.id}>
+                              {barber.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="block-date">Data</Label>
+                      <Input
+                        id="block-date"
+                        type="date"
+                        value={blockFormData.blocked_date}
+                        onChange={(e) => setBlockFormData({ ...blockFormData, blocked_date: e.target.value })}
+                        min={today}
+                        required
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="start-time">Hora Início</Label>
+                        <Input
+                          id="start-time"
+                          type="time"
+                          value={blockFormData.start_time}
+                          onChange={(e) => setBlockFormData({ ...blockFormData, start_time: e.target.value })}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="end-time">Hora Fim</Label>
+                        <Input
+                          id="end-time"
+                          type="time"
+                          value={blockFormData.end_time}
+                          onChange={(e) => setBlockFormData({ ...blockFormData, end_time: e.target.value })}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="reason">Motivo (opcional)</Label>
+                      <Textarea
+                        id="reason"
+                        value={blockFormData.reason}
+                        onChange={(e) => setBlockFormData({ ...blockFormData, reason: e.target.value })}
+                        placeholder="Ex: Folga, Evento pessoal, Curso..."
+                        rows={3}
+                      />
+                    </div>
+
+                    <Button type="submit" className="w-full" disabled={createBlockedTime.isPending}>
+                      Bloquear Horário
+                    </Button>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            )}
             
             <Dialog open={open} onOpenChange={(isOpen) => {
               setOpen(isOpen);
