@@ -85,9 +85,9 @@ export const Layout = ({ children }: LayoutProps) => {
             variant="ghost"
             size="icon"
             onClick={() => setOpen(false)}
-            className="lg:hidden -mt-1 -mr-2 bg-primary/10 hover:bg-primary/20"
+            className="lg:hidden -mt-1 -mr-2 bg-primary/10 hover:bg-primary/20 h-8 w-8"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </Button>
         </div>
       </div>
