@@ -80,100 +80,120 @@ export default function ClientArea() {
   return (
     <Layout>
       <div className="space-y-8 animate-fade-in">
-        {/* Header com perfil */}
-        <Card className="shadow-elegant">
-          <CardContent className="pt-6">
+        {/* Header com perfil - Design moderno com gradiente */}
+        <div className="relative overflow-hidden rounded-2xl shadow-elegant">
+          <div className="absolute inset-0 gradient-primary opacity-90" />
+          <div className="relative p-8">
             <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-              <Avatar className="h-24 w-24 border-4 border-primary/20">
-                <AvatarFallback className="text-2xl font-bold bg-gradient-primary text-white">
-                  {user?.name?.charAt(0) || 'U'}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 space-y-3">
+              <div className="relative">
+                <div className="absolute -inset-1 gradient-primary rounded-full blur opacity-75 animate-pulse" />
+                <Avatar className="relative h-28 w-28 border-4 border-white/20 shadow-elegant">
+                  <AvatarFallback className="text-4xl font-bold bg-white/10 backdrop-blur-sm text-white">
+                    {user?.name?.charAt(0) || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+              <div className="flex-1 space-y-4">
                 <div>
-                  <h1 className="text-3xl font-bold mb-1">Olá, {user?.name}! 👋</h1>
-                  <p className="text-muted-foreground">Bem-vindo à sua área pessoal</p>
+                  <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">
+                    Olá, {user?.name}! 👋
+                  </h1>
+                  <p className="text-white/90 text-lg">Bem-vindo à sua área pessoal</p>
                 </div>
-                <div className="flex flex-wrap gap-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    <span>{profile?.email || user?.email}</span>
+                <div className="flex flex-wrap gap-4">
+                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20">
+                    <Mail className="h-4 w-4 text-white" />
+                    <span className="text-white font-medium">{profile?.email || user?.email}</span>
                   </div>
                   {profile?.phone && (
-                    <div className="flex items-center gap-2">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                      <span>{profile.phone}</span>
+                    <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20">
+                      <Phone className="h-4 w-4 text-white" />
+                      <span className="text-white font-medium">{profile.phone}</span>
                     </div>
                   )}
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        {/* Estatísticas rápidas */}
+        {/* Estatísticas rápidas - Cards modernos */}
         <div className="grid gap-6 md:grid-cols-3">
-          <Card className="hover-lift">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                Próximos Agendamentos
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-primary">
-                {upcomingAppointments.length}
+          <Card className="hover-lift relative overflow-hidden border-primary/20 shadow-elegant group">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
+            <CardContent className="pt-6 relative">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-smooth">
+                  <Calendar className="h-6 w-6 text-primary" />
+                </div>
+                <div className="text-3xl font-bold text-primary">
+                  {upcomingAppointments.length}
+                </div>
               </div>
+              <h3 className="font-semibold text-lg">Próximos</h3>
+              <p className="text-sm text-muted-foreground">Agendamentos confirmados</p>
             </CardContent>
           </Card>
           
-          <Card className="hover-lift">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4" />
-                Total de Visitas
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-success">
-                {allAppointments.filter(a => a.status === 'completed').length}
+          <Card className="hover-lift relative overflow-hidden border-success/20 shadow-elegant group">
+            <div className="absolute inset-0 bg-gradient-to-br from-success/5 to-transparent" />
+            <CardContent className="pt-6 relative">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 rounded-xl bg-success/10 group-hover:bg-success/20 transition-smooth">
+                  <CheckCircle2 className="h-6 w-6 text-success" />
+                </div>
+                <div className="text-3xl font-bold text-success">
+                  {allAppointments.filter(a => a.status === 'completed').length}
+                </div>
               </div>
+              <h3 className="font-semibold text-lg">Total de Visitas</h3>
+              <p className="text-sm text-muted-foreground">Serviços concluídos</p>
             </CardContent>
           </Card>
 
-          <Card className="hover-lift">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                Pontos de Fidelidade
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-accent">
-                {profile?.loyalty_points || 0}
+          <Card className="hover-lift relative overflow-hidden border-accent/20 shadow-elegant group">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent" />
+            <CardContent className="pt-6 relative">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 rounded-xl bg-accent/10 group-hover:bg-accent/20 transition-smooth">
+                  <MapPin className="h-6 w-6 text-accent" />
+                </div>
+                <div className="text-3xl font-bold text-accent">
+                  {profile?.loyalty_points || 0}
+                </div>
               </div>
+              <h3 className="font-semibold text-lg">Fidelidade</h3>
+              <p className="text-sm text-muted-foreground">Pontos acumulados</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Calendar and appointments tabs */}
+        {/* Calendar and appointments tabs - Design melhorado */}
         <Tabs defaultValue="upcoming" className="space-y-6">
-          <TabsList className="grid w-full max-w-[400px] grid-cols-2">
-            <TabsTrigger value="upcoming" className="flex items-center gap-2">
+          <TabsList className="grid w-full max-w-[500px] grid-cols-2 p-1 bg-muted/50 backdrop-blur-sm">
+            <TabsTrigger 
+              value="upcoming" 
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-primary data-[state=active]:text-white data-[state=active]:shadow-elegant"
+            >
               <Calendar className="h-4 w-4" />
               Meus Agendamentos
             </TabsTrigger>
-            <TabsTrigger value="book" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="book" 
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-primary data-[state=active]:text-white data-[state=active]:shadow-elegant"
+            >
               <CalendarPlus className="h-4 w-4" />
               Novo Agendamento
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="upcoming" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
+            <Card className="shadow-elegant border-primary/10">
+              <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent">
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <Calendar className="h-5 w-5 text-primary" />
+                  </div>
                   Próximos Agendamentos
                 </CardTitle>
               </CardHeader>
@@ -199,44 +219,48 @@ export default function ClientArea() {
                   return (
                     <div
                       key={appointment.id}
-                      className="p-6 rounded-lg border border-border hover:bg-muted/50 transition-smooth"
+                      className="group relative overflow-hidden p-6 rounded-xl border border-primary/10 hover:border-primary/30 bg-gradient-to-br from-card to-muted/5 hover:shadow-elegant transition-smooth"
                     >
-                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="space-y-3">
-                          <div className="flex items-center gap-3">
-                            <div className="p-3 rounded-lg gradient-primary">
-                              <Scissors className="h-5 w-5 text-white" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-smooth" />
+                      <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-4">
+                            <div className="relative">
+                              <div className="absolute inset-0 gradient-primary blur-lg opacity-50" />
+                              <div className="relative p-3 rounded-xl gradient-primary shadow-elegant">
+                                <Scissors className="h-6 w-6 text-white" />
+                              </div>
                             </div>
                             <div>
-                              <h3 className="font-semibold text-lg">
+                              <h3 className="font-bold text-xl mb-1">
                                 {appointment.service?.name}
                               </h3>
-                              <p className="text-sm text-muted-foreground">
+                              <p className="text-sm text-muted-foreground font-medium">
                                 {formatDate(appointment.appointment_date)}
                               </p>
                             </div>
                           </div>
-                          <div className="flex flex-wrap gap-4 text-sm">
-                            <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap gap-3">
+                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20">
                               <Clock className="h-4 w-4 text-primary" />
-                              <span className="font-medium">
+                              <span className="font-semibold text-primary">
                                 {formatTime(appointment.appointment_time)}
                               </span>
                             </div>
-                            <div className="flex items-center gap-2 text-success">
-                              <span className="font-semibold">
+                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-success/10 border border-success/20">
+                              <span className="font-bold text-success">
                                 R$ {appointment.service?.price}
                               </span>
                             </div>
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <Clock className="h-4 w-4" />
-                              <span>{appointment.service?.duration} min</span>
+                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted border border-border">
+                              <Clock className="h-4 w-4 text-muted-foreground" />
+                              <span className="font-medium">{appointment.service?.duration} min</span>
                             </div>
                           </div>
                         </div>
                         <Badge 
                           variant="outline" 
-                          className={`${statusConfig.color} flex items-center gap-2 px-4 py-2 border`}
+                          className={`${statusConfig.color} flex items-center gap-2 px-4 py-2 border text-sm font-semibold`}
                         >
                           <StatusIcon className="h-4 w-4" />
                           {statusConfig.label}
@@ -251,14 +275,16 @@ export default function ClientArea() {
             </Card>
 
             {/* Histórico de agendamentos */}
-            <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
-              Histórico de Agendamentos
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+            <Card className="shadow-elegant border-muted">
+              <CardHeader className="bg-gradient-to-r from-muted/30 to-transparent">
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <div className="p-2 rounded-lg bg-muted">
+                    <Clock className="h-5 w-5" />
+                  </div>
+                  Histórico de Agendamentos
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
             {allLoading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -274,29 +300,35 @@ export default function ClientArea() {
                   const StatusIcon = statusConfig.icon;
 
                   return (
-                    <div
+                  <div
                       key={appointment.id}
-                      className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/30 transition-smooth"
+                      className="group flex items-center justify-between p-4 rounded-xl border border-border hover:border-primary/20 hover:bg-gradient-to-r hover:from-muted/50 hover:to-transparent transition-smooth"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="text-center min-w-[80px]">
-                          <div className="text-sm text-muted-foreground">
+                        <div className="text-center min-w-[90px] p-3 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/10 group-hover:border-primary/20 transition-smooth">
+                          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                             {formatBrasiliaDate(toBrasiliaTime(appointment.appointment_date), 'dd/MMM')}
                           </div>
-                          <div className="text-lg font-bold text-primary">
+                          <div className="text-xl font-bold text-primary mt-1">
                             {formatTime(appointment.appointment_time)}
                           </div>
                         </div>
-                        <Separator orientation="vertical" className="h-12" />
-                        <div>
-                          <div className="font-semibold">{appointment.service?.name}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {appointment.service?.duration} min • R$ {appointment.service?.price}
+                        <Separator orientation="vertical" className="h-14" />
+                        <div className="space-y-1">
+                          <div className="font-bold text-lg">{appointment.service?.name}</div>
+                          <div className="flex items-center gap-3 text-sm">
+                            <span className="text-muted-foreground">
+                              {appointment.service?.duration} min
+                            </span>
+                            <span className="text-muted-foreground">•</span>
+                            <span className="font-semibold text-success">
+                              R$ {appointment.service?.price}
+                            </span>
                           </div>
                         </div>
                       </div>
-                      <Badge variant="outline" className={`${statusConfig.color} flex items-center gap-1.5 border`}>
-                        <StatusIcon className="h-3.5 w-3.5" />
+                      <Badge variant="outline" className={`${statusConfig.color} flex items-center gap-2 px-3 py-1.5 border font-semibold`}>
+                        <StatusIcon className="h-4 w-4" />
                         {statusConfig.label}
                       </Badge>
                     </div>
