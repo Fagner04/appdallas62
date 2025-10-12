@@ -17,7 +17,7 @@ import { useBarbers } from '@/hooks/useBarbers';
 import { useServices } from '@/hooks/useServices';
 import { useBlockedTimes, useCreateBlockedTime, useDeleteBlockedTime } from '@/hooks/useBlockedTimes';
 import { useAuth } from '@/contexts/AuthContext';
-import { getTodayBrasilia } from '@/lib/timezone';
+import { getTodayBrasilia, formatBrasiliaDate, toBrasiliaTime } from '@/lib/timezone';
 import { DigitalClock } from '@/components/DigitalClock';
 
 export default function Agendamentos() {
@@ -501,7 +501,7 @@ export default function Agendamentos() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <CalendarIcon className="h-5 w-5" />
-                  Lista de Agendamentos - {new Date(selectedDate).toLocaleDateString('pt-BR')}
+                  Lista de Agendamentos - {formatBrasiliaDate(toBrasiliaTime(selectedDate + 'T12:00:00'), 'dd/MM/yyyy')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
