@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { getTodayBrasilia, getBrasiliaDate } from '@/lib/timezone';
 
 export interface Appointment {
   id: string;
@@ -118,10 +119,25 @@ export const useAvailableTimeSlots = (date: string, barberId: string, serviceDur
         return hours * 60 + minutes;
       };
 
+      // Get current time in Brasilia timezone
+      const todayString = getTodayBrasilia();
+      const isToday = date === todayString;
+      const currentTimeInMinutes = isToday 
+        ? (() => {
+            const now = getBrasiliaDate();
+            return now.getHours() * 60 + now.getMinutes();
+          })()
+        : 0;
+
       // Filter out occupied slots
       const availableSlots = allSlots.filter(slot => {
         const slotStart = timeToMinutes(slot);
         const slotEnd = slotStart + serviceDuration;
+
+        // Se for hoje, não mostrar horários que já passaram
+        if (isToday && slotStart <= currentTimeInMinutes) {
+          return false;
+        }
 
         // Check if slot overlaps with existing appointments
         const hasAppointmentConflict = appointments?.some(apt => {
