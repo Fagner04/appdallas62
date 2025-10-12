@@ -45,7 +45,7 @@ export function ClientBookingCalendar() {
   const selectedServiceData = services.find(s => s.id === selectedService);
   const serviceDuration = selectedServiceData?.duration || 30;
 
-  const formattedDate = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '';
+  const formattedDate = selectedDate ? formatBrasiliaDate(selectedDate, 'yyyy-MM-dd') : '';
   
   const { data: availableSlots = [], isLoading: slotsLoading } = useAvailableTimeSlots(
     formattedDate,
