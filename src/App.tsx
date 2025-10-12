@@ -17,6 +17,7 @@ import Relatorios from "./pages/Relatorios";
 import Notificacoes from "./pages/Notificacoes";
 import Configuracoes from "./pages/Configuracoes";
 import AgendaBarbeiro from "./pages/AgendaBarbeiro";
+import ControleClientes from "./pages/ControleClientes";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -128,6 +129,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <AgendaBarbeiro />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/controle-clientes"
+        element={
+          <ProtectedRoute>
+            <ControleClientes />
           </ProtectedRoute>
         }
       />

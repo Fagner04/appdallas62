@@ -39,6 +39,7 @@ const getMenuItems = (role?: string) => {
       { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
       { icon: Calendar, label: 'Agendamentos', path: '/agendamentos' },
       { icon: Users, label: 'Clientes', path: '/clientes' },
+      { icon: UserCog, label: 'Controle de Clientes', path: '/controle-clientes' },
       { icon: DollarSign, label: 'Caixa do Dia', path: '/caixa' },
       { icon: Settings, label: 'Configurações', path: '/configuracoes' },
     ];
