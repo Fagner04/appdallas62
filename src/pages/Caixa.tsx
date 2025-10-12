@@ -2,54 +2,68 @@ import { useState } from 'react';
 import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { DollarSign, TrendingUp, TrendingDown, Plus, Minus } from 'lucide-react';
+import { DollarSign, TrendingUp, TrendingDown, Plus, Minus, Loader2, Trash2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toast } from 'sonner';
+import { useTransactions, useTransactionStats, useCreateTransaction, useDeleteTransaction } from '@/hooks/useTransactions';
+import { useServices } from '@/hooks/useServices';
+import { getTodayBrasilia } from '@/lib/timezone';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 export default function Caixa() {
-  const [transactions, setTransactions] = useState([
-    { id: 1, type: 'entrada', category: 'Corte', amount: 40, description: 'João Silva - Corte Simples', time: '09:00' },
-    { id: 2, type: 'entrada', category: 'Corte + Barba', amount: 60, description: 'Pedro Santos', time: '10:00' },
-    { id: 3, type: 'saida', category: 'Compras', amount: 150, description: 'Lâminas e produtos', time: '11:30' },
-    { id: 4, type: 'entrada', category: 'Barba', amount: 30, description: 'Carlos Oliveira', time: '14:00' },
-  ]);
-
   const [open, setOpen] = useState(false);
-  const [transactionType, setTransactionType] = useState<'entrada' | 'saida'>('entrada');
+  const [transactionType, setTransactionType] = useState<'income' | 'expense'>('income');
   const [formData, setFormData] = useState({
     category: '',
     amount: '',
     description: '',
   });
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [transactionToDelete, setTransactionToDelete] = useState<string | null>(null);
 
-  const totalEntradas = transactions
-    .filter(t => t.type === 'entrada')
-    .reduce((sum, t) => sum + t.amount, 0);
-
-  const totalSaidas = transactions
-    .filter(t => t.type === 'saida')
-    .reduce((sum, t) => sum + t.amount, 0);
-
-  const saldo = totalEntradas - totalSaidas;
+  const today = getTodayBrasilia();
+  const { data: transactions = [], isLoading: loadingTransactions } = useTransactions(today);
+  const { data: stats, isLoading: loadingStats } = useTransactionStats(today);
+  const { data: services = [] } = useServices();
+  const createTransaction = useCreateTransaction();
+  const deleteTransaction = useDeleteTransaction();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const newTransaction = {
-      id: transactions.length + 1,
+    createTransaction.mutate({
       type: transactionType,
       category: formData.category,
       amount: Number(formData.amount),
       description: formData.description,
-      time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-    };
-    setTransactions([...transactions, newTransaction]);
-    toast.success(`${transactionType === 'entrada' ? 'Entrada' : 'Saída'} registrada com sucesso!`);
+    });
     setOpen(false);
     setFormData({ category: '', amount: '', description: '' });
   };
+
+  const handleDelete = () => {
+    if (transactionToDelete) {
+      deleteTransaction.mutate(transactionToDelete);
+      setDeleteDialogOpen(false);
+      setTransactionToDelete(null);
+    }
+  };
+
+  const openDeleteDialog = (id: string) => {
+    setTransactionToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  if (loadingTransactions || loadingStats) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -62,23 +76,22 @@ export default function Caixa() {
             </p>
           </div>
           <div className="flex gap-2">
+            <Button 
+              variant="outline"
+              className="gap-2"
+              onClick={() => {
+                setTransactionType('expense');
+                setOpen(true);
+              }}
+            >
+              <Minus className="h-5 w-5" />
+              Nova Saída
+            </Button>
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
                 <Button 
-                  variant="outline"
                   className="gap-2"
-                  onClick={() => setTransactionType('saida')}
-                >
-                  <Minus className="h-5 w-5" />
-                  Nova Saída
-                </Button>
-              </DialogTrigger>
-            </Dialog>
-            <Dialog open={open} onOpenChange={setOpen}>
-              <DialogTrigger asChild>
-                <Button 
-                  className="gap-2"
-                  onClick={() => setTransactionType('entrada')}
+                  onClick={() => setTransactionType('income')}
                 >
                   <Plus className="h-5 w-5" />
                   Nova Entrada
@@ -87,7 +100,7 @@ export default function Caixa() {
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>
-                    Registrar {transactionType === 'entrada' ? 'Entrada' : 'Saída'}
+                    Registrar {transactionType === 'income' ? 'Entrada' : 'Saída'}
                   </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -101,18 +114,25 @@ export default function Caixa() {
                         <SelectValue placeholder="Selecione a categoria" />
                       </SelectTrigger>
                       <SelectContent>
-                        {transactionType === 'entrada' ? (
+                        {transactionType === 'income' ? (
                           <>
-                            <SelectItem value="Corte">Corte</SelectItem>
-                            <SelectItem value="Barba">Barba</SelectItem>
-                            <SelectItem value="Corte + Barba">Corte + Barba</SelectItem>
+                            {services.map((service) => (
+                              <SelectItem key={service.id} value={service.name}>
+                                {service.name}
+                              </SelectItem>
+                            ))}
                             <SelectItem value="Outros">Outros</SelectItem>
                           </>
                         ) : (
                           <>
                             <SelectItem value="Compras">Compras</SelectItem>
+                            <SelectItem value="Produtos">Produtos</SelectItem>
                             <SelectItem value="Salários">Salários</SelectItem>
                             <SelectItem value="Aluguel">Aluguel</SelectItem>
+                            <SelectItem value="Água">Água</SelectItem>
+                            <SelectItem value="Energia">Energia</SelectItem>
+                            <SelectItem value="Internet">Internet</SelectItem>
+                            <SelectItem value="Manutenção">Manutenção</SelectItem>
                             <SelectItem value="Outros">Outros</SelectItem>
                           </>
                         )}
@@ -125,6 +145,7 @@ export default function Caixa() {
                       id="amount"
                       type="number"
                       step="0.01"
+                      min="0"
                       value={formData.amount}
                       onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                       required
@@ -139,8 +160,15 @@ export default function Caixa() {
                       required
                     />
                   </div>
-                  <Button type="submit" className="w-full">
-                    Registrar {transactionType === 'entrada' ? 'Entrada' : 'Saída'}
+                  <Button type="submit" className="w-full" disabled={createTransaction.isPending}>
+                    {createTransaction.isPending ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        Registrando...
+                      </>
+                    ) : (
+                      `Registrar ${transactionType === 'income' ? 'Entrada' : 'Saída'}`
+                    )}
                   </Button>
                 </form>
               </DialogContent>
@@ -160,9 +188,9 @@ export default function Caixa() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-success">R$ {totalEntradas.toFixed(2)}</div>
+              <div className="text-3xl font-bold text-success">R$ {stats?.income.toFixed(2)}</div>
               <p className="text-xs text-muted-foreground mt-2">
-                {transactions.filter(t => t.type === 'entrada').length} transações
+                {stats?.incomeCount} transações
               </p>
             </CardContent>
           </Card>
@@ -177,9 +205,9 @@ export default function Caixa() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-destructive">R$ {totalSaidas.toFixed(2)}</div>
+              <div className="text-3xl font-bold text-destructive">R$ {stats?.expenses.toFixed(2)}</div>
               <p className="text-xs text-muted-foreground mt-2">
-                {transactions.filter(t => t.type === 'saida').length} transações
+                {stats?.expenseCount} transações
               </p>
             </CardContent>
           </Card>
@@ -194,8 +222,8 @@ export default function Caixa() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className={`text-3xl font-bold ${saldo >= 0 ? 'text-success' : 'text-destructive'}`}>
-                R$ {saldo.toFixed(2)}
+              <div className={`text-3xl font-bold ${(stats?.balance ?? 0) >= 0 ? 'text-success' : 'text-destructive'}`}>
+                R$ {stats?.balance.toFixed(2)}
               </div>
               <p className="text-xs text-muted-foreground mt-2">
                 Saldo líquido do dia
@@ -210,40 +238,78 @@ export default function Caixa() {
             <CardTitle>Movimentações de Hoje</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {transactions.map((transaction) => (
-                <div
-                  key={transaction.id}
-                  className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-smooth"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className={`p-2 rounded-lg ${
-                      transaction.type === 'entrada' ? 'bg-success/10' : 'bg-destructive/10'
-                    }`}>
-                      {transaction.type === 'entrada' ? (
-                        <TrendingUp className="h-5 w-5 text-success" />
-                      ) : (
-                        <TrendingDown className="h-5 w-5 text-destructive" />
-                      )}
+            {transactions.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                Nenhuma transação registrada hoje
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {transactions.map((transaction) => (
+                  <div
+                    key={transaction.id}
+                    className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-smooth group"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`p-2 rounded-lg ${
+                        transaction.type === 'income' ? 'bg-success/10' : 'bg-destructive/10'
+                      }`}>
+                        {transaction.type === 'income' ? (
+                          <TrendingUp className="h-5 w-5 text-success" />
+                        ) : (
+                          <TrendingDown className="h-5 w-5 text-destructive" />
+                        )}
+                      </div>
+                      <div>
+                        <div className="font-semibold">{transaction.category || 'Sem categoria'}</div>
+                        <div className="text-sm text-muted-foreground">{transaction.description}</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="font-semibold">{transaction.category}</div>
-                      <div className="text-sm text-muted-foreground">{transaction.description}</div>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <div className={`text-xl font-bold ${
+                          transaction.type === 'income' ? 'text-success' : 'text-destructive'
+                        }`}>
+                          {transaction.type === 'income' ? '+' : '-'}R$ {Number(transaction.amount).toFixed(2)}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {new Date(transaction.created_at).toLocaleTimeString('pt-BR', { 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                          })}
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => openDeleteDialog(transaction.id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className={`text-xl font-bold ${
-                      transaction.type === 'entrada' ? 'text-success' : 'text-destructive'
-                    }`}>
-                      {transaction.type === 'entrada' ? '+' : '-'}R$ {transaction.amount.toFixed(2)}
-                    </div>
-                    <div className="text-sm text-muted-foreground">{transaction.time}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
+
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja excluir esta transação? Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                Excluir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </Layout>
   );
