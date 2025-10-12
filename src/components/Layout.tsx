@@ -15,6 +15,7 @@ import {
   UserCog,
   User,
   Clock,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -70,13 +71,25 @@ export const Layout = ({ children }: LayoutProps) => {
   const SidebarContent = () => (
     <div className="flex h-full flex-col">
       <div className="border-b border-border p-6">
-        <h1 className="text-2xl font-bold text-foreground">
-          Dallas Barbearia
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
-          <User className="h-4 w-4" />
-          {user?.name}
-        </p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">
+              Dallas Barbearia
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
+              <User className="h-4 w-4" />
+              {user?.name}
+            </p>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setOpen(false)}
+            className="lg:hidden -mt-1 -mr-2"
+          >
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
 
       <nav className="flex-1 space-y-1 p-4">
