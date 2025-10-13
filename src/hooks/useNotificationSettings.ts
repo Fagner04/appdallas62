@@ -15,6 +15,8 @@ export interface NotificationSettings {
   updated_at: string;
 }
 
+type SupabaseNotificationSettings = any;
+
 export const useNotificationSettings = (userId?: string) => {
   const queryClient = useQueryClient();
 
@@ -24,7 +26,7 @@ export const useNotificationSettings = (userId?: string) => {
       if (!userId) return null;
 
       const { data, error } = await supabase
-        .from('notification_settings')
+        .from('notification_settings' as any)
         .select('*')
         .eq('user_id', userId)
         .maybeSingle();
@@ -34,7 +36,7 @@ export const useNotificationSettings = (userId?: string) => {
       // If no settings exist, create default ones
       if (!data) {
         const { data: newSettings, error: insertError } = await supabase
-          .from('notification_settings')
+          .from('notification_settings' as any)
           .insert({
             user_id: userId,
             appointment_reminder_enabled: true,
@@ -48,10 +50,10 @@ export const useNotificationSettings = (userId?: string) => {
           .single();
 
         if (insertError) throw insertError;
-        return newSettings;
+        return newSettings as unknown as NotificationSettings;
       }
 
-      return data;
+      return data as unknown as NotificationSettings;
     },
     enabled: !!userId,
   });
@@ -61,14 +63,14 @@ export const useNotificationSettings = (userId?: string) => {
       if (!userId) throw new Error('User ID is required');
 
       const { data, error } = await supabase
-        .from('notification_settings')
+        .from('notification_settings' as any)
         .update(updates)
         .eq('user_id', userId)
         .select()
         .single();
 
       if (error) throw error;
-      return data;
+      return data as unknown as NotificationSettings;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notification-settings', userId] });
