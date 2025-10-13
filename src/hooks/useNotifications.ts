@@ -77,6 +77,10 @@ export const useNotifications = (userId?: string) => {
 
   const markAllAsRead = useMutation({
     mutationFn: async () => {
+      if (!userId) {
+        throw new Error('Usuário não autenticado');
+      }
+
       const { error } = await supabase
         .from('notifications')
         .update({ is_read: true })
@@ -86,7 +90,7 @@ export const useNotifications = (userId?: string) => {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications', userId] });
       toast({
         title: 'Notificações marcadas como lidas',
       });
@@ -95,6 +99,10 @@ export const useNotifications = (userId?: string) => {
 
   const deleteNotification = useMutation({
     mutationFn: async (notificationId: string) => {
+      if (!userId) {
+        throw new Error('Usuário não autenticado');
+      }
+
       const { error } = await supabase
         .from('notifications')
         .delete()
@@ -104,15 +112,25 @@ export const useNotifications = (userId?: string) => {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications', userId] });
       toast({
         title: 'Notificação excluída',
+      });
+    },
+    onError: () => {
+      toast({
+        title: 'Erro ao excluir notificação',
+        variant: 'destructive',
       });
     },
   });
 
   const clearAllNotifications = useMutation({
     mutationFn: async () => {
+      if (!userId) {
+        throw new Error('Usuário não autenticado');
+      }
+
       const { error } = await supabase
         .from('notifications')
         .delete()
@@ -121,9 +139,16 @@ export const useNotifications = (userId?: string) => {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications', userId] });
       toast({
         title: 'Todas as notificações foram excluídas',
+      });
+    },
+    onError: () => {
+      toast({
+        title: 'Erro ao excluir notificações',
+        description: 'Não foi possível excluir as notificações. Tente novamente.',
+        variant: 'destructive',
       });
     },
   });
