@@ -92,7 +92,6 @@ export const Layout = ({ children }: LayoutProps) => {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            {(user?.role === 'customer' || user?.role === 'barber') && <NotificationBell />}
             <Button
               variant="ghost"
               size="icon"
@@ -147,13 +146,24 @@ export const Layout = ({ children }: LayoutProps) => {
 
       {/* Mobile Header + Sidebar */}
       <div className="flex flex-1 flex-col overflow-x-hidden">
+        {/* Desktop Header */}
+        <header className="hidden lg:block sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
+          <div className="flex h-16 items-center justify-between px-6">
+            <h1 className="text-xl font-bold text-foreground">Dallas Barbearia</h1>
+            <div className="flex items-center gap-2">
+              {user && <NotificationBell />}
+            </div>
+          </div>
+        </header>
+
+        {/* Mobile Header */}
         <header className="lg:hidden sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
           <div className="flex h-16 items-center justify-between px-4">
             <h1 className="text-xl font-bold text-foreground">
               Dallas Barbearia
             </h1>
             <div className="flex items-center gap-2">
-              {(user?.role === 'customer' || user?.role === 'barber') && <NotificationBell />}
+              {user && <NotificationBell />}
               <Sheet open={open} onOpenChange={setOpen}>
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="icon">
