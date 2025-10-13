@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { User, Clock, Lock, Loader2 } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { User, Clock, Lock, Loader2, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { useWorkingHours, useUpdateWorkingHours } from '@/hooks/useWorkingHours';
 import { usePasswordChange } from '@/hooks/usePasswordChange';
@@ -40,6 +41,8 @@ export default function Configuracoes() {
     newPassword: '',
     confirmPassword: '',
   });
+
+  const [isWorkingHoursOpen, setIsWorkingHoursOpen] = useState(true);
 
   useEffect(() => {
     if (workingHours.length > 0) {
@@ -135,14 +138,25 @@ export default function Configuracoes() {
         </Card>
 
         {/* Working Hours */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
-              Horário de Funcionamento
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <Collapsible open={isWorkingHoursOpen} onOpenChange={setIsWorkingHoursOpen}>
+          <Card>
+            <CardHeader>
+              <CollapsibleTrigger className="w-full">
+                <CardTitle className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-5 w-5" />
+                    Horário de Funcionamento
+                  </div>
+                  <ChevronDown 
+                    className={`h-5 w-5 transition-transform duration-200 ${
+                      isWorkingHoursOpen ? 'rotate-180' : ''
+                    }`}
+                  />
+                </CardTitle>
+              </CollapsibleTrigger>
+            </CardHeader>
+            <CollapsibleContent>
+              <CardContent className="space-y-4">
             {isLoading ? (
               <div className="flex justify-center p-8">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -206,8 +220,10 @@ export default function Configuracoes() {
                 </Button>
               </>
             )}
-          </CardContent>
-        </Card>
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
 
         {/* Security */}
         <Card>
