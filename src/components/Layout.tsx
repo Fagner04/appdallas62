@@ -87,7 +87,7 @@ export const Layout = ({ children }: LayoutProps) => {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            {user?.role === 'customer' && <NotificationBell />}
+            {(user?.role === 'customer' || user?.role === 'barber') && <NotificationBell />}
             <Button
               variant="ghost"
               size="icon"
@@ -148,7 +148,7 @@ export const Layout = ({ children }: LayoutProps) => {
               Dallas Barbearia
             </h1>
             <div className="flex items-center gap-2">
-              {user?.role === 'customer' && <NotificationBell />}
+              {(user?.role === 'customer' || user?.role === 'barber') && <NotificationBell />}
               <Sheet open={open} onOpenChange={setOpen}>
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="icon">
