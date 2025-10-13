@@ -60,6 +60,8 @@ export function BarberScheduleView() {
               mode="single"
               selected={selectedDate}
               onSelect={setSelectedDate}
+              today={getBrasiliaDate()}
+              defaultMonth={getBrasiliaDate()}
               locale={ptBR}
               className="rounded-md border"
             />
