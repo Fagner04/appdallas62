@@ -46,13 +46,6 @@ export default function ControleClientes() {
       enabled: true,
     },
     {
-      id: 'notifications',
-      title: 'Notificações',
-      description: 'Enviar notificações de lembrete aos clientes',
-      icon: Bell,
-      enabled: true,
-    },
-    {
       id: 'view_blocked_times',
       title: 'Ver Horários Bloqueados',
       description: 'Mostrar horários bloqueados no calendário do cliente',
