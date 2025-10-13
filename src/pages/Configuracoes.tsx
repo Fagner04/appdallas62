@@ -132,27 +132,37 @@ export default function Configuracoes() {
                 </div>
                 <div className="grid gap-4">
                   {DAYS.map((day) => (
-                    <div key={day.value} className="flex items-center justify-between p-3 rounded-lg border border-border">
-                      <span className="font-medium w-24">{day.label}</span>
-                      <div className="flex items-center gap-4">
-                        <Input 
-                          type="time" 
-                          value={hours[day.value]?.start || '09:00'} 
-                          onChange={(e) => updateDay(day.value, 'start', e.target.value)}
-                          disabled={!hours[day.value]?.isOpen}
-                          className="w-32" 
-                        />
-                        <span className="text-muted-foreground">até</span>
-                        <Input 
-                          type="time" 
-                          value={hours[day.value]?.end || '18:00'} 
-                          onChange={(e) => updateDay(day.value, 'end', e.target.value)}
-                          disabled={!hours[day.value]?.isOpen}
-                          className="w-32" 
-                        />
+                    <div key={day.value} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 rounded-lg border border-border">
+                      <div className="flex items-center justify-between sm:w-auto">
+                        <span className="font-medium">{day.label}</span>
                         <Switch 
                           checked={hours[day.value]?.isOpen || false}
                           onCheckedChange={(checked) => updateDay(day.value, 'isOpen', checked)}
+                          className="sm:hidden"
+                        />
+                      </div>
+                      <div className="flex items-center gap-2 sm:gap-4 flex-1 justify-between sm:justify-end">
+                        <div className="flex items-center gap-2 flex-1 sm:flex-initial">
+                          <Input 
+                            type="time" 
+                            value={hours[day.value]?.start || '09:00'} 
+                            onChange={(e) => updateDay(day.value, 'start', e.target.value)}
+                            disabled={!hours[day.value]?.isOpen}
+                            className="w-full sm:w-32 text-sm" 
+                          />
+                          <span className="text-muted-foreground text-sm">até</span>
+                          <Input 
+                            type="time" 
+                            value={hours[day.value]?.end || '18:00'} 
+                            onChange={(e) => updateDay(day.value, 'end', e.target.value)}
+                            disabled={!hours[day.value]?.isOpen}
+                            className="w-full sm:w-32 text-sm" 
+                          />
+                        </div>
+                        <Switch 
+                          checked={hours[day.value]?.isOpen || false}
+                          onCheckedChange={(checked) => updateDay(day.value, 'isOpen', checked)}
+                          className="hidden sm:inline-flex"
                         />
                       </div>
                     </div>
