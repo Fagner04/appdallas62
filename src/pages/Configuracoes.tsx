@@ -42,9 +42,9 @@ export default function Configuracoes() {
     confirmPassword: '',
   });
 
-  const [isProfileOpen, setIsProfileOpen] = useState(true);
-  const [isWorkingHoursOpen, setIsWorkingHoursOpen] = useState(true);
-  const [isSecurityOpen, setIsSecurityOpen] = useState(true);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isWorkingHoursOpen, setIsWorkingHoursOpen] = useState(false);
+  const [isSecurityOpen, setIsSecurityOpen] = useState(false);
 
   useEffect(() => {
     if (workingHours.length > 0) {
