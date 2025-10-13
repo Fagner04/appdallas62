@@ -10,6 +10,7 @@ import { useServices } from '@/hooks/useServices';
 import { useBarbers } from '@/hooks/useBarbers';
 import { useAvailableTimeSlots, useCreateAppointment } from '@/hooks/useAppointments';
 import { useBlockedTimes } from '@/hooks/useBlockedTimes';
+import { useWorkingHours } from '@/hooks/useWorkingHours';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -59,6 +60,9 @@ export function ClientBookingCalendar() {
   // Buscar horários bloqueados específicos da data selecionada
   const { data: dateBlockedTimes = [] } = useBlockedTimes(selectedBarber, formattedDate);
 
+  // Buscar horários de funcionamento
+  const { data: workingHours = [] } = useWorkingHours();
+
   const createAppointment = useCreateAppointment();
 
   const handleBooking = async () => {
@@ -97,6 +101,13 @@ export function ClientBookingCalendar() {
     return allBlockedTimes.some(blocked => blocked.blocked_date === dateStr);
   };
 
+  // Verificar se um dia está fechado (sem expediente)
+  const isDayClosed = (date: Date) => {
+    const dayOfWeek = date.getDay(); // 0=Domingo, 1=Segunda, etc.
+    const dayHours = workingHours.find(wh => wh.day_of_week === dayOfWeek);
+    return dayHours ? !dayHours.is_open : false;
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -110,26 +121,36 @@ export function ClientBookingCalendar() {
           {/* Calendar */}
           <div className="space-y-4 order-2 lg:order-1">
             <Label>Selecione a Data</Label>
-            {selectedBarber && allBlockedTimes.length > 0 && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-2 rounded-md">
-                <Ban className="h-4 w-4 text-destructive" />
-                <span>Datas com fundo vermelho têm horários bloqueados</span>
-              </div>
-            )}
+            <div className="space-y-2">
+              {selectedBarber && allBlockedTimes.length > 0 && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-2 rounded-md">
+                  <Ban className="h-4 w-4 text-destructive" />
+                  <span>Datas com fundo vermelho têm horários bloqueados</span>
+                </div>
+              )}
+              {workingHours.length > 0 && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-2 rounded-md">
+                  <Clock className="h-4 w-4 text-amber-500" />
+                  <span>Datas com fundo laranja são dias sem expediente (fechado)</span>
+                </div>
+              )}
+            </div>
             <Calendar
               mode="single"
               selected={selectedDate}
               onSelect={setSelectedDate}
-              disabled={(date) => date < minDate}
+              disabled={(date) => date < minDate || isDayClosed(date)}
               today={getBrasiliaDate()}
               defaultMonth={getBrasiliaDate()}
               locale={ptBR}
               className="rounded-md border"
               modifiers={{
-                blocked: (date) => selectedBarber ? isDateBlocked(date) : false
+                blocked: (date) => selectedBarber ? isDateBlocked(date) : false,
+                closed: (date) => isDayClosed(date)
               }}
               modifiersClassNames={{
-                blocked: "bg-destructive/20 text-destructive font-semibold"
+                blocked: "bg-destructive/20 text-destructive font-semibold",
+                closed: "bg-amber-500/20 text-amber-700 line-through opacity-50"
               }}
             />
           </div>

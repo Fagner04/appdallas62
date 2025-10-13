@@ -92,6 +92,23 @@ export const useAvailableTimeSlots = (date: string, barberId: string, serviceDur
 
       if (blockedError) throw blockedError;
 
+      // Fetch working hours for the day of week
+      const dateObj = new Date(date + 'T00:00:00');
+      const dayOfWeek = dateObj.getDay();
+      
+      const { data: workingHours, error: hoursError } = await supabase
+        .from('working_hours' as any)
+        .select('*')
+        .eq('day_of_week', dayOfWeek)
+        .single();
+
+      if (hoursError) throw hoursError;
+
+      // Se o dia está fechado, retornar array vazio
+      if (!workingHours || !(workingHours as any).is_open) {
+        return [];
+      }
+
       // Fetch service durations for existing appointments
       const serviceIds = appointments?.map(apt => apt.service_id) || [];
       const { data: services } = await supabase
@@ -99,9 +116,11 @@ export const useAvailableTimeSlots = (date: string, barberId: string, serviceDur
         .select('id, duration')
         .in('id', serviceIds);
 
-      // Define working hours (8:00 AM to 8:00 PM)
-      const workStart = 8 * 60; // 8:00 AM in minutes
-      const workEnd = 20 * 60;  // 8:00 PM in minutes
+      // Usar horários de funcionamento configurados
+      const [startHour, startMin] = (workingHours as any).start_time.split(':').map(Number);
+      const [endHour, endMin] = (workingHours as any).end_time.split(':').map(Number);
+      const workStart = startHour * 60 + startMin;
+      const workEnd = endHour * 60 + endMin;
       const slotDuration = 30;  // 30 minutes per slot
 
       // Create all possible time slots

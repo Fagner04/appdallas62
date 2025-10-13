@@ -4,12 +4,72 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { User, Clock, Lock } from 'lucide-react';
+import { User, Clock, Lock, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useWorkingHours, useUpdateWorkingHours } from '@/hooks/useWorkingHours';
+import { useState, useEffect } from 'react';
+
+const DAYS = [
+  { value: 1, label: 'Segunda' },
+  { value: 2, label: 'Terça' },
+  { value: 3, label: 'Quarta' },
+  { value: 4, label: 'Quinta' },
+  { value: 5, label: 'Sexta' },
+  { value: 6, label: 'Sábado' },
+  { value: 0, label: 'Domingo' },
+];
 
 export default function Configuracoes() {
+  const { data: workingHours = [], isLoading } = useWorkingHours();
+  const updateWorkingHours = useUpdateWorkingHours();
+
+  const [hours, setHours] = useState<Record<number, { isOpen: boolean; start: string; end: string }>>({
+    1: { isOpen: true, start: '09:00', end: '18:00' },
+    2: { isOpen: true, start: '09:00', end: '18:00' },
+    3: { isOpen: true, start: '09:00', end: '18:00' },
+    4: { isOpen: true, start: '09:00', end: '18:00' },
+    5: { isOpen: true, start: '09:00', end: '18:00' },
+    6: { isOpen: true, start: '09:00', end: '18:00' },
+    0: { isOpen: false, start: '09:00', end: '18:00' },
+  });
+
+  useEffect(() => {
+    if (workingHours.length > 0) {
+      const hoursMap: Record<number, { isOpen: boolean; start: string; end: string }> = {};
+      workingHours.forEach(wh => {
+        hoursMap[wh.day_of_week] = {
+          isOpen: wh.is_open,
+          start: wh.start_time,
+          end: wh.end_time,
+        };
+      });
+      setHours(hoursMap);
+    }
+  }, [workingHours]);
+
   const handleSave = () => {
     toast.success('Configurações salvas com sucesso!');
+  };
+
+  const handleSaveWorkingHours = async () => {
+    const data = Object.entries(hours).map(([day, config]) => ({
+      day_of_week: parseInt(day),
+      is_open: config.isOpen,
+      start_time: config.start,
+      end_time: config.end,
+    }));
+
+    await updateWorkingHours.mutateAsync(data);
+  };
+
+  const updateDay = (day: number, field: 'isOpen' | 'start' | 'end', value: boolean | string) => {
+    setHours(prev => ({
+      ...prev,
+      [day]: {
+        ...prev[day],
+        [field]: value,
+      },
+    }));
   };
 
   return (
@@ -60,29 +120,59 @@ export default function Configuracoes() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-4">
-              {['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'].map((day) => (
-                <div key={day} className="flex items-center justify-between p-3 rounded-lg border border-border">
-                  <span className="font-medium w-24">{day}</span>
-                  <div className="flex items-center gap-4">
-                    <Input type="time" defaultValue="09:00" className="w-32" />
-                    <span className="text-muted-foreground">até</span>
-                    <Input type="time" defaultValue="18:00" className="w-32" />
-                    <Switch defaultChecked />
-                  </div>
-                </div>
-              ))}
-              <div className="flex items-center justify-between p-3 rounded-lg border border-border">
-                <span className="font-medium w-24">Domingo</span>
-                <div className="flex items-center gap-4">
-                  <Input type="time" defaultValue="09:00" className="w-32" disabled />
-                  <span className="text-muted-foreground">até</span>
-                  <Input type="time" defaultValue="18:00" className="w-32" disabled />
-                  <Switch />
-                </div>
+            {isLoading ? (
+              <div className="flex justify-center p-8">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
-            </div>
-            <Button onClick={handleSave}>Salvar Horários</Button>
+            ) : (
+              <>
+                <div className="bg-muted/50 p-3 rounded-md text-sm text-muted-foreground">
+                  <p className="font-medium mb-1">⚠️ Importante:</p>
+                  <p>Dias desligados (switch OFF) bloqueiam automaticamente os agendamentos dos clientes nesse dia.</p>
+                </div>
+                <div className="grid gap-4">
+                  {DAYS.map((day) => (
+                    <div key={day.value} className="flex items-center justify-between p-3 rounded-lg border border-border">
+                      <span className="font-medium w-24">{day.label}</span>
+                      <div className="flex items-center gap-4">
+                        <Input 
+                          type="time" 
+                          value={hours[day.value]?.start || '09:00'} 
+                          onChange={(e) => updateDay(day.value, 'start', e.target.value)}
+                          disabled={!hours[day.value]?.isOpen}
+                          className="w-32" 
+                        />
+                        <span className="text-muted-foreground">até</span>
+                        <Input 
+                          type="time" 
+                          value={hours[day.value]?.end || '18:00'} 
+                          onChange={(e) => updateDay(day.value, 'end', e.target.value)}
+                          disabled={!hours[day.value]?.isOpen}
+                          className="w-32" 
+                        />
+                        <Switch 
+                          checked={hours[day.value]?.isOpen || false}
+                          onCheckedChange={(checked) => updateDay(day.value, 'isOpen', checked)}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <Button 
+                  onClick={handleSaveWorkingHours}
+                  disabled={updateWorkingHours.isPending}
+                >
+                  {updateWorkingHours.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Salvando...
+                    </>
+                  ) : (
+                    'Salvar Horários'
+                  )}
+                </Button>
+              </>
+            )}
           </CardContent>
         </Card>
 
