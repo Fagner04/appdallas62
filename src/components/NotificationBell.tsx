@@ -1,4 +1,4 @@
-import { Bell } from 'lucide-react';
+import { Bell, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -7,20 +7,42 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { CheckCircle2, Clock } from 'lucide-react';
+import { useState } from 'react';
 
 export const NotificationBell = () => {
   const { user } = useAuth();
-  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications(user?.id);
+  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification, clearAllNotifications } = useNotifications(user?.id);
+  const [showClearDialog, setShowClearDialog] = useState(false);
 
   const handleNotificationClick = (notificationId: string, isRead: boolean) => {
     if (!isRead) {
       markAsRead.mutate(notificationId);
     }
+  };
+
+  const handleDeleteNotification = (e: React.MouseEvent, notificationId: string) => {
+    e.stopPropagation();
+    deleteNotification.mutate(notificationId);
+  };
+
+  const handleClearAll = () => {
+    clearAllNotifications.mutate();
+    setShowClearDialog(false);
   };
 
   return (
@@ -41,15 +63,27 @@ export const NotificationBell = () => {
       <PopoverContent className="w-80 p-0" align="end">
         <div className="flex items-center justify-between p-4 border-b border-border">
           <h3 className="font-semibold">Notificações</h3>
-          {unreadCount > 0 && (
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => markAllAsRead.mutate()}
-            >
-              Marcar todas como lidas
-            </Button>
-          )}
+          <div className="flex gap-2">
+            {notifications?.length > 0 && (
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setShowClearDialog(true)}
+                className="text-destructive hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+            {unreadCount > 0 && (
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => markAllAsRead.mutate()}
+              >
+                Marcar lidas
+              </Button>
+            )}
+          </div>
         </div>
         <ScrollArea className="h-[400px]">
           {notifications?.length === 0 ? (
@@ -60,10 +94,10 @@ export const NotificationBell = () => {
           ) : (
             <div className="divide-y divide-border">
               {notifications?.map((notification) => (
-                <button
+                <div
                   key={notification.id}
                   onClick={() => handleNotificationClick(notification.id, notification.is_read)}
-                  className={`w-full text-left p-4 hover:bg-muted/50 transition-colors ${
+                  className={`w-full text-left p-4 hover:bg-muted/50 transition-colors cursor-pointer relative group ${
                     !notification.is_read ? 'bg-primary/5' : ''
                   }`}
                 >
@@ -96,13 +130,38 @@ export const NotificationBell = () => {
                         })}
                       </p>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={(e) => handleDeleteNotification(e, notification.id)}
+                    >
+                      <X className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                    </Button>
                   </div>
-                </button>
+                </div>
               ))}
             </div>
           )}
         </ScrollArea>
       </PopoverContent>
+
+      <AlertDialog open={showClearDialog} onOpenChange={setShowClearDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Limpar todas as notificações?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. Todas as suas notificações serão excluídas permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleClearAll} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Limpar tudo
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Popover>
   );
 };

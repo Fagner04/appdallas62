@@ -93,6 +93,41 @@ export const useNotifications = (userId?: string) => {
     },
   });
 
+  const deleteNotification = useMutation({
+    mutationFn: async (notificationId: string) => {
+      const { error } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('id', notificationId)
+        .eq('user_id', userId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      toast({
+        title: 'Notificação excluída',
+      });
+    },
+  });
+
+  const clearAllNotifications = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('user_id', userId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      toast({
+        title: 'Todas as notificações foram excluídas',
+      });
+    },
+  });
+
   const sendNotification = useMutation({
     mutationFn: async (notification: Omit<Notification, 'id' | 'created_at' | 'is_read'>) => {
       const { error } = await supabase
@@ -117,6 +152,8 @@ export const useNotifications = (userId?: string) => {
     unreadCount,
     markAsRead,
     markAllAsRead,
+    deleteNotification,
+    clearAllNotifications,
     sendNotification,
   };
 };
