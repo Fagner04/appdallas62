@@ -601,7 +601,7 @@ export default function Agendamentos() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Clock className="h-5 w-5" />
-                  Visualização de Horários - {new Date(selectedDate).toLocaleDateString('pt-BR')}
+                  Visualização de Horários - {formatBrasiliaDate(toBrasiliaTime(selectedDate + 'T12:00:00'), 'dd/MM/yyyy')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
