@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Layout } from '@/components/Layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,18 +8,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Bell, Send, Calendar, CheckCircle2, Clock, Plus, Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import { useNotifications, useNotificationStats } from '@/hooks/useNotifications';
+import { useNotificationSettings } from '@/hooks/useNotificationSettings';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { NotificationTemplateEditor } from '@/components/NotificationTemplateEditor';
+import { toast } from 'sonner';
 
 export default function Notificacoes() {
   const { user } = useAuth();
   const { notifications, sendNotification } = useNotifications(user?.id);
   const { data: stats } = useNotificationStats();
   const { data: customers } = useCustomers();
+  const { settings, isLoading, updateSettings } = useNotificationSettings(user?.id);
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState('');
@@ -27,6 +34,14 @@ export default function Notificacoes() {
   const [message, setMessage] = useState('');
   const [type, setType] = useState<'confirmation' | 'reminder' | 'promotion' | 'system'>('system');
   const [editingTemplate, setEditingTemplate] = useState<any>(null);
+
+  const handleNotificationToggle = async (field: string, value: boolean) => {
+    await updateSettings.mutateAsync({ [field]: value });
+  };
+
+  const handleReminderHoursChange = async (hours: number) => {
+    await updateSettings.mutateAsync({ appointment_reminder_hours: hours });
+  };
 
   const handleSendNotification = () => {
     if (!selectedCustomer || !title || !message) return;
@@ -69,6 +84,14 @@ export default function Notificacoes() {
           <h1 className="text-4xl font-bold mb-2">Notificações</h1>
           <p className="text-muted-foreground">Gerencie as notificações automáticas para clientes</p>
         </div>
+
+        <Tabs defaultValue="notifications" className="w-full">
+          <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-2">
+            <TabsTrigger value="notifications">Notificações</TabsTrigger>
+            <TabsTrigger value="settings">Configurações</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="notifications" className="space-y-6 mt-6">
 
         {/* Stats */}
         <div className="grid gap-6 md:grid-cols-3">
@@ -233,6 +256,138 @@ export default function Notificacoes() {
             </div>
           </CardContent>
         </Card>
+          </TabsContent>
+
+          <TabsContent value="settings" className="space-y-6 mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bell className="h-5 w-5" />
+                  Configurações de Notificações
+                </CardTitle>
+                <CardDescription>
+                  Gerencie como e quando você deseja receber notificações
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {isLoading ? (
+                  <div className="text-center py-4">Carregando configurações...</div>
+                ) : (
+                  <>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                          <Label htmlFor="reminder">Lembretes de Agendamento</Label>
+                          <p className="text-sm text-muted-foreground">
+                            Receba lembretes antes dos agendamentos
+                          </p>
+                        </div>
+                        <Switch
+                          id="reminder"
+                          checked={settings?.appointment_reminder_enabled ?? true}
+                          onCheckedChange={(checked) =>
+                            handleNotificationToggle('appointment_reminder_enabled', checked)
+                          }
+                        />
+                      </div>
+
+                      {settings?.appointment_reminder_enabled && (
+                        <div className="ml-6 space-y-2">
+                          <Label htmlFor="reminder-hours">Antecedência do lembrete</Label>
+                          <div className="flex items-center gap-2">
+                            <Input
+                              id="reminder-hours"
+                              type="number"
+                              min="1"
+                              max="72"
+                              value={settings?.appointment_reminder_hours ?? 24}
+                              onChange={(e) => handleReminderHoursChange(Number(e.target.value))}
+                              onBlur={() => toast.success('Antecedência atualizada')}
+                              className="w-24"
+                            />
+                            <span className="text-sm text-muted-foreground">horas antes</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <Separator />
+
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <Label htmlFor="confirmation">Confirmações de Agendamento</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Notificação quando um agendamento for criado
+                        </p>
+                      </div>
+                      <Switch
+                        id="confirmation"
+                        checked={settings?.appointment_confirmation_enabled ?? true}
+                        onCheckedChange={(checked) =>
+                          handleNotificationToggle('appointment_confirmation_enabled', checked)
+                        }
+                      />
+                    </div>
+
+                    <Separator />
+
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <Label htmlFor="cancelled">Cancelamentos</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Notificação quando um agendamento for cancelado
+                        </p>
+                      </div>
+                      <Switch
+                        id="cancelled"
+                        checked={settings?.appointment_cancelled_enabled ?? true}
+                        onCheckedChange={(checked) =>
+                          handleNotificationToggle('appointment_cancelled_enabled', checked)
+                        }
+                      />
+                    </div>
+
+                    <Separator />
+
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <Label htmlFor="rescheduled">Reagendamentos</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Notificação quando um agendamento for reagendado
+                        </p>
+                      </div>
+                      <Switch
+                        id="rescheduled"
+                        checked={settings?.appointment_rescheduled_enabled ?? true}
+                        onCheckedChange={(checked) =>
+                          handleNotificationToggle('appointment_rescheduled_enabled', checked)
+                        }
+                      />
+                    </div>
+
+                    <Separator />
+
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <Label htmlFor="marketing">Notificações de Marketing</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Receba promoções e novidades
+                        </p>
+                      </div>
+                      <Switch
+                        id="marketing"
+                        checked={settings?.marketing_enabled ?? false}
+                        onCheckedChange={(checked) =>
+                          handleNotificationToggle('marketing_enabled', checked)
+                        }
+                      />
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
 
       {editingTemplate && (
