@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, NavLink, useLocation } from 'react-router-dom';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -72,6 +72,11 @@ export const Layout = ({ children }: LayoutProps) => {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const menuItems = getMenuItems(user?.role);
+
+  useEffect(() => {
+    console.log('Layout - User role:', user?.role);
+    console.log('Layout - Should show notification bell:', user?.role === 'customer' || user?.role === 'barber');
+  }, [user]);
 
   const SidebarContent = () => (
     <div className="flex h-full flex-col">
