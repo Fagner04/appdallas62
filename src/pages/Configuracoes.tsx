@@ -42,7 +42,9 @@ export default function Configuracoes() {
     confirmPassword: '',
   });
 
+  const [isProfileOpen, setIsProfileOpen] = useState(true);
   const [isWorkingHoursOpen, setIsWorkingHoursOpen] = useState(true);
+  const [isSecurityOpen, setIsSecurityOpen] = useState(true);
 
   useEffect(() => {
     if (workingHours.length > 0) {
@@ -107,14 +109,25 @@ export default function Configuracoes() {
         </div>
 
         {/* Profile Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              Perfil da Barbearia
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <Collapsible open={isProfileOpen} onOpenChange={setIsProfileOpen}>
+          <Card>
+            <CardHeader>
+              <CollapsibleTrigger className="w-full">
+                <CardTitle className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    Perfil da Barbearia
+                  </div>
+                  <ChevronDown 
+                    className={`h-5 w-5 transition-transform duration-200 ${
+                      isProfileOpen ? 'rotate-180' : ''
+                    }`}
+                  />
+                </CardTitle>
+              </CollapsibleTrigger>
+            </CardHeader>
+            <CollapsibleContent>
+              <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="name">Nome da Barbearia</Label>
@@ -134,8 +147,10 @@ export default function Configuracoes() {
               </div>
             </div>
             <Button onClick={handleSave}>Salvar Alterações</Button>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
 
         {/* Working Hours */}
         <Collapsible open={isWorkingHoursOpen} onOpenChange={setIsWorkingHoursOpen}>
@@ -226,14 +241,25 @@ export default function Configuracoes() {
         </Collapsible>
 
         {/* Security */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Lock className="h-5 w-5" />
-              Segurança
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        <Collapsible open={isSecurityOpen} onOpenChange={setIsSecurityOpen}>
+          <Card>
+            <CardHeader>
+              <CollapsibleTrigger className="w-full">
+                <CardTitle className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-2">
+                    <Lock className="h-5 w-5" />
+                    Segurança
+                  </div>
+                  <ChevronDown 
+                    className={`h-5 w-5 transition-transform duration-200 ${
+                      isSecurityOpen ? 'rotate-180' : ''
+                    }`}
+                  />
+                </CardTitle>
+              </CollapsibleTrigger>
+            </CardHeader>
+            <CollapsibleContent>
+              <CardContent>
             <form onSubmit={handlePasswordChange} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="current-password">Senha Atual</Label>
@@ -286,8 +312,10 @@ export default function Configuracoes() {
                 )}
               </Button>
             </form>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
       </div>
     </Layout>
   );
