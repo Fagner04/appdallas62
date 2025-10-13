@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { User, Clock, Lock, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useWorkingHours, useUpdateWorkingHours } from '@/hooks/useWorkingHours';
+import { usePasswordChange } from '@/hooks/usePasswordChange';
 import { useState, useEffect } from 'react';
 
 const DAYS = [
@@ -22,6 +23,7 @@ const DAYS = [
 export default function Configuracoes() {
   const { data: workingHours = [], isLoading } = useWorkingHours();
   const updateWorkingHours = useUpdateWorkingHours();
+  const { changePassword, isLoading: isChangingPassword } = usePasswordChange();
 
   const [hours, setHours] = useState<Record<number, { isOpen: boolean; start: string; end: string }>>({
     1: { isOpen: true, start: '09:00', end: '18:00' },
@@ -31,6 +33,12 @@ export default function Configuracoes() {
     5: { isOpen: true, start: '09:00', end: '18:00' },
     6: { isOpen: true, start: '09:00', end: '18:00' },
     0: { isOpen: false, start: '09:00', end: '18:00' },
+  });
+
+  const [passwords, setPasswords] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
   });
 
   useEffect(() => {
@@ -70,6 +78,21 @@ export default function Configuracoes() {
         [field]: value,
       },
     }));
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const result = await changePassword(passwords);
+    
+    if (result.success) {
+      // Limpar os campos após sucesso
+      setPasswords({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      });
+    }
   };
 
   return (
@@ -194,20 +217,59 @@ export default function Configuracoes() {
               Segurança
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="current-password">Senha Atual</Label>
-              <Input id="current-password" type="password" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="new-password">Nova Senha</Label>
-              <Input id="new-password" type="password" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirm-password">Confirmar Nova Senha</Label>
-              <Input id="confirm-password" type="password" />
-            </div>
-            <Button onClick={handleSave}>Alterar Senha</Button>
+          <CardContent>
+            <form onSubmit={handlePasswordChange} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="current-password">Senha Atual</Label>
+                <Input 
+                  id="current-password" 
+                  type="password"
+                  value={passwords.currentPassword}
+                  onChange={(e) => setPasswords(prev => ({ ...prev, currentPassword: e.target.value }))}
+                  placeholder="Digite sua senha atual"
+                  required
+                  autoComplete="current-password"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-password">Nova Senha</Label>
+                <Input 
+                  id="new-password" 
+                  type="password"
+                  value={passwords.newPassword}
+                  onChange={(e) => setPasswords(prev => ({ ...prev, newPassword: e.target.value }))}
+                  placeholder="Mínimo 6 caracteres"
+                  required
+                  minLength={6}
+                  autoComplete="new-password"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-password">Confirmar Nova Senha</Label>
+                <Input 
+                  id="confirm-password" 
+                  type="password"
+                  value={passwords.confirmPassword}
+                  onChange={(e) => setPasswords(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                  placeholder="Digite a nova senha novamente"
+                  required
+                  autoComplete="new-password"
+                />
+              </div>
+              <Button 
+                type="submit" 
+                disabled={isChangingPassword}
+              >
+                {isChangingPassword ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Alterando...
+                  </>
+                ) : (
+                  'Alterar Senha'
+                )}
+              </Button>
+            </form>
           </CardContent>
         </Card>
       </div>
