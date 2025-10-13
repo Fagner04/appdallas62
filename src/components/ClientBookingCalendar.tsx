@@ -15,11 +15,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { getTodayBrasilia, formatBrasiliaDate } from '@/lib/timezone';
+import { getTodayBrasilia, formatBrasiliaDate, getBrasiliaDate } from '@/lib/timezone';
 
 export function ClientBookingCalendar() {
   const { user } = useAuth();
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(getBrasiliaDate());
   const [selectedService, setSelectedService] = useState<string>('');
   const [selectedBarber, setSelectedBarber] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string>('');
@@ -89,7 +89,7 @@ export function ClientBookingCalendar() {
     }
   };
 
-  const minDate = new Date();
+  const minDate = getBrasiliaDate();
 
   // Verificar se uma data tem horários bloqueados
   const isDateBlocked = (date: Date) => {
@@ -121,6 +121,8 @@ export function ClientBookingCalendar() {
               selected={selectedDate}
               onSelect={setSelectedDate}
               disabled={(date) => date < minDate}
+              today={getBrasiliaDate()}
+              defaultMonth={getBrasiliaDate()}
               locale={ptBR}
               className="rounded-md border"
               modifiers={{
