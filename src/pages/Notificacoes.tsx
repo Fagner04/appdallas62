@@ -6,13 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Bell, Send, Calendar, CheckCircle2, Clock, Plus } from 'lucide-react';
+import { Bell, Send, Calendar, CheckCircle2, Clock, Plus, Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useNotifications, useNotificationStats } from '@/hooks/useNotifications';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { NotificationTemplateEditor } from '@/components/NotificationTemplateEditor';
 
 export default function Notificacoes() {
   const { user } = useAuth();
@@ -25,6 +26,7 @@ export default function Notificacoes() {
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
   const [type, setType] = useState<'confirmation' | 'reminder' | 'promotion' | 'system'>('system');
+  const [editingTemplate, setEditingTemplate] = useState<any>(null);
 
   const handleSendNotification = () => {
     if (!selectedCustomer || !title || !message) return;
@@ -53,6 +55,13 @@ export default function Notificacoes() {
     { label: 'Pendentes', value: stats?.pending || 0, icon: Clock, color: 'text-warning' },
   ];
 
+  const templates = [
+    { type: 'confirmation', title: 'Confirmação de Agendamento', description: 'Enviada imediatamente após o agendamento', icon: Calendar },
+    { type: 'reminder', title: 'Lembrete 1h Antes', description: 'Enviada 1 hora antes do horário agendado', icon: Bell },
+    { type: 'thanks', title: 'Agradecimento Pós-Visita', description: 'Enviada após a conclusão do atendimento', icon: CheckCircle2 },
+    { type: 'promotion', title: 'Promoções e Ofertas', description: 'Enviada periodicamente com ofertas especiais', icon: Sparkles },
+  ];
+
   return (
     <Layout>
       <div className="space-y-6 animate-fade-in">
@@ -78,56 +87,31 @@ export default function Notificacoes() {
           ))}
         </div>
 
-        {/* Notification Settings */}
+        {/* Notification Templates */}
         <Card>
           <CardHeader>
-            <CardTitle>Configurações de Notificações</CardTitle>
+            <CardTitle>Templates de Notificações Automáticas</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="p-4 rounded-lg border border-border space-y-2">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-primary" />
-                  <span className="font-semibold">Confirmação de Agendamento</span>
+              {templates.map((template) => (
+                <div key={template.type} className="p-4 rounded-lg border border-border space-y-2 hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <template.icon className="h-5 w-5 text-primary" />
+                    <span className="font-semibold">{template.title}</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {template.description}
+                  </p>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => setEditingTemplate(template)}
+                  >
+                    Editar Mensagem
+                  </Button>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  Enviada imediatamente após o agendamento
-                </p>
-                <Button size="sm" variant="outline">Editar Mensagem</Button>
-              </div>
-
-              <div className="p-4 rounded-lg border border-border space-y-2">
-                <div className="flex items-center gap-2">
-                  <Bell className="h-5 w-5 text-warning" />
-                  <span className="font-semibold">Lembrete 1h Antes</span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Enviada 1 hora antes do horário agendado
-                </p>
-                <Button size="sm" variant="outline">Editar Mensagem</Button>
-              </div>
-
-              <div className="p-4 rounded-lg border border-border space-y-2">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-success" />
-                  <span className="font-semibold">Agradecimento Pós-Visita</span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Enviada após a conclusão do atendimento
-                </p>
-                <Button size="sm" variant="outline">Editar Mensagem</Button>
-              </div>
-
-              <div className="p-4 rounded-lg border border-border space-y-2">
-                <div className="flex items-center gap-2">
-                  <Send className="h-5 w-5 text-accent" />
-                  <span className="font-semibold">Promoções e Ofertas</span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Enviada periodicamente com ofertas especiais
-                </p>
-                <Button size="sm" variant="outline">Editar Mensagem</Button>
-              </div>
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -250,6 +234,14 @@ export default function Notificacoes() {
           </CardContent>
         </Card>
       </div>
+
+      {editingTemplate && (
+        <NotificationTemplateEditor
+          isOpen={!!editingTemplate}
+          onClose={() => setEditingTemplate(null)}
+          template={editingTemplate}
+        />
+      )}
     </Layout>
   );
 }
