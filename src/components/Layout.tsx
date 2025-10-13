@@ -1,25 +1,30 @@
-import { ReactNode } from 'react';
-import { NavLink } from 'react-router-dom';
+import { ReactNode, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate, NavLink, useLocation } from 'react-router-dom';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { NotificationBell } from '@/components/NotificationBell';
 import {
   LayoutDashboard,
-  Calendar,
-  Scissors,
   Users,
+  Calendar,
   DollarSign,
-  BarChart3,
   Settings,
-  Bell,
   LogOut,
   Menu,
+  Scissors,
+  Clock,
+  ClipboardList,
+  FileText,
+  Bell,
+  LucideIcon,
+  UserCircle,
+  BarChart3,
   UserCog,
   User,
-  Clock,
   X,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { useState } from 'react';
 
 interface LayoutProps {
   children: ReactNode;
@@ -81,14 +86,17 @@ export const Layout = ({ children }: LayoutProps) => {
               {user?.name}
             </p>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setOpen(false)}
-            className="lg:hidden -mt-1 -mr-2 bg-primary/10 hover:bg-primary/20 h-8 w-8"
-          >
-            <X className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center gap-2">
+            {user?.role === 'customer' && <NotificationBell />}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setOpen(false)}
+              className="lg:hidden -mt-1 -mr-2 bg-primary/10 hover:bg-primary/20 h-8 w-8"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -139,16 +147,19 @@ export const Layout = ({ children }: LayoutProps) => {
             <h1 className="text-xl font-bold text-foreground">
               Dallas Barbearia
             </h1>
-            <Sheet open={open} onOpenChange={setOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-6 w-6" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-72 p-0 [&>button]:hidden">
-                <SidebarContent />
-              </SheetContent>
-            </Sheet>
+            <div className="flex items-center gap-2">
+              {user?.role === 'customer' && <NotificationBell />}
+              <Sheet open={open} onOpenChange={setOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Menu className="h-6 w-6" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-72 p-0 [&>button]:hidden">
+                  <SidebarContent />
+                </SheetContent>
+              </Sheet>
+            </div>
           </div>
         </header>
 
