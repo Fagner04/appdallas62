@@ -88,6 +88,15 @@ const Index = () => {
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="py-6 border-t border-border/50 bg-card/50">
+        <div className="container mx-auto px-4">
+          <p className="text-center text-sm text-muted-foreground">
+            Todos os direitos reservados Dallas - 2025 🩶
+          </p>
+        </div>
+      </footer>
     </div>
   );
 };
