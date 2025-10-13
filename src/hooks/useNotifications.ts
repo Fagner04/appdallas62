@@ -130,6 +130,17 @@ export const useNotifications = (userId?: string) => {
 
   const sendNotification = useMutation({
     mutationFn: async (notification: Omit<Notification, 'id' | 'created_at' | 'is_read'>) => {
+      // Verifica se o cliente tem notificações habilitadas
+      const { data: customer } = await supabase
+        .from('customers')
+        .select('notifications_enabled')
+        .eq('user_id', notification.user_id)
+        .single();
+
+      if (customer && customer.notifications_enabled === false) {
+        throw new Error('Cliente não aceita notificações');
+      }
+
       const { error } = await supabase
         .from('notifications')
         .insert(notification);
@@ -141,6 +152,20 @@ export const useNotifications = (userId?: string) => {
       toast({
         title: 'Notificação enviada',
       });
+    },
+    onError: (error: Error) => {
+      if (error.message === 'Cliente não aceita notificações') {
+        toast({
+          title: 'Cliente bloqueou notificações',
+          description: 'Este cliente optou por não receber notificações',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Erro ao enviar notificação',
+          variant: 'destructive',
+        });
+      }
     },
   });
 

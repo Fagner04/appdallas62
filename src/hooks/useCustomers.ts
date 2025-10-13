@@ -10,6 +10,7 @@ export interface Customer {
   email?: string;
   notes?: string;
   loyalty_points?: number;
+  notifications_enabled?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -26,6 +27,7 @@ export interface UpdateCustomerData {
   phone?: string;
   email?: string;
   notes?: string;
+  notifications_enabled?: boolean;
 }
 
 export const useCustomers = () => {

@@ -2,13 +2,15 @@ import { useState, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, Plus, Mail, Phone, Calendar, Pencil, Trash2 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Users, Plus, Mail, Phone, Calendar, Pencil, Trash2, Bell, BellOff } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useCustomers, useCreateCustomer, useUpdateCustomer, useDeleteCustomer, Customer } from '@/hooks/useCustomers';
+import { toast } from 'sonner';
 
 export default function Clientes() {
   const [open, setOpen] = useState(false);
@@ -80,6 +82,14 @@ export default function Clientes() {
       phone: '',
       notes: '',
     });
+  };
+
+  const handleToggleNotifications = async (customerId: string, currentValue: boolean) => {
+    await updateCustomer.mutateAsync({
+      id: customerId,
+      data: { notifications_enabled: !currentValue },
+    });
+    toast.success(`Notificações ${!currentValue ? 'ativadas' : 'desativadas'} para este cliente`);
   };
 
   return (
@@ -192,6 +202,28 @@ export default function Clientes() {
                       <p className="text-sm text-muted-foreground">{customer.notes}</p>
                     </div>
                   )}
+                  
+                  {/* Controle de Notificações */}
+                  <div className="pt-2 border-t border-border">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {customer.notifications_enabled !== false ? (
+                          <Bell className="h-4 w-4 text-primary" />
+                        ) : (
+                          <BellOff className="h-4 w-4 text-muted-foreground" />
+                        )}
+                        <Label htmlFor={`notifications-${customer.id}`} className="text-sm cursor-pointer">
+                          Receber notificações
+                        </Label>
+                      </div>
+                      <Switch
+                        id={`notifications-${customer.id}`}
+                        checked={customer.notifications_enabled !== false}
+                        onCheckedChange={() => handleToggleNotifications(customer.id, customer.notifications_enabled !== false)}
+                      />
+                    </div>
+                  </div>
+                  
                   <div className="flex items-center justify-between pt-3 border-t border-border">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Calendar className="h-4 w-4" />
