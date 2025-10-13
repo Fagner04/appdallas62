@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Users, Plus, Mail, Phone, Calendar, Pencil, Trash2, Bell, BellOff } from 'lucide-react';
+import { Users, Plus, Mail, Phone, Calendar, Pencil, Trash2, Bell, BellOff, Search } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
@@ -17,6 +17,7 @@ export default function Clientes() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [customerToDelete, setCustomerToDelete] = useState<string | null>(null);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -92,73 +93,91 @@ export default function Clientes() {
     toast.success(`Notificações ${!currentValue ? 'ativadas' : 'desativadas'} para este cliente`);
   };
 
+  const filteredCustomers = customers?.filter((customer) =>
+    customer.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <Layout>
       <div className="space-y-6 animate-fade-in">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold mb-2">Clientes</h1>
-            <p className="text-muted-foreground">Gerencie sua base de clientes</p>
-          </div>
-          <Dialog open={open} onOpenChange={(isOpen) => {
-            setOpen(isOpen);
-            if (!isOpen) handleDialogClose();
-          }}>
-            <DialogTrigger asChild>
-              <Button className="gap-2">
-                <Plus className="h-5 w-5" />
-                Novo Cliente
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>
-                  {editingCustomer ? 'Editar Cliente' : 'Cadastrar Novo Cliente'}
-                </DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Nome Completo</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Telefone</Label>
-                  <Input
-                    id="phone"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="notes">Observações</Label>
-                  <Textarea
-                    id="notes"
-                    value={formData.notes}
-                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    placeholder="Adicione observações sobre o cliente"
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={createCustomer.isPending || updateCustomer.isPending}>
-                  {editingCustomer ? 'Atualizar Cliente' : 'Cadastrar Cliente'}
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Clientes</h1>
+              <p className="text-muted-foreground">Gerencie sua base de clientes</p>
+            </div>
+            <Dialog open={open} onOpenChange={(isOpen) => {
+              setOpen(isOpen);
+              if (!isOpen) handleDialogClose();
+            }}>
+              <DialogTrigger asChild>
+                <Button className="gap-2">
+                  <Plus className="h-5 w-5" />
+                  Novo Cliente
                 </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingCustomer ? 'Editar Cliente' : 'Cadastrar Novo Cliente'}
+                  </DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Nome Completo</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Telefone</Label>
+                    <Input
+                      id="phone"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="notes">Observações</Label>
+                    <Textarea
+                      id="notes"
+                      value={formData.notes}
+                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                      placeholder="Adicione observações sobre o cliente"
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={createCustomer.isPending || updateCustomer.isPending}>
+                    {editingCustomer ? 'Atualizar Cliente' : 'Cadastrar Cliente'}
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          {/* Campo de Busca */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Buscar cliente por nome..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
         </div>
 
         {isLoading ? (
@@ -167,9 +186,13 @@ export default function Clientes() {
           <div className="text-center py-8 text-muted-foreground">
             Nenhum cliente cadastrado ainda
           </div>
+        ) : !filteredCustomers || filteredCustomers.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            Nenhum cliente encontrado com esse nome
+          </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2">
-            {customers.map((customer) => (
+            {filteredCustomers.map((customer) => (
               <Card key={customer.id} className="hover-lift">
                 <CardHeader>
                   <div className="flex items-start justify-between">
