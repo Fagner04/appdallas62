@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { getTodayBrasilia } from '@/lib/timezone';
 
 export const useDashboardStats = () => {
   return useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: async () => {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getTodayBrasilia();
 
       // Get today's appointments count
       const { count: appointmentsToday } = await supabase
@@ -40,7 +41,7 @@ export const useTodayAppointments = () => {
   return useQuery({
     queryKey: ['today-appointments'],
     queryFn: async () => {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getTodayBrasilia();
 
       const { data, error } = await supabase
         .from('appointments')

@@ -7,14 +7,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2, Calendar as CalendarIcon, Clock, User, Scissors, Phone } from 'lucide-react';
 import { useBarbers } from '@/hooks/useBarbers';
 import { useAppointments } from '@/hooks/useAppointments';
-import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { formatBrasiliaDate, toBrasiliaTime } from '@/lib/timezone';
+import { formatBrasiliaDate, getBrasiliaDate, toBrasiliaTime } from '@/lib/timezone';
 import { useAuth } from '@/contexts/AuthContext';
+import { format } from 'date-fns';
 
 export function BarberScheduleView() {
   const { user } = useAuth();
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(getBrasiliaDate());
   const [selectedBarber, setSelectedBarber] = useState<string>('');
 
   const { data: barbers = [], isLoading: barbersLoading } = useBarbers();
@@ -23,7 +23,7 @@ export function BarberScheduleView() {
   const isBarber = user?.role === 'barber';
   const defaultBarberId = isBarber ? user?.id : '';
 
-  const formattedDate = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '';
+  const formattedDate = selectedDate ? formatBrasiliaDate(selectedDate, 'yyyy-MM-dd') : '';
   const barberId = selectedBarber || defaultBarberId;
   
   const { data: appointments = [], isLoading: appointmentsLoading } = useAppointments(formattedDate);

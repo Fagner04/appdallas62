@@ -1,32 +1,33 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, startOfYear, endOfYear } from 'date-fns';
+import { getBrasiliaDate, formatBrasiliaDate } from '@/lib/timezone';
 
 type Period = 'week' | 'month' | 'quarter' | 'year';
 
 const getDateRange = (period: Period) => {
-  const now = new Date();
+  const now = getBrasiliaDate();
   
   switch (period) {
     case 'week':
       return {
-        start: startOfWeek(now).toISOString().split('T')[0],
-        end: endOfWeek(now).toISOString().split('T')[0],
+        start: formatBrasiliaDate(startOfWeek(now), 'yyyy-MM-dd'),
+        end: formatBrasiliaDate(endOfWeek(now), 'yyyy-MM-dd'),
       };
     case 'month':
       return {
-        start: startOfMonth(now).toISOString().split('T')[0],
-        end: endOfMonth(now).toISOString().split('T')[0],
+        start: formatBrasiliaDate(startOfMonth(now), 'yyyy-MM-dd'),
+        end: formatBrasiliaDate(endOfMonth(now), 'yyyy-MM-dd'),
       };
     case 'quarter':
       return {
-        start: startOfQuarter(now).toISOString().split('T')[0],
-        end: endOfQuarter(now).toISOString().split('T')[0],
+        start: formatBrasiliaDate(startOfQuarter(now), 'yyyy-MM-dd'),
+        end: formatBrasiliaDate(endOfQuarter(now), 'yyyy-MM-dd'),
       };
     case 'year':
       return {
-        start: startOfYear(now).toISOString().split('T')[0],
-        end: endOfYear(now).toISOString().split('T')[0],
+        start: formatBrasiliaDate(startOfYear(now), 'yyyy-MM-dd'),
+        end: formatBrasiliaDate(endOfYear(now), 'yyyy-MM-dd'),
       };
   }
 };
