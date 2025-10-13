@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Shield, Calendar, DollarSign, Ban, Bell, Eye, Clock, Trash2 } from 'lucide-react';
+import { Shield, Calendar, DollarSign, Ban, Eye, Clock } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -50,13 +50,6 @@ export default function ControleClientes() {
       title: 'Ver Horários Bloqueados',
       description: 'Mostrar horários bloqueados no calendário do cliente',
       icon: Eye,
-      enabled: true,
-    },
-    {
-      id: 'delete_notifications',
-      title: 'Apagar Notificações',
-      description: 'Permitir que clientes apaguem suas próprias notificações',
-      icon: Trash2,
       enabled: true,
     },
   ]);
