@@ -4,78 +4,59 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Shield, Calendar, DollarSign, Ban, Eye, Clock, Trash2 } from 'lucide-react';
-import { useState } from 'react';
-import { toast } from 'sonner';
+import { useClientFeatures } from '@/hooks/useClientFeatures';
 
 interface ClientFeature {
   id: string;
   title: string;
   description: string;
   icon: any;
-  enabled: boolean;
 }
 
 export default function ControleClientes() {
-  const [features, setFeatures] = useState<ClientFeature[]>([
+  const { isFeatureEnabled, toggleFeature } = useClientFeatures();
+
+  const featuresList: ClientFeature[] = [
     {
       id: 'online_booking',
       title: 'Agendamentos Online',
       description: 'Permitir que clientes façam agendamentos pelo sistema',
       icon: Calendar,
-      enabled: true,
     },
     {
       id: 'show_prices',
       title: 'Mostrar Preços',
       description: 'Exibir valores dos serviços para clientes',
       icon: DollarSign,
-      enabled: true,
     },
     {
       id: 'cancel_appointments',
       title: 'Cancelamento de Agendamentos',
       description: 'Permitir que clientes cancelem seus próprios agendamentos',
       icon: Ban,
-      enabled: false,
     },
     {
       id: 'view_history',
       title: 'Ver Histórico',
       description: 'Clientes podem ver histórico completo de serviços',
       icon: Clock,
-      enabled: true,
     },
     {
       id: 'view_blocked_times',
       title: 'Ver Horários Bloqueados',
       description: 'Mostrar horários bloqueados no calendário do cliente',
       icon: Eye,
-      enabled: true,
     },
     {
       id: 'delete_notifications',
       title: 'Apagar Notificações',
       description: 'Permitir que clientes apaguem suas próprias notificações',
       icon: Trash2,
-      enabled: true,
     },
-  ]);
+  ];
 
-  const handleToggle = (featureId: string) => {
-    setFeatures((prev) =>
-      prev.map((feature) =>
-        feature.id === featureId
-          ? { ...feature, enabled: !feature.enabled }
-          : feature
-      )
-    );
-    
-    const feature = features.find((f) => f.id === featureId);
-    const newState = !feature?.enabled;
-    
-    toast.success(
-      `${feature?.title} ${newState ? 'habilitada' : 'desabilitada'} para clientes`
-    );
+  const handleToggle = (featureId: string, featureTitle: string) => {
+    toggleFeature(featureId, featureTitle);
   };
 
   return (
@@ -99,7 +80,7 @@ export default function ControleClientes() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {features.map((feature, index) => (
+            {featuresList.map((feature, index) => (
               <div key={feature.id}>
                 <div className="flex items-center justify-between space-x-4">
                   <div className="flex items-start gap-4 flex-1">
@@ -120,11 +101,11 @@ export default function ControleClientes() {
                   </div>
                   <Switch
                     id={feature.id}
-                    checked={feature.enabled}
-                    onCheckedChange={() => handleToggle(feature.id)}
+                    checked={isFeatureEnabled(feature.id)}
+                    onCheckedChange={() => handleToggle(feature.id, feature.title)}
                   />
                 </div>
-                {index < features.length - 1 && (
+                {index < featuresList.length - 1 && (
                   <Separator className="mt-6" />
                 )}
               </div>
