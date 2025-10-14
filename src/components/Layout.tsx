@@ -64,6 +64,7 @@ const getMenuItems = (role?: string) => {
     { icon: Settings, label: 'Controle de Clientes', path: '/controle-clientes' },
     { icon: DollarSign, label: 'Caixa do Dia', path: '/caixa' },
     { icon: BarChart3, label: 'Relatórios', path: '/relatorios' },
+    { icon: FileText, label: 'Marketing', path: '/marketing' },
     { icon: Bell, label: 'Notificações', path: '/notificacoes' },
     { icon: User, label: 'Perfil', path: '/configuracoes' },
   ];

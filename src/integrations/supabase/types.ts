@@ -194,6 +194,102 @@ export type Database = {
         }
         Relationships: []
       }
+      loyalty_coupons: {
+        Row: {
+          code: string
+          created_at: string
+          customer_id: string
+          expires_at: string | null
+          id: string
+          is_redeemed: boolean | null
+          redeemed_appointment_id: string | null
+          redeemed_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          customer_id: string
+          expires_at?: string | null
+          id?: string
+          is_redeemed?: boolean | null
+          redeemed_appointment_id?: string | null
+          redeemed_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          customer_id?: string
+          expires_at?: string | null
+          id?: string
+          is_redeemed?: boolean | null
+          redeemed_appointment_id?: string | null
+          redeemed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loyalty_coupons_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loyalty_coupons_redeemed_appointment_id_fkey"
+            columns: ["redeemed_appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      loyalty_history: {
+        Row: {
+          action: string
+          appointment_id: string | null
+          created_at: string
+          customer_id: string
+          description: string | null
+          id: string
+          points_balance: number
+          points_change: number
+        }
+        Insert: {
+          action: string
+          appointment_id?: string | null
+          created_at?: string
+          customer_id: string
+          description?: string | null
+          id?: string
+          points_balance: number
+          points_change: number
+        }
+        Update: {
+          action?: string
+          appointment_id?: string | null
+          created_at?: string
+          customer_id?: string
+          description?: string | null
+          id?: string
+          points_balance?: number
+          points_change?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loyalty_history_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loyalty_history_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_settings: {
         Row: {
           appointment_cancelled_enabled: boolean | null
