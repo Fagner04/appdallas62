@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Gift, Users, TrendingUp, Award, Calendar, CheckCircle2, XCircle, Plus, Minus, RotateCcw } from 'lucide-react';
+import { Gift, Users, TrendingUp, Award, Calendar, CheckCircle2, XCircle, Plus, Minus, RotateCcw, Bell, Send, Clock, Sparkles, MessageSquare } from 'lucide-react';
 import { useLoyaltyCoupons, useLoyaltyStats, useUpdateCustomerPoints } from '@/hooks/useLoyalty';
 import { useCustomers } from '@/hooks/useCustomers';
 import { formatDistanceToNow } from 'date-fns';
@@ -12,17 +12,41 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { useNotifications, useNotificationStats } from '@/hooks/useNotifications';
+import { useNotificationTemplates } from '@/hooks/useNotificationTemplates';
+import { NotificationTemplateEditor } from '@/components/NotificationTemplateEditor';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export default function Marketing() {
+  const { user } = useAuth();
   const { coupons, redeemCoupon } = useLoyaltyCoupons();
   const { stats } = useLoyaltyStats();
   const { data: customers } = useCustomers();
   const updatePoints = useUpdateCustomerPoints();
+  const { notifications, sendNotification } = useNotifications(user?.id);
+  const { data: notificationStats } = useNotificationStats();
+  const { templates } = useNotificationTemplates();
 
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
   const [pointsDialog, setPointsDialog] = useState(false);
   const [pointsAmount, setPointsAmount] = useState('');
   const [pointsAction, setPointsAction] = useState<'add' | 'remove' | 'set'>('add');
+  
+  // Notification states
+  const [isNotificationDialogOpen, setIsNotificationDialogOpen] = useState(false);
+  const [selectedNotificationCustomer, setSelectedNotificationCustomer] = useState('');
+  const [sendToAll, setSendToAll] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState('');
+  const [notificationTitle, setNotificationTitle] = useState('');
+  const [notificationMessage, setNotificationMessage] = useState('');
+  const [notificationType, setNotificationType] = useState<'confirmation' | 'reminder' | 'promotion' | 'system'>('system');
+  const [editingTemplate, setEditingTemplate] = useState<any>(null);
+  const [isCreatingTemplate, setIsCreatingTemplate] = useState(false);
 
   const handleRedeem = async (couponId: string) => {
     await redeemCoupon.mutateAsync(couponId);
@@ -46,6 +70,92 @@ export default function Marketing() {
     setSelectedCustomer(customerId);
     setPointsAction(action);
     setPointsDialog(true);
+  };
+
+  const handleTemplateSelect = (templateId: string) => {
+    setSelectedTemplate(templateId);
+    const template = templates?.find(t => t.id === templateId);
+    if (template) {
+      setNotificationTitle(template.title);
+      setNotificationMessage(template.message);
+      setNotificationType(template.type as any);
+    }
+  };
+
+  const handleSendNotification = async () => {
+    if ((!selectedNotificationCustomer && !sendToAll) || !notificationTitle || !notificationMessage) return;
+
+    if (sendToAll) {
+      const customersWithUserId = customers?.filter(c => c.user_id) || [];
+      
+      if (customersWithUserId.length === 0) {
+        toast.error('Nenhum cliente encontrado para enviar notificação');
+        return;
+      }
+
+      const { data: userRoles } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'customer')
+        .in('user_id', customersWithUserId.map(c => c.user_id!));
+
+      const customerUserIds = new Set(userRoles?.map(r => r.user_id) || []);
+      const customersOnly = customersWithUserId.filter(c => customerUserIds.has(c.user_id!));
+
+      if (customersOnly.length === 0) {
+        toast.error('Nenhum cliente encontrado para enviar notificação');
+        return;
+      }
+
+      let successCount = 0;
+      for (const customer of customersOnly) {
+        try {
+          await sendNotification.mutateAsync({
+            user_id: customer.user_id!,
+            title: notificationTitle,
+            message: notificationMessage,
+            type: notificationType,
+            related_id: null,
+          });
+          successCount++;
+        } catch (error) {
+          console.error('Erro ao enviar notificação para', customer.name, error);
+        }
+      }
+
+      toast.success(`Notificação enviada para ${successCount} cliente(s)`);
+    } else {
+      const customer = customers?.find((c) => c.id === selectedNotificationCustomer);
+      if (!customer?.user_id) return;
+
+      sendNotification.mutate({
+        user_id: customer.user_id,
+        title: notificationTitle,
+        message: notificationMessage,
+        type: notificationType,
+        related_id: null,
+      });
+    }
+
+    setIsNotificationDialogOpen(false);
+    setSelectedNotificationCustomer('');
+    setSendToAll(false);
+    setSelectedTemplate('');
+    setNotificationTitle('');
+    setNotificationMessage('');
+    setNotificationType('system');
+  };
+
+  const getIconComponent = (iconName: string) => {
+    const icons: Record<string, any> = {
+      Calendar,
+      Bell,
+      CheckCircle2,
+      Sparkles,
+      Gift,
+      MessageSquare,
+    };
+    return icons[iconName] || Bell;
   };
 
   const activeCoupons = coupons?.filter(c => !c.is_redeemed) || [];
@@ -136,6 +246,38 @@ export default function Marketing() {
               </div>
             </div>
           </CardContent>
+        </Card>
+
+        {/* Notificações Card */}
+        <Card 
+          className="cursor-pointer hover:shadow-lg transition-all duration-300 border-2 border-primary/20 hover:border-primary/40"
+          onClick={() => setIsNotificationDialogOpen(true)}
+        >
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-lg bg-primary/10">
+                  <Send className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <CardTitle>Enviar Notificações</CardTitle>
+                  <CardDescription className="mt-1">
+                    Comunique-se com seus clientes através de notificações personalizadas
+                  </CardDescription>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Badge variant="secondary" className="gap-1">
+                  <Clock className="h-3 w-3" />
+                  {notificationStats?.sentToday || 0} hoje
+                </Badge>
+                <Badge variant="outline" className="gap-1">
+                  <CheckCircle2 className="h-3 w-3" />
+                  {notificationStats?.confirmations || 0} confirmadas
+                </Badge>
+              </div>
+            </div>
+          </CardHeader>
         </Card>
 
         {/* Cupons e Pontos */}
@@ -383,6 +525,158 @@ export default function Marketing() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Dialog para enviar notificações */}
+      <Dialog open={isNotificationDialogOpen} onOpenChange={setIsNotificationDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Send className="h-5 w-5 text-primary" />
+              Enviar Notificação
+            </DialogTitle>
+            <DialogDescription>
+              Envie notificações personalizadas para seus clientes
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Template (Opcional)</label>
+              <Select value={selectedTemplate} onValueChange={handleTemplateSelect}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um template" />
+                </SelectTrigger>
+                <SelectContent>
+                  {templates?.map((template) => (
+                    <SelectItem key={template.id} value={template.id}>
+                      {template.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className={`
+              p-4 rounded-lg border-2 transition-all duration-300
+              ${sendToAll 
+                ? 'border-primary bg-primary/5 shadow-lg shadow-primary/20' 
+                : 'border-border bg-muted/30'
+              }
+            `}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`
+                    p-2 rounded-full transition-all duration-300
+                    ${sendToAll ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}
+                  `}>
+                    <Users className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="sendToAll"
+                      className="text-sm font-semibold cursor-pointer block"
+                    >
+                      Enviar para todos os clientes
+                    </label>
+                    <p className="text-xs text-muted-foreground">
+                      {sendToAll ? 'Todos receberão esta notificação' : 'Enviar apenas para um cliente'}
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  id="sendToAll"
+                  checked={sendToAll}
+                  onCheckedChange={(checked) => {
+                    setSendToAll(checked);
+                    if (checked) {
+                      setSelectedNotificationCustomer('');
+                    }
+                  }}
+                />
+              </div>
+            </div>
+            
+            {!sendToAll && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Cliente</label>
+                <Select value={selectedNotificationCustomer} onValueChange={setSelectedNotificationCustomer}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o cliente" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {customers?.map((customer) => (
+                      <SelectItem key={customer.id} value={customer.id}>
+                        {customer.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Tipo</label>
+              <Select value={notificationType} onValueChange={(v: any) => setNotificationType(v)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="system">Sistema</SelectItem>
+                  <SelectItem value="confirmation">Confirmação</SelectItem>
+                  <SelectItem value="reminder">Lembrete</SelectItem>
+                  <SelectItem value="promotion">Promoção</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Título</label>
+              <Input
+                value={notificationTitle}
+                onChange={(e) => setNotificationTitle(e.target.value)}
+                placeholder="Título da notificação"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Mensagem</label>
+              <Textarea
+                value={notificationMessage}
+                onChange={(e) => setNotificationMessage(e.target.value)}
+                placeholder="Mensagem da notificação"
+                rows={4}
+              />
+            </div>
+            <Button 
+              onClick={handleSendNotification} 
+              className="w-full"
+              disabled={(!selectedNotificationCustomer && !sendToAll) || !notificationTitle || !notificationMessage || sendNotification.isPending}
+            >
+              <Send className="h-4 w-4 mr-2" />
+              {sendNotification.isPending ? 'Enviando...' : sendToAll ? 'Enviar para Todos' : 'Enviar Notificação'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {editingTemplate && (
+        <NotificationTemplateEditor
+          isOpen={!!editingTemplate}
+          onClose={() => setEditingTemplate(null)}
+          template={editingTemplate}
+        />
+      )}
+      
+      {isCreatingTemplate && (
+        <NotificationTemplateEditor
+          isOpen={isCreatingTemplate}
+          onClose={() => setIsCreatingTemplate(false)}
+          template={{
+            type: 'custom',
+            title: '',
+            description: '',
+            message: '',
+            icon: 'Bell',
+          }}
+          isNew={true}
+        />
+      )}
     </Layout>
   );
 }
