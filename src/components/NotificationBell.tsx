@@ -1,4 +1,4 @@
-import { Bell, Trash2, X, ChevronDown } from 'lucide-react';
+import { Bell, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -17,12 +17,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
@@ -103,68 +97,58 @@ export const NotificationBell = () => {
               <p className="text-sm">Nenhuma notificação</p>
             </div>
           ) : (
-            <Accordion type="single" collapsible className="w-full">
+            <div className="divide-y divide-border">
               {notifications?.map((notification) => (
-                <AccordionItem 
-                  key={notification.id} 
-                  value={notification.id}
-                  className={`border-b border-border ${!notification.is_read ? 'bg-primary/5' : ''}`}
+                <div
+                  key={notification.id}
+                  className={`relative group p-4 hover:bg-muted/50 cursor-pointer transition-colors ${
+                    !notification.is_read ? 'bg-primary/5' : ''
+                  }`}
+                  onClick={() => handleNotificationClick(notification.id, notification.is_read)}
                 >
-                  <div className="relative group">
-                    <AccordionTrigger 
-                      className="hover:bg-muted/50 px-4 py-3 hover:no-underline"
-                      onClick={() => handleNotificationClick(notification.id, notification.is_read)}
-                    >
-                      <div className="flex gap-3 flex-1 text-left">
-                        <div className={`p-2 rounded-lg h-fit ${
-                          notification.is_read ? 'bg-muted' : 'bg-primary/10'
-                        }`}>
-                          {notification.type === 'confirmation' ? (
-                            <CheckCircle2 className="h-4 w-4" />
-                          ) : notification.type === 'reminder' ? (
-                            <Clock className="h-4 w-4" />
-                          ) : (
-                            <Bell className="h-4 w-4" />
-                          )}
-                        </div>
-                        <div className="flex-1 space-y-1 pr-4">
-                          <div className="flex items-center gap-2">
-                            <p className="font-semibold text-sm">{notification.title}</p>
-                            {!notification.is_read && (
-                              <div className="h-2 w-2 rounded-full bg-primary" />
-                            )}
-                          </div>
-                          <p className="text-sm text-muted-foreground line-clamp-1">
-                            {notification.message}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {formatDistanceToNow(new Date(notification.created_at), {
-                              addSuffix: true,
-                              locale: ptBR,
-                            })}
-                          </p>
-                        </div>
-                      </div>
-                    </AccordionTrigger>
-                    {canDeleteNotifications && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 absolute right-10 top-3 opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                        onClick={(e) => handleDeleteNotification(e, notification.id)}
-                      >
-                        <X className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-                      </Button>
-                    )}
-                  </div>
-                  <AccordionContent className="px-4 pb-3">
-                    <div className="pl-11 text-sm text-foreground">
-                      {notification.message}
+                  <div className="flex gap-3">
+                    <div className={`p-2 rounded-lg h-fit ${
+                      notification.is_read ? 'bg-muted' : 'bg-primary/10'
+                    }`}>
+                      {notification.type === 'confirmation' ? (
+                        <CheckCircle2 className="h-4 w-4" />
+                      ) : notification.type === 'reminder' ? (
+                        <Clock className="h-4 w-4" />
+                      ) : (
+                        <Bell className="h-4 w-4" />
+                      )}
                     </div>
-                  </AccordionContent>
-                </AccordionItem>
+                    <div className="flex-1 space-y-1 pr-8">
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold text-sm">{notification.title}</p>
+                        {!notification.is_read && (
+                          <div className="h-2 w-2 rounded-full bg-primary" />
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {notification.message}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(notification.created_at), {
+                          addSuffix: true,
+                          locale: ptBR,
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                  {canDeleteNotifications && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 absolute right-2 top-4 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={(e) => handleDeleteNotification(e, notification.id)}
+                    >
+                      <X className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                    </Button>
+                  )}
+                </div>
               ))}
-            </Accordion>
+            </div>
           )}
         </ScrollArea>
       </PopoverContent>
