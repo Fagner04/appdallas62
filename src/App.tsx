@@ -51,7 +51,7 @@ const AppRoutes = () => {
         path="/cliente"
         element={
           <ProtectedRoute>
-            <ClientArea />
+            {user?.role === 'customer' ? <ClientArea /> : <Navigate to="/dashboard" replace />}
           </ProtectedRoute>
         }
       />
@@ -59,7 +59,7 @@ const AppRoutes = () => {
         path="/perfil"
         element={
           <ProtectedRoute>
-            <PerfilCliente />
+            {user?.role === 'customer' ? <PerfilCliente /> : <Navigate to="/dashboard" replace />}
           </ProtectedRoute>
         }
       />
