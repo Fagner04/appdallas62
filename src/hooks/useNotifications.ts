@@ -117,11 +117,19 @@ export const useNotifications = (userId?: string) => {
         title: 'Notificação excluída',
       });
     },
-    onError: () => {
-      toast({
-        title: 'Erro ao excluir notificação',
-        variant: 'destructive',
-      });
+    onError: (error: any) => {
+      if (error?.code === 'PGRST301' || error?.message?.includes('policy')) {
+        toast({
+          title: 'Ação não permitida',
+          description: 'Você não tem permissão para apagar notificações. Entre em contato com o administrador.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Erro ao excluir notificação',
+          variant: 'destructive',
+        });
+      }
     },
   });
 
@@ -144,12 +152,20 @@ export const useNotifications = (userId?: string) => {
         title: 'Todas as notificações foram excluídas',
       });
     },
-    onError: () => {
-      toast({
-        title: 'Erro ao excluir notificações',
-        description: 'Não foi possível excluir as notificações. Tente novamente.',
-        variant: 'destructive',
-      });
+    onError: (error: any) => {
+      if (error?.code === 'PGRST301' || error?.message?.includes('policy')) {
+        toast({
+          title: 'Ação não permitida',
+          description: 'Você não tem permissão para apagar notificações. Entre em contato com o administrador.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Erro ao excluir notificações',
+          description: 'Não foi possível excluir as notificações. Tente novamente.',
+          variant: 'destructive',
+        });
+      }
     },
   });
 

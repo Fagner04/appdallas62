@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export interface ClientFeature {
   id: string;
@@ -9,84 +10,75 @@ export interface ClientFeature {
   enabled: boolean;
 }
 
-const STORAGE_KEY = 'client_features_settings';
-
 const getDefaultFeatures = (): Record<string, boolean> => ({
   online_booking: true,
   show_prices: true,
   cancel_appointments: false,
   view_history: true,
   view_blocked_times: true,
-  delete_notifications: false, // Mudado para false por padrão
+  delete_notifications: false,
   view_notifications: true,
 });
 
 export const useClientFeatures = () => {
-  const [features, setFeatures] = useState<Record<string, boolean>>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        return JSON.parse(saved);
-      }
-    } catch (error) {
-      console.error('Erro ao carregar configurações:', error);
-    }
-    return getDefaultFeatures();
+  const queryClient = useQueryClient();
+
+  // Buscar configurações do banco de dados
+  const { data: dbFeatures, isLoading } = useQuery({
+    queryKey: ['client-features'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('settings')
+        .select('key, value')
+        .like('key', 'client_%');
+
+      if (error) throw error;
+
+      const features: Record<string, boolean> = getDefaultFeatures();
+      
+      data?.forEach((setting) => {
+        const key = setting.key.replace('client_', '');
+        features[key] = setting.value === true || setting.value === 'true';
+      });
+
+      return features;
+    },
   });
 
-  const [isLoading, setIsLoading] = useState(false);
+  const features = dbFeatures || getDefaultFeatures();
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(features));
-      
-      // Dispatch custom event to notify other components
-      window.dispatchEvent(new CustomEvent('clientFeaturesChanged', { 
-        detail: features 
-      }));
-    } catch (error) {
-      console.error('Erro ao salvar configurações:', error);
-      toast.error('Erro ao salvar configurações');
-    }
-  }, [features]);
+  // Mutation para atualizar configuração no banco
+  const updateFeature = useMutation({
+    mutationFn: async ({ featureId, value }: { featureId: string; value: boolean }) => {
+      const { error } = await supabase
+        .from('settings')
+        .upsert({
+          key: `client_${featureId}`,
+          value: value as any,
+        }, {
+          onConflict: 'key'
+        });
 
-  // Listen for changes from other tabs/windows
-  useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY && e.newValue) {
-        try {
-          setFeatures(JSON.parse(e.newValue));
-        } catch (error) {
-          console.error('Erro ao sincronizar configurações:', error);
-        }
-      }
-    };
-
-    const handleCustomChange = (e: CustomEvent) => {
-      setFeatures(e.detail);
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('clientFeaturesChanged' as any, handleCustomChange as any);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('clientFeaturesChanged' as any, handleCustomChange as any);
-    };
-  }, []);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['client-features'] });
+    },
+  });
 
   const toggleFeature = (featureId: string, featureTitle: string) => {
-    setFeatures((prev) => {
-      const newState = !prev[featureId];
-      
-      toast.success(
-        `${featureTitle} ${newState ? 'habilitada' : 'desabilitada'} para clientes`
-      );
-      
-      return {
-        ...prev,
-        [featureId]: newState,
-      };
+    const currentValue = features[featureId] ?? true;
+    const newValue = !currentValue;
+    
+    updateFeature.mutate({ featureId, value: newValue }, {
+      onSuccess: () => {
+        toast.success(
+          `${featureTitle} ${newValue ? 'habilitada' : 'desabilitada'} para clientes`
+        );
+      },
+      onError: () => {
+        toast.error('Erro ao atualizar configuração');
+      }
     });
   };
 
