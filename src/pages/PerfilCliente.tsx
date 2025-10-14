@@ -391,26 +391,23 @@ export default function PerfilCliente() {
         </Card>
 
         {/* Sair da Conta */}
-        <Card className="shadow-elegant border-destructive/20 bg-gradient-to-br from-destructive/5 to-transparent">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-xl">
-              <div className="p-2 rounded-lg bg-destructive/10">
-                <LogOut className="h-5 w-5 text-destructive" />
+        <Card className="border-destructive/10">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-1.5 rounded-lg bg-destructive/10">
+                <LogOut className="h-4 w-4 text-destructive" />
               </div>
-              Sair da Conta
-            </CardTitle>
-            <CardDescription>
-              Encerre sua sessão de forma segura
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+              <div>
+                <p className="text-sm font-medium">Sair da Conta</p>
+                <p className="text-xs text-muted-foreground">Encerre sua sessão</p>
+              </div>
+            </div>
             <Button
               onClick={logout}
               variant="destructive"
-              className="w-full sm:w-auto shadow-elegant hover:shadow-xl transition-smooth"
-              size="lg"
+              size="sm"
+              className="transition-smooth"
             >
-              <LogOut className="h-4 w-4 mr-2" />
               Sair
             </Button>
           </CardContent>
