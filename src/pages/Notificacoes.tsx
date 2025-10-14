@@ -1,31 +1,27 @@
 import { useState } from 'react';
 import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Bell, CheckCircle2, Clock, Gift, Calendar, Send, Users, Plus, Edit, Trash2, FileText } from 'lucide-react';
+import { Send, Users, Plus, Edit, Trash2, FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useNotificationTemplates, NotificationTemplate } from '@/hooks/useNotificationTemplates';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { NotificationTemplateEditor } from '@/components/NotificationTemplateEditor';
 
 export default function Notificacoes() {
   const { user } = useAuth();
-  const { notifications, markAsRead, sendNotification } = useNotifications(user?.id);
+  const { sendNotification } = useNotifications(user?.id);
   const { data: customers } = useCustomers();
   const { templates, deleteTemplate } = useNotificationTemplates();
   
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState('');
   const [sendToAll, setSendToAll] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState('');
@@ -36,12 +32,6 @@ export default function Notificacoes() {
   const [isTemplateEditorOpen, setIsTemplateEditorOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<NotificationTemplate | undefined>();
   const [isNewTemplate, setIsNewTemplate] = useState(false);
-
-  const handleNotificationClick = (notification: any) => {
-    if (!notification.is_read) {
-      markAsRead.mutate(notification.id);
-    }
-  };
 
   const handleTemplateSelect = (templateId: string) => {
     setSelectedTemplate(templateId);
@@ -108,7 +98,6 @@ export default function Notificacoes() {
       });
     }
 
-    setIsDialogOpen(false);
     setSelectedCustomer('');
     setSendToAll(false);
     setSelectedTemplate('');
@@ -140,206 +129,142 @@ export default function Notificacoes() {
       <div className="space-y-6 animate-fade-in">
         <div className="flex items-center gap-3">
           <div className="p-3 rounded-lg bg-primary/10">
-            <Bell className="h-8 w-8 text-primary" />
+            <Send className="h-8 w-8 text-primary" />
           </div>
           <div>
-            <h1 className="text-4xl font-bold mb-1">Minhas Notificações</h1>
-            <p className="text-muted-foreground">Acompanhe suas notificações e atualizações</p>
+            <h1 className="text-4xl font-bold mb-1">Notificações</h1>
+            <p className="text-muted-foreground">Envie notificações para seus clientes</p>
           </div>
         </div>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Notificações Recentes</CardTitle>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Enviar Notificação
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2">
-                    <Send className="h-5 w-5 text-primary" />
-                    Enviar Notificação
-                  </DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Template (Opcional)</label>
-                    <Select value={selectedTemplate} onValueChange={handleTemplateSelect}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione um template" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {templates?.map((template) => (
-                          <SelectItem key={template.id} value={template.id}>
-                            {template.title}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className={`
-                    p-4 rounded-lg border-2 transition-all duration-300
-                    ${sendToAll 
-                      ? 'border-primary bg-primary/5 shadow-lg shadow-primary/20' 
-                      : 'border-border bg-muted/30'
-                    }
-                  `}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className={`
-                          p-2 rounded-full transition-all duration-300
-                          ${sendToAll ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}
-                        `}>
-                          <Users className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <label
-                            htmlFor="sendToAll"
-                            className="text-sm font-semibold cursor-pointer block"
-                          >
-                            Enviar para todos os clientes
-                          </label>
-                          <p className="text-xs text-muted-foreground">
-                            {sendToAll ? 'Todos receberão esta notificação' : 'Enviar apenas para um cliente'}
-                          </p>
-                        </div>
-                      </div>
-                      <Switch
-                        id="sendToAll"
-                        checked={sendToAll}
-                        onCheckedChange={(checked) => {
-                          setSendToAll(checked);
-                          if (checked) {
-                            setSelectedCustomer('');
-                          }
-                        }}
-                      />
-                    </div>
-                  </div>
-                  
-                  {!sendToAll && (
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Cliente</label>
-                      <Select value={selectedCustomer} onValueChange={setSelectedCustomer}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o cliente" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {customers?.map((customer) => (
-                            <SelectItem key={customer.id} value={customer.id}>
-                              {customer.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Tipo</label>
-                    <Select value={type} onValueChange={(v: any) => setType(v)}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="system">Sistema</SelectItem>
-                        <SelectItem value="confirmation">Confirmação</SelectItem>
-                        <SelectItem value="reminder">Lembrete</SelectItem>
-                        <SelectItem value="promotion">Promoção</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Título</label>
-                    <Input
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      placeholder="Título da notificação"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Mensagem</label>
-                    <Textarea
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      placeholder="Mensagem da notificação"
-                      rows={4}
-                    />
-                  </div>
-                  <Button 
-                    onClick={handleSendNotification} 
-                    className="w-full"
-                    disabled={(!selectedCustomer && !sendToAll) || !title || !message || sendNotification.isPending}
-                  >
-                    <Send className="h-4 w-4 mr-2" />
-                    {sendNotification.isPending ? 'Enviando...' : sendToAll ? 'Enviar para Todos' : 'Enviar Notificação'}
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Send className="h-5 w-5 text-primary" />
+              Enviar Notificação
+            </CardTitle>
+            <CardDescription>
+              Envie notificações personalizadas para seus clientes
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {notifications?.length === 0 ? (
-                <div className="text-center py-12">
-                  <Bell className="h-12 w-12 mx-auto text-muted-foreground mb-3 opacity-50" />
-                  <p className="text-muted-foreground">
-                    Nenhuma notificação encontrada
-                  </p>
-                </div>
-              ) : (
-                notifications?.map((notification) => (
-                  <div
-                    key={notification.id}
-                    onClick={() => handleNotificationClick(notification)}
-                    className={`
-                      flex items-start gap-4 p-4 rounded-lg border-2 cursor-pointer
-                      transition-all duration-300
-                      ${notification.is_read 
-                        ? 'border-border hover:bg-muted/50' 
-                        : 'border-primary/30 bg-primary/5 hover:bg-primary/10 shadow-sm shadow-primary/20'
-                      }
-                    `}
-                  >
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Template (Opcional)</label>
+                <Select value={selectedTemplate} onValueChange={handleTemplateSelect}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um template" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {templates?.map((template) => (
+                      <SelectItem key={template.id} value={template.id}>
+                        {template.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className={`
+                p-4 rounded-lg border-2 transition-all duration-300
+                ${sendToAll 
+                  ? 'border-primary bg-primary/5 shadow-lg shadow-primary/20' 
+                  : 'border-border bg-muted/30'
+                }
+              `}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
                     <div className={`
-                      p-3 rounded-lg transition-all duration-300
-                      ${notification.is_read ? 'bg-muted' : 'bg-primary/20'}
+                      p-2 rounded-full transition-all duration-300
+                      ${sendToAll ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}
                     `}>
-                      {notification.type === 'confirmation' ? (
-                        <CheckCircle2 className={`h-5 w-5 ${!notification.is_read && 'text-primary'}`} />
-                      ) : notification.type === 'reminder' ? (
-                        <Clock className={`h-5 w-5 ${!notification.is_read && 'text-primary'}`} />
-                      ) : notification.type === 'promotion' ? (
-                        <Gift className={`h-5 w-5 ${!notification.is_read && 'text-primary'}`} />
-                      ) : (
-                        <Bell className={`h-5 w-5 ${!notification.is_read && 'text-primary'}`} />
-                      )}
+                      <Users className="h-5 w-5" />
                     </div>
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`font-semibold ${!notification.is_read && 'text-primary'}`}>
-                          {notification.title}
-                        </span>
-                        <Badge variant={notification.is_read ? 'secondary' : 'default'}>
-                          {notification.is_read ? 'Lida' : 'Nova'}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground">{notification.message}</p>
-                      <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {formatDistanceToNow(new Date(notification.created_at), {
-                          addSuffix: true,
-                          locale: ptBR,
-                        })}
+                    <div>
+                      <label
+                        htmlFor="sendToAll"
+                        className="text-sm font-semibold cursor-pointer block"
+                      >
+                        Enviar para todos os clientes
+                      </label>
+                      <p className="text-xs text-muted-foreground">
+                        {sendToAll ? 'Todos receberão esta notificação' : 'Enviar apenas para um cliente'}
                       </p>
                     </div>
                   </div>
-                ))
+                  <Switch
+                    id="sendToAll"
+                    checked={sendToAll}
+                    onCheckedChange={(checked) => {
+                      setSendToAll(checked);
+                      if (checked) {
+                        setSelectedCustomer('');
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+              
+              {!sendToAll && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Cliente</label>
+                  <Select value={selectedCustomer} onValueChange={setSelectedCustomer}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o cliente" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {customers?.map((customer) => (
+                        <SelectItem key={customer.id} value={customer.id}>
+                          {customer.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               )}
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Tipo</label>
+                <Select value={type} onValueChange={(v: any) => setType(v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="system">Sistema</SelectItem>
+                    <SelectItem value="confirmation">Confirmação</SelectItem>
+                    <SelectItem value="reminder">Lembrete</SelectItem>
+                    <SelectItem value="promotion">Promoção</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Título</label>
+                <Input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Título da notificação"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Mensagem</label>
+                <Textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Mensagem da notificação"
+                  rows={4}
+                />
+              </div>
+              
+              <Button 
+                onClick={handleSendNotification} 
+                className="w-full"
+                disabled={(!selectedCustomer && !sendToAll) || !title || !message || sendNotification.isPending}
+              >
+                <Send className="h-4 w-4 mr-2" />
+                {sendNotification.isPending ? 'Enviando...' : sendToAll ? 'Enviar para Todos' : 'Enviar Notificação'}
+              </Button>
             </div>
           </CardContent>
         </Card>
