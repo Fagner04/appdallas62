@@ -96,6 +96,15 @@ export const Layout = ({ children }: LayoutProps) => {
             <Button
               variant="ghost"
               size="icon"
+              onClick={logout}
+              className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 w-8"
+              title="Sair"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setOpen(false)}
               className="lg:hidden -mt-1 -mr-2 bg-primary/10 hover:bg-primary/20 h-8 w-8"
             >
@@ -124,17 +133,6 @@ export const Layout = ({ children }: LayoutProps) => {
           </NavLink>
         ))}
       </nav>
-
-      <div className="border-t border-border p-4">
-        <Button
-          variant="ghost"
-          onClick={logout}
-          className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
-        >
-          <LogOut className="mr-3 h-5 w-5" />
-          Sair
-        </Button>
-      </div>
     </div>
   );
 
