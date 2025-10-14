@@ -131,7 +131,7 @@ export const Layout = ({ children }: LayoutProps) => {
         ))}
       </nav>
       
-      <div className="p-4 border-t border-border">
+      <div className="p-4 border-t border-border hidden lg:block">
         <Button
           variant="outline"
           size="sm"
