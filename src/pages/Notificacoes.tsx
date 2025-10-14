@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
-import { Bell, Send, Calendar, CheckCircle2, Clock, Plus, Sparkles, Gift, MessageSquare } from 'lucide-react';
+import { Bell, Send, Calendar, CheckCircle2, Clock, Plus, Sparkles, Gift, MessageSquare, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNotifications, useNotificationStats } from '@/hooks/useNotifications';
@@ -18,7 +18,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { NotificationTemplateEditor } from '@/components/NotificationTemplateEditor';
 import { toast } from 'sonner';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 
 export default function Notificacoes() {
   const { user } = useAuth();
@@ -232,24 +232,47 @@ export default function Notificacoes() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="sendToAll" 
-                      checked={sendToAll}
-                      onCheckedChange={(checked) => {
-                        setSendToAll(checked as boolean);
-                        if (checked) {
-                          setSelectedCustomer('');
-                        }
-                      }}
-                    />
-                    <label
-                      htmlFor="sendToAll"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      Enviar para todos os clientes
-                    </label>
+                  
+                  <div className={`
+                    p-4 rounded-lg border-2 transition-all duration-300
+                    ${sendToAll 
+                      ? 'border-primary bg-primary/5 shadow-lg shadow-primary/20' 
+                      : 'border-border bg-muted/30'
+                    }
+                  `}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`
+                          p-2 rounded-full transition-all duration-300
+                          ${sendToAll ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}
+                        `}>
+                          <Users className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <label
+                            htmlFor="sendToAll"
+                            className="text-sm font-semibold cursor-pointer block"
+                          >
+                            Enviar para todos os clientes
+                          </label>
+                          <p className="text-xs text-muted-foreground">
+                            {sendToAll ? 'Todos receberão esta notificação' : 'Enviar apenas para um cliente'}
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        id="sendToAll"
+                        checked={sendToAll}
+                        onCheckedChange={(checked) => {
+                          setSendToAll(checked);
+                          if (checked) {
+                            setSelectedCustomer('');
+                          }
+                        }}
+                      />
+                    </div>
                   </div>
+                  
                   {!sendToAll && (
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Cliente</label>
