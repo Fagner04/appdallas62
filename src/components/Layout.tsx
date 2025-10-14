@@ -88,7 +88,7 @@ export const Layout = ({ children }: LayoutProps) => {
       <div className="border-b border-border p-6">
         <div className="flex items-start justify-between">
           <div className={isCollapsed ? "hidden" : ""}>
-            <h1 className="text-2xl font-bold text-foreground">
+            <h1 className="text-xl font-bold text-foreground">
               Dallas Barbearia
             </h1>
           </div>
