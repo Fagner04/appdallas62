@@ -4,8 +4,9 @@ import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Clock, Scissors, Ban } from 'lucide-react';
+import { Loader2, Clock, Scissors, Ban, Gift, CheckCircle } from 'lucide-react';
 import { useServices } from '@/hooks/useServices';
 import { useBarbers } from '@/hooks/useBarbers';
 import { useAvailableTimeSlots, useCreateAppointment } from '@/hooks/useAppointments';
@@ -30,6 +31,9 @@ export function ClientBookingCalendar({ onSuccess }: ClientBookingCalendarProps 
   const [selectedService, setSelectedService] = useState<string>('');
   const [selectedBarber, setSelectedBarber] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string>('');
+  const [couponCode, setCouponCode] = useState<string>('');
+  const [validatedCoupon, setValidatedCoupon] = useState<any>(null);
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
 
   const { data: services = [], isLoading: servicesLoading } = useServices();
   const { data: barbers = [], isLoading: barbersLoading } = useBarbers();
@@ -71,6 +75,46 @@ export function ClientBookingCalendar({ onSuccess }: ClientBookingCalendarProps 
 
   const createAppointment = useCreateAppointment();
 
+  const validateCoupon = async () => {
+    if (!couponCode.trim()) {
+      setValidatedCoupon(null);
+      return;
+    }
+
+    setValidatingCoupon(true);
+    try {
+      const { data, error } = await supabase
+        .from('loyalty_coupons')
+        .select('*, customer:customers(name)')
+        .eq('code', couponCode.toUpperCase())
+        .eq('is_redeemed', false)
+        .eq('customer_id', customerProfile?.id)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (!data) {
+        toast.error('Cupom inválido ou já utilizado');
+        setValidatedCoupon(null);
+      } else {
+        // Verificar se expirou
+        if (data.expires_at && new Date(data.expires_at) < new Date()) {
+          toast.error('Este cupom expirou');
+          setValidatedCoupon(null);
+        } else {
+          toast.success('Cupom válido! Corte grátis aplicado 🎉');
+          setValidatedCoupon(data);
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao validar cupom:', error);
+      toast.error('Erro ao validar cupom');
+      setValidatedCoupon(null);
+    } finally {
+      setValidatingCoupon(false);
+    }
+  };
+
   const handleBooking = async () => {
     if (!selectedDate || !selectedService || !selectedBarber || !selectedTime) {
       toast.error('Por favor, preencha todos os campos');
@@ -83,17 +127,37 @@ export function ClientBookingCalendar({ onSuccess }: ClientBookingCalendarProps 
     }
 
     try {
-      await createAppointment.mutateAsync({
+      const appointmentData: any = {
         customer_id: customerProfile.id,
         service_id: selectedService,
         barber_id: selectedBarber,
         appointment_date: formattedDate,
         appointment_time: selectedTime
-      });
+      };
+
+      // Se tem cupom válido, marcar para resgatar
+      if (validatedCoupon) {
+        appointmentData.notes = `Cupom aplicado: ${validatedCoupon.code}`;
+      }
+
+      await createAppointment.mutateAsync(appointmentData);
+
+      // Se usou cupom, marcar como resgatado
+      if (validatedCoupon) {
+        await supabase
+          .from('loyalty_coupons')
+          .update({ 
+            is_redeemed: true, 
+            redeemed_at: new Date().toISOString()
+          })
+          .eq('id', validatedCoupon.id);
+      }
 
       // Reset form
       setSelectedTime('');
-      toast.success('Agendamento realizado com sucesso!');
+      setCouponCode('');
+      setValidatedCoupon(null);
+      toast.success(validatedCoupon ? 'Agendamento realizado! Cupom aplicado 🎉' : 'Agendamento realizado com sucesso!');
       
       // Call onSuccess callback if provided
       if (onSuccess) {
@@ -276,6 +340,54 @@ export function ClientBookingCalendar({ onSuccess }: ClientBookingCalendarProps 
                 </div>
               </div>
             )}
+
+            {/* Cupom de Fidelidade */}
+            <div className="space-y-2 pt-4 border-t">
+              <Label htmlFor="coupon" className="flex items-center gap-2">
+                <Gift className="h-4 w-4 text-success" />
+                Cupom de Fidelidade (Opcional)
+              </Label>
+              <div className="flex gap-2">
+                <div className="flex-1 relative">
+                  <Input
+                    id="coupon"
+                    placeholder="Digite o código do cupom"
+                    value={couponCode}
+                    onChange={(e) => {
+                      setCouponCode(e.target.value.toUpperCase());
+                      setValidatedCoupon(null);
+                    }}
+                    className={validatedCoupon ? 'border-success' : ''}
+                  />
+                  {validatedCoupon && (
+                    <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-success" />
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={validateCoupon}
+                  disabled={!couponCode.trim() || validatingCoupon}
+                >
+                  {validatingCoupon ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    'Validar'
+                  )}
+                </Button>
+              </div>
+              {validatedCoupon && (
+                <div className="p-3 rounded-lg bg-success/10 border border-success/30">
+                  <p className="text-sm text-success font-semibold flex items-center gap-2">
+                    <Gift className="h-4 w-4" />
+                    Cupom válido! Corte grátis aplicado 🎉
+                  </p>
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Tem um cupom? Use-o para ganhar um corte grátis!
+              </p>
+            </div>
 
             <Button
               onClick={handleBooking}

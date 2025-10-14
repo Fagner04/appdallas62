@@ -102,35 +102,45 @@ export const useLoyaltyStats = () => {
   return { stats };
 };
 
-export const useCustomerLoyalty = (customerId: string) => {
+export const useCustomerLoyalty = (userId: string) => {
   return useQuery({
-    queryKey: ['customer-loyalty', customerId],
+    queryKey: ['customer-loyalty', userId],
     queryFn: async () => {
-      const { data: customer } = await supabase
+      // Buscar customer_id do user_id
+      const { data: customerData } = await supabase
         .from('customers')
-        .select('loyalty_points')
-        .eq('id', customerId)
-        .single();
+        .select('id, loyalty_points')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (!customerData) {
+        return {
+          points: 0,
+          availableCoupons: [],
+          history: [],
+        };
+      }
 
       const { data: coupons } = await supabase
         .from('loyalty_coupons')
         .select('*')
-        .eq('customer_id', customerId)
-        .eq('is_redeemed', false);
+        .eq('customer_id', customerData.id)
+        .eq('is_redeemed', false)
+        .order('created_at', { ascending: false });
 
       const { data: history } = await supabase
         .from('loyalty_history')
         .select('*')
-        .eq('customer_id', customerId)
+        .eq('customer_id', customerData.id)
         .order('created_at', { ascending: false })
         .limit(10);
 
       return {
-        points: customer?.loyalty_points || 0,
+        points: customerData?.loyalty_points || 0,
         availableCoupons: coupons || [],
         history: history || [],
       };
     },
-    enabled: !!customerId,
+    enabled: !!userId,
   });
 };
