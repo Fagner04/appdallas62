@@ -343,6 +343,42 @@ export const useUpdateAppointment = () => {
 
           await supabase.from('notifications').insert(notifications);
         }
+      } else {
+        // Se admin/barbeiro editou, notificar o cliente
+        if (appointment) {
+          // Buscar user_id do cliente
+          const { data: customerData } = await supabase
+            .from('customers')
+            .select('user_id, name')
+            .eq('id', (appointment as any).customer_id)
+            .single();
+
+          if (customerData?.user_id) {
+            let notificationTitle = 'Agendamento Atualizado';
+            let notificationType: 'update' | 'cancellation' | 'confirmation' = 'update';
+            let actionMessage = 'atualizou';
+
+            if (data.status === 'cancelled') {
+              notificationTitle = 'Agendamento Cancelado';
+              notificationType = 'cancellation';
+              actionMessage = 'cancelou';
+            } else if (data.status === 'confirmed') {
+              notificationTitle = 'Agendamento Confirmado';
+              notificationType = 'confirmation';
+              actionMessage = 'confirmou';
+            }
+
+            const notification = {
+              user_id: customerData.user_id,
+              title: notificationTitle,
+              message: `${editorName} ${actionMessage} seu agendamento`,
+              type: notificationType,
+              related_id: id,
+            };
+
+            await supabase.from('notifications').insert(notification);
+          }
+        }
       }
 
       return appointment;
