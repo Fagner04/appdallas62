@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar as CalendarIcon, Plus, Clock, User, Scissors, Pencil, Trash2, Ban, Lock, Unlock } from 'lucide-react';
+import { Calendar as CalendarIcon, Plus, Clock, User, Scissors, Pencil, Trash2, Ban, Lock, Unlock, Award } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
@@ -547,7 +547,7 @@ export default function Agendamentos() {
                               </span>
                             </div>
                             <div className="flex items-center gap-2">
-                              <User className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
+                              <Award className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
                               <span className="text-xs sm:text-sm font-medium text-primary">
                                 {appointment.barber?.name || 'Barbeiro'}
                               </span>
