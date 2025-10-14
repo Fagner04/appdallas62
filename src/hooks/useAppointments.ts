@@ -207,21 +207,42 @@ export const useCreateAppointment = () => {
         .eq('id', data.customer_id)
         .single();
 
-      const { data: admins } = await supabase
+      // Buscar admins e barbers da tabela user_roles
+      const { data: admins, error: adminsError } = await supabase
         .from('user_roles')
         .select('user_id')
         .or('role.eq.admin,role.eq.barber');
 
-      if (admins && customerData) {
-        const notifications = admins.map(admin => ({
-          user_id: admin.user_id,
+      console.log('Admins found:', admins, 'Error:', adminsError);
+
+      // Se não encontrar na user_roles, buscar todos os barbeiros ativos
+      let notificationUsers: { user_id: string }[] = admins || [];
+      
+      if (!notificationUsers.length) {
+        const { data: barbers } = await supabase
+          .from('barbers')
+          .select('user_id')
+          .eq('is_active', true)
+          .not('user_id', 'is', null);
+        
+        notificationUsers = barbers?.filter(b => b.user_id).map(b => ({ user_id: b.user_id! })) || [];
+        console.log('Barbers found:', notificationUsers);
+      }
+
+      if (notificationUsers.length > 0 && customerData) {
+        const notifications = notificationUsers.map(user => ({
+          user_id: user.user_id,
           title: 'Novo Agendamento',
           message: `${customerData.name} criou um novo agendamento`,
           type: 'booking',
           related_id: appointment.id,
         }));
 
-        await supabase.from('notifications').insert(notifications);
+        console.log('Creating notifications:', notifications);
+        const { error: notifError } = await supabase.from('notifications').insert(notifications);
+        if (notifError) console.error('Error creating notifications:', notifError);
+      } else {
+        console.warn('No admin/barber users found to notify');
       }
 
       return appointment;
@@ -259,17 +280,30 @@ export const useUpdateAppointment = () => {
       if (error) throw error;
 
       // Create notification for admin about appointment update
-      const { data: admins } = await supabase
+      const { data: admins, error: adminsError } = await supabase
         .from('user_roles')
         .select('user_id')
         .or('role.eq.admin,role.eq.barber');
 
-      if (admins && appointment) {
+      // Se não encontrar na user_roles, buscar todos os barbeiros ativos
+      let notificationUsers: { user_id: string }[] = admins || [];
+      
+      if (!notificationUsers.length) {
+        const { data: barbers } = await supabase
+          .from('barbers')
+          .select('user_id')
+          .eq('is_active', true)
+          .not('user_id', 'is', null);
+        
+        notificationUsers = barbers?.filter(b => b.user_id).map(b => ({ user_id: b.user_id! })) || [];
+      }
+
+      if (notificationUsers.length > 0 && appointment) {
         const customerName = (appointment as any).customer?.name || 'Um cliente';
         const actionType = data.status === 'cancelled' ? 'cancelou' : 'editou';
         
-        const notifications = admins.map(admin => ({
-          user_id: admin.user_id,
+        const notifications = notificationUsers.map(user => ({
+          user_id: user.user_id,
           title: data.status === 'cancelled' ? 'Agendamento Cancelado' : 'Agendamento Editado',
           message: `${customerName} ${actionType} um agendamento`,
           type: data.status === 'cancelled' ? 'cancellation' : 'update',
