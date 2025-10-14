@@ -546,6 +546,12 @@ export default function Agendamentos() {
                                 {appointment.service?.name || 'Serviço'}
                               </span>
                             </div>
+                            <div className="flex items-center gap-2">
+                              <User className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
+                              <span className="text-xs sm:text-sm font-medium text-primary">
+                                {appointment.barber?.name || 'Barbeiro'}
+                              </span>
+                            </div>
                           </div>
                         </div>
                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
