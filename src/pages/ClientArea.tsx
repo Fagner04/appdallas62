@@ -25,12 +25,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { formatBrasiliaDate, toBrasiliaTime } from '@/lib/timezone';
 import { ClientBookingCalendar } from '@/components/ClientBookingCalendar';
 import { AvatarUpload } from '@/components/AvatarUpload';
-import { useNotificationSettings } from '@/hooks/useNotificationSettings';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Bell } from 'lucide-react';
-import { toast } from 'sonner';
 
 export default function ClientArea() {
   const { user } = useAuth();
@@ -38,25 +32,6 @@ export default function ClientArea() {
   const { data: profile, isLoading: profileLoading } = useCustomerProfile();
   const { data: upcomingAppointments = [], isLoading: upcomingLoading } = useUpcomingAppointments();
   const { data: allAppointments = [], isLoading: allLoading } = useCustomerAppointments();
-  const { settings, isLoading: settingsLoading, updateSettings } = useNotificationSettings(user?.id);
-
-  const handleNotificationToggle = async (key: string, value: boolean) => {
-    try {
-      await updateSettings.mutateAsync({ [key]: value });
-    } catch (error) {
-      console.error('Erro ao atualizar configuração:', error);
-    }
-  };
-
-  const handleReminderHoursChange = async (hours: number) => {
-    if (hours >= 1 && hours <= 72) {
-      try {
-        await updateSettings.mutateAsync({ appointment_reminder_hours: hours });
-      } catch (error) {
-        console.error('Erro ao atualizar horas:', error);
-      }
-    }
-  };
 
   const getStatusConfig = (status: string) => {
     const configs = {
@@ -279,148 +254,6 @@ export default function ClientArea() {
               })}
             </div>
           )}
-            </CardContent>
-          </Card>
-
-          {/* Configurações de Notificações */}
-          <Card className="shadow-elegant border-primary/10">
-            <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent">
-              <CardTitle className="flex items-center gap-2 text-xl">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <Bell className="h-5 w-5 text-primary" />
-                </div>
-                Configurações de Notificações
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6 pt-6">
-              {settingsLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                </div>
-              ) : (
-                <>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 rounded-xl border bg-gradient-to-br from-card to-muted/5 hover:shadow-md transition-smooth">
-                      <div className="space-y-1 flex-1">
-                        <Label htmlFor="reminder" className="text-base font-semibold cursor-pointer">
-                          Lembretes de Agendamento
-                        </Label>
-                        <p className="text-sm text-muted-foreground">
-                          Receba lembretes antes dos seus agendamentos
-                        </p>
-                      </div>
-                      <Switch
-                        id="reminder"
-                        checked={settings?.appointment_reminder_enabled ?? true}
-                        onCheckedChange={(checked) =>
-                          handleNotificationToggle('appointment_reminder_enabled', checked)
-                        }
-                      />
-                    </div>
-
-                    {settings?.appointment_reminder_enabled && (
-                      <div className="ml-6 space-y-2 p-4 rounded-lg bg-muted/30 border">
-                        <Label htmlFor="reminder-hours" className="font-medium">
-                          Antecedência do lembrete
-                        </Label>
-                        <div className="flex items-center gap-2">
-                          <Input
-                            id="reminder-hours"
-                            type="number"
-                            min="1"
-                            max="72"
-                            value={settings?.appointment_reminder_hours ?? 24}
-                            onChange={(e) => handleReminderHoursChange(Number(e.target.value))}
-                            onBlur={() => toast.success('Antecedência atualizada')}
-                            className="w-24"
-                          />
-                          <span className="text-sm text-muted-foreground font-medium">horas antes</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <Separator />
-
-                  <div className="flex items-center justify-between p-4 rounded-xl border bg-gradient-to-br from-card to-muted/5 hover:shadow-md transition-smooth">
-                    <div className="space-y-1 flex-1">
-                      <Label htmlFor="confirmation" className="text-base font-semibold cursor-pointer">
-                        Confirmações de Agendamento
-                      </Label>
-                      <p className="text-sm text-muted-foreground">
-                        Notificação quando um agendamento for criado
-                      </p>
-                    </div>
-                    <Switch
-                      id="confirmation"
-                      checked={settings?.appointment_confirmation_enabled ?? true}
-                      onCheckedChange={(checked) =>
-                        handleNotificationToggle('appointment_confirmation_enabled', checked)
-                      }
-                    />
-                  </div>
-
-                  <Separator />
-
-                  <div className="flex items-center justify-between p-4 rounded-xl border bg-gradient-to-br from-card to-muted/5 hover:shadow-md transition-smooth">
-                    <div className="space-y-1 flex-1">
-                      <Label htmlFor="cancelled" className="text-base font-semibold cursor-pointer">
-                        Cancelamentos
-                      </Label>
-                      <p className="text-sm text-muted-foreground">
-                        Notificação quando um agendamento for cancelado
-                      </p>
-                    </div>
-                    <Switch
-                      id="cancelled"
-                      checked={settings?.appointment_cancelled_enabled ?? true}
-                      onCheckedChange={(checked) =>
-                        handleNotificationToggle('appointment_cancelled_enabled', checked)
-                      }
-                    />
-                  </div>
-
-                  <Separator />
-
-                  <div className="flex items-center justify-between p-4 rounded-xl border bg-gradient-to-br from-card to-muted/5 hover:shadow-md transition-smooth">
-                    <div className="space-y-1 flex-1">
-                      <Label htmlFor="rescheduled" className="text-base font-semibold cursor-pointer">
-                        Reagendamentos
-                      </Label>
-                      <p className="text-sm text-muted-foreground">
-                        Notificação quando um agendamento for reagendado
-                      </p>
-                    </div>
-                    <Switch
-                      id="rescheduled"
-                      checked={settings?.appointment_rescheduled_enabled ?? true}
-                      onCheckedChange={(checked) =>
-                        handleNotificationToggle('appointment_rescheduled_enabled', checked)
-                      }
-                    />
-                  </div>
-
-                  <Separator />
-
-                  <div className="flex items-center justify-between p-4 rounded-xl border bg-gradient-to-br from-card to-muted/5 hover:shadow-md transition-smooth">
-                    <div className="space-y-1 flex-1">
-                      <Label htmlFor="marketing" className="text-base font-semibold cursor-pointer">
-                        Notificações de Marketing
-                      </Label>
-                      <p className="text-sm text-muted-foreground">
-                        Receba promoções e novidades
-                      </p>
-                    </div>
-                    <Switch
-                      id="marketing"
-                      checked={settings?.marketing_enabled ?? false}
-                      onCheckedChange={(checked) =>
-                        handleNotificationToggle('marketing_enabled', checked)
-                      }
-                    />
-                  </div>
-                </>
-              )}
             </CardContent>
           </Card>
 

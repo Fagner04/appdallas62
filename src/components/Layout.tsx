@@ -37,6 +37,7 @@ const getMenuItems = (role?: string) => {
       { icon: LayoutDashboard, label: 'Minha Área', path: '/cliente' },
       { icon: Calendar, label: 'Meus Agendamentos', path: '/agendamentos' },
       { icon: Clock, label: 'Histórico', path: '/historico' },
+      { icon: User, label: 'Perfil', path: '/perfil' },
     ];
   }
 

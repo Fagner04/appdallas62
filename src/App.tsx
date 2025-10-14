@@ -9,6 +9,7 @@ import Register from "./pages/Register";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import ClientArea from "./pages/ClientArea";
+import PerfilCliente from "./pages/PerfilCliente";
 import Agendamentos from "./pages/Agendamentos";
 import Servicos from "./pages/Servicos";
 import Barbeiros from "./pages/Barbeiros";
@@ -51,6 +52,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <ClientArea />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/perfil"
+        element={
+          <ProtectedRoute>
+            <PerfilCliente />
           </ProtectedRoute>
         }
       />
