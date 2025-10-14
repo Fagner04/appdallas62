@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Layout } from '@/components/Layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Bell, CheckCircle2, Clock, Gift, Calendar, Send, Users, Plus } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Bell, CheckCircle2, Clock, Gift, Calendar, Send, Users, Plus, Edit, Trash2, FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,19 +10,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import { useNotifications } from '@/hooks/useNotifications';
-import { useNotificationTemplates } from '@/hooks/useNotificationTemplates';
+import { useNotificationTemplates, NotificationTemplate } from '@/hooks/useNotificationTemplates';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
+import { NotificationTemplateEditor } from '@/components/NotificationTemplateEditor';
 
 export default function Notificacoes() {
   const { user } = useAuth();
   const { notifications, markAsRead, sendNotification } = useNotifications(user?.id);
   const { data: customers } = useCustomers();
-  const { templates } = useNotificationTemplates();
+  const { templates, deleteTemplate } = useNotificationTemplates();
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState('');
@@ -31,6 +32,10 @@ export default function Notificacoes() {
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
   const [type, setType] = useState<'confirmation' | 'reminder' | 'promotion' | 'system'>('system');
+  
+  const [isTemplateEditorOpen, setIsTemplateEditorOpen] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState<NotificationTemplate | undefined>();
+  const [isNewTemplate, setIsNewTemplate] = useState(false);
 
   const handleNotificationClick = (notification: any) => {
     if (!notification.is_read) {
@@ -110,6 +115,24 @@ export default function Notificacoes() {
     setTitle('');
     setMessage('');
     setType('system');
+  };
+
+  const handleCreateTemplate = () => {
+    setEditingTemplate(undefined);
+    setIsNewTemplate(true);
+    setIsTemplateEditorOpen(true);
+  };
+
+  const handleEditTemplate = (template: NotificationTemplate) => {
+    setEditingTemplate(template);
+    setIsNewTemplate(false);
+    setIsTemplateEditorOpen(true);
+  };
+
+  const handleDeleteTemplate = (templateId: string) => {
+    if (confirm('Tem certeza que deseja excluir este template?')) {
+      deleteTemplate.mutate(templateId);
+    }
   };
 
   return (
@@ -320,6 +343,96 @@ export default function Notificacoes() {
             </div>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-primary" />
+                  Templates de Notificações Automáticas
+                </CardTitle>
+                <CardDescription>
+                  Crie e gerencie templates para envio rápido de notificações
+                </CardDescription>
+              </div>
+              <Button onClick={handleCreateTemplate} size="sm">
+                <Plus className="h-4 w-4 mr-2" />
+                Novo Template
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {templates?.length === 0 ? (
+              <div className="text-center py-12">
+                <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-3 opacity-50" />
+                <p className="text-muted-foreground mb-4">
+                  Nenhum template criado ainda
+                </p>
+                <Button onClick={handleCreateTemplate} variant="outline">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Criar Primeiro Template
+                </Button>
+              </div>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {templates?.map((template) => (
+                  <Card key={template.id} className="relative overflow-hidden">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <CardTitle className="text-base mb-1">{template.title}</CardTitle>
+                          {template.description && (
+                            <CardDescription className="text-xs">{template.description}</CardDescription>
+                          )}
+                        </div>
+                        <Badge variant={template.is_system ? 'default' : 'secondary'} className="ml-2">
+                          {template.is_system ? 'Sistema' : 'Customizado'}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pb-3">
+                      <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                        {template.message}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEditTemplate(template)}
+                          className="flex-1"
+                        >
+                          <Edit className="h-3 w-3 mr-1" />
+                          Editar
+                        </Button>
+                        {!template.is_system && (
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleDeleteTemplate(template.id)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <NotificationTemplateEditor
+          isOpen={isTemplateEditorOpen}
+          onClose={() => {
+            setIsTemplateEditorOpen(false);
+            setEditingTemplate(undefined);
+            setIsNewTemplate(false);
+          }}
+          template={editingTemplate}
+          isNew={isNewTemplate}
+        />
       </div>
     </Layout>
   );
