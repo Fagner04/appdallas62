@@ -297,33 +297,33 @@ export default function Marketing() {
                           </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-2">
-                          <div className="grid grid-cols-3 gap-2">
+                          <div className="flex flex-col sm:flex-row gap-2">
                             <Button
                               onClick={() => openPointsDialog(customer.id, 'add')}
                               size="sm"
                               variant="outline"
-                              className="gap-1"
+                              className="gap-1 flex-1"
                             >
                               <Plus className="h-3 w-3" />
-                              Adicionar
+                              <span className="text-xs sm:text-sm">Adicionar</span>
                             </Button>
                             <Button
                               onClick={() => openPointsDialog(customer.id, 'remove')}
                               size="sm"
                               variant="outline"
-                              className="gap-1"
+                              className="gap-1 flex-1"
                             >
                               <Minus className="h-3 w-3" />
-                              Remover
+                              <span className="text-xs sm:text-sm">Remover</span>
                             </Button>
                             <Button
                               onClick={() => openPointsDialog(customer.id, 'set')}
                               size="sm"
                               variant="outline"
-                              className="gap-1"
+                              className="gap-1 flex-1"
                             >
                               <RotateCcw className="h-3 w-3" />
-                              Definir
+                              <span className="text-xs sm:text-sm">Definir</span>
                             </Button>
                           </div>
                         </CardContent>
