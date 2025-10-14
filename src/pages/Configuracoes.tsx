@@ -1,14 +1,15 @@
 import { Layout } from '@/components/Layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { User, Clock, Lock, Loader2, ChevronDown } from 'lucide-react';
+import { User, Clock, Lock, Loader2, ChevronDown, LogOut } from 'lucide-react';
 import { toast } from 'sonner';
 import { useWorkingHours, useUpdateWorkingHours } from '@/hooks/useWorkingHours';
 import { usePasswordChange } from '@/hooks/usePasswordChange';
+import { useAuth } from '@/contexts/AuthContext';
 import { useState, useEffect } from 'react';
 
 const DAYS = [
@@ -22,6 +23,7 @@ const DAYS = [
 ];
 
 export default function Configuracoes() {
+  const { logout } = useAuth();
   const { data: workingHours = [], isLoading } = useWorkingHours();
   const updateWorkingHours = useUpdateWorkingHours();
   const { changePassword, isLoading: isChangingPassword } = usePasswordChange();
@@ -316,6 +318,29 @@ export default function Configuracoes() {
             </CollapsibleContent>
           </Card>
         </Collapsible>
+
+        {/* Sair da Conta */}
+        <Card className="border-destructive/10">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-1.5 rounded-lg bg-destructive/10">
+                <LogOut className="h-4 w-4 text-destructive" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">Sair da Conta</p>
+                <p className="text-xs text-muted-foreground">Encerre sua sessão</p>
+              </div>
+            </div>
+            <Button
+              onClick={logout}
+              variant="destructive"
+              size="sm"
+              className="transition-smooth"
+            >
+              Sair
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </Layout>
   );
