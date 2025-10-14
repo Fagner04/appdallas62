@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { supabase } from '@/integrations/supabase/client';
 import { Bell, Send, Calendar, CheckCircle2, Clock, Plus, Sparkles, Gift, MessageSquare } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -39,7 +40,7 @@ export default function Notificacoes() {
     if ((!selectedCustomer && !sendToAll) || !title || !message) return;
 
     if (sendToAll) {
-      // Enviar para todos os clientes
+      // Enviar apenas para clientes (excluindo admins e barbeiros)
       const customersWithUserId = customers?.filter(c => c.user_id) || [];
       
       if (customersWithUserId.length === 0) {
@@ -47,8 +48,23 @@ export default function Notificacoes() {
         return;
       }
 
+      // Filtrar apenas usuários com role 'customer'
+      const { data: userRoles } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'customer')
+        .in('user_id', customersWithUserId.map(c => c.user_id!));
+
+      const customerUserIds = new Set(userRoles?.map(r => r.user_id) || []);
+      const customersOnly = customersWithUserId.filter(c => customerUserIds.has(c.user_id!));
+
+      if (customersOnly.length === 0) {
+        toast.error('Nenhum cliente encontrado para enviar notificação');
+        return;
+      }
+
       let successCount = 0;
-      for (const customer of customersWithUserId) {
+      for (const customer of customersOnly) {
         try {
           await sendNotification.mutateAsync({
             user_id: customer.user_id!,
