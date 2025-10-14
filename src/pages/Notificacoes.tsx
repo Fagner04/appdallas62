@@ -30,11 +30,22 @@ export default function Notificacoes() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState('');
   const [sendToAll, setSendToAll] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState('');
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
   const [type, setType] = useState<'confirmation' | 'reminder' | 'promotion' | 'system'>('system');
   const [editingTemplate, setEditingTemplate] = useState<any>(null);
   const [isCreatingTemplate, setIsCreatingTemplate] = useState(false);
+
+  const handleTemplateSelect = (templateId: string) => {
+    setSelectedTemplate(templateId);
+    const template = templates?.find(t => t.id === templateId);
+    if (template) {
+      setTitle(template.title);
+      setMessage(template.message);
+      setType(template.type as any);
+    }
+  };
 
   const handleSendNotification = async () => {
     if ((!selectedCustomer && !sendToAll) || !title || !message) return;
@@ -97,6 +108,7 @@ export default function Notificacoes() {
     setIsDialogOpen(false);
     setSelectedCustomer('');
     setSendToAll(false);
+    setSelectedTemplate('');
     setTitle('');
     setMessage('');
     setType('system');
@@ -205,6 +217,21 @@ export default function Notificacoes() {
                   <DialogTitle>Enviar Notificação</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Template (Opcional)</label>
+                    <Select value={selectedTemplate} onValueChange={handleTemplateSelect}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione um template" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {templates?.map((template) => (
+                          <SelectItem key={template.id} value={template.id}>
+                            {template.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox 
                       id="sendToAll" 
