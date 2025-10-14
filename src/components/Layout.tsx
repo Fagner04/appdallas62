@@ -87,10 +87,6 @@ export const Layout = ({ children }: LayoutProps) => {
             <h1 className="text-2xl font-bold text-foreground">
               Dallas Barbearia
             </h1>
-            <p className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
-              <User className="h-4 w-4" />
-              {user?.name}
-            </p>
           </div>
           <div className="flex items-center gap-2">
             <Button
