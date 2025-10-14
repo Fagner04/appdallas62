@@ -23,6 +23,7 @@ import AgendaBarbeiro from "./pages/AgendaBarbeiro";
 import ControleClientes from "./pages/ControleClientes";
 import HistoricoCliente from "./pages/HistoricoCliente";
 import Marketing from "./pages/Marketing";
+import Planos from "./pages/Planos";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -174,6 +175,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Marketing />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/planos"
+        element={
+          <ProtectedRoute>
+            <Planos />
           </ProtectedRoute>
         }
       />
