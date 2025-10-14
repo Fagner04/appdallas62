@@ -144,3 +144,65 @@ export const useCustomerLoyalty = (userId: string) => {
     enabled: !!userId,
   });
 };
+
+export const useUpdateCustomerPoints = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ customerId, points, action }: { 
+      customerId: string; 
+      points: number;
+      action: 'add' | 'remove' | 'set';
+    }) => {
+      const { data: customer } = await supabase
+        .from('customers')
+        .select('loyalty_points')
+        .eq('id', customerId)
+        .single();
+
+      if (!customer) throw new Error('Cliente não encontrado');
+
+      let newPoints = 0;
+      let pointsChange = 0;
+      
+      if (action === 'set') {
+        newPoints = points;
+        pointsChange = points - (customer.loyalty_points || 0);
+      } else if (action === 'add') {
+        newPoints = (customer.loyalty_points || 0) + points;
+        pointsChange = points;
+      } else {
+        newPoints = Math.max(0, (customer.loyalty_points || 0) - points);
+        pointsChange = -points;
+      }
+
+      const { error } = await supabase
+        .from('customers')
+        .update({ loyalty_points: newPoints })
+        .eq('id', customerId);
+
+      if (error) throw error;
+
+      // Registra no histórico
+      await supabase
+        .from('loyalty_history')
+        .insert({
+          customer_id: customerId,
+          points_change: pointsChange,
+          points_balance: newPoints,
+          action: action === 'add' ? 'earned' : action === 'remove' ? 'removed' : 'adjusted',
+          description: `Pontos ajustados manualmente pelo administrador`,
+        });
+
+      return { newPoints };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['customers'] });
+      queryClient.invalidateQueries({ queryKey: ['loyalty-stats'] });
+      toast.success('Pontos atualizados com sucesso!');
+    },
+    onError: () => {
+      toast.error('Erro ao atualizar pontos');
+    },
+  });
+};

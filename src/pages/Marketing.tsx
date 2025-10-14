@@ -3,19 +3,49 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Gift, Users, TrendingUp, Award, Calendar, CheckCircle2, XCircle } from 'lucide-react';
-import { useLoyaltyCoupons, useLoyaltyStats } from '@/hooks/useLoyalty';
+import { Gift, Users, TrendingUp, Award, Calendar, CheckCircle2, XCircle, Plus, Minus, RotateCcw } from 'lucide-react';
+import { useLoyaltyCoupons, useLoyaltyStats, useUpdateCustomerPoints } from '@/hooks/useLoyalty';
 import { useCustomers } from '@/hooks/useCustomers';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export default function Marketing() {
   const { coupons, redeemCoupon } = useLoyaltyCoupons();
   const { stats } = useLoyaltyStats();
   const { data: customers } = useCustomers();
+  const updatePoints = useUpdateCustomerPoints();
+
+  const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
+  const [pointsDialog, setPointsDialog] = useState(false);
+  const [pointsAmount, setPointsAmount] = useState('');
+  const [pointsAction, setPointsAction] = useState<'add' | 'remove' | 'set'>('add');
 
   const handleRedeem = async (couponId: string) => {
     await redeemCoupon.mutateAsync(couponId);
+  };
+
+  const handlePointsUpdate = async () => {
+    if (!selectedCustomer || !pointsAmount) return;
+    
+    await updatePoints.mutateAsync({
+      customerId: selectedCustomer,
+      points: parseInt(pointsAmount),
+      action: pointsAction,
+    });
+    
+    setPointsDialog(false);
+    setPointsAmount('');
+    setSelectedCustomer(null);
+  };
+
+  const openPointsDialog = (customerId: string, action: 'add' | 'remove' | 'set') => {
+    setSelectedCustomer(customerId);
+    setPointsAction(action);
+    setPointsDialog(true);
   };
 
   const activeCoupons = coupons?.filter(c => !c.is_redeemed) || [];
@@ -108,22 +138,25 @@ export default function Marketing() {
           </CardContent>
         </Card>
 
-        {/* Cupons */}
+        {/* Cupons e Pontos */}
         <Card>
           <CardHeader>
-            <CardTitle>Gerenciar Cupons</CardTitle>
+            <CardTitle>Gerenciar Programa de Fidelidade</CardTitle>
             <CardDescription>
-              Visualize e gerencie os cupons de fidelidade dos clientes
+              Visualize e gerencie cupons e pontos de fidelidade dos clientes
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="active">
               <TabsList>
                 <TabsTrigger value="active">
-                  Ativos ({activeCoupons.length})
+                  Cupons Ativos ({activeCoupons.length})
                 </TabsTrigger>
                 <TabsTrigger value="redeemed">
-                  Resgatados ({redeemedCoupons.length})
+                  Cupons Resgatados ({redeemedCoupons.length})
+                </TabsTrigger>
+                <TabsTrigger value="points">
+                  Pontos dos Clientes
                 </TabsTrigger>
               </TabsList>
 
@@ -238,10 +271,118 @@ export default function Marketing() {
                   </div>
                 )}
               </TabsContent>
+
+              {/* Nova aba de Pontos */}
+              <TabsContent value="points" className="space-y-4 mt-4">
+                {!customers || customers.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Users className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+                    <p className="text-muted-foreground">
+                      Nenhum cliente cadastrado
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {customers.map((customer) => (
+                      <Card key={customer.id} className="border-primary/20">
+                        <CardHeader className="pb-3">
+                          <div className="flex items-center justify-between">
+                            <CardTitle className="text-lg">{customer.name}</CardTitle>
+                            <div className="p-2 rounded-lg bg-primary/10">
+                              <Award className="h-4 w-4 text-primary" />
+                            </div>
+                          </div>
+                          <CardDescription>
+                            {customer.loyalty_points || 0} pontos de fidelidade
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                          <div className="grid grid-cols-3 gap-2">
+                            <Button
+                              onClick={() => openPointsDialog(customer.id, 'add')}
+                              size="sm"
+                              variant="outline"
+                              className="gap-1"
+                            >
+                              <Plus className="h-3 w-3" />
+                              Adicionar
+                            </Button>
+                            <Button
+                              onClick={() => openPointsDialog(customer.id, 'remove')}
+                              size="sm"
+                              variant="outline"
+                              className="gap-1"
+                            >
+                              <Minus className="h-3 w-3" />
+                              Remover
+                            </Button>
+                            <Button
+                              onClick={() => openPointsDialog(customer.id, 'set')}
+                              size="sm"
+                              variant="outline"
+                              className="gap-1"
+                            >
+                              <RotateCcw className="h-3 w-3" />
+                              Definir
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
             </Tabs>
           </CardContent>
         </Card>
       </div>
+
+      {/* Dialog para gerenciar pontos */}
+      <Dialog open={pointsDialog} onOpenChange={setPointsDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {pointsAction === 'add' && 'Adicionar Pontos'}
+              {pointsAction === 'remove' && 'Remover Pontos'}
+              {pointsAction === 'set' && 'Definir Pontos'}
+            </DialogTitle>
+            <DialogDescription>
+              {pointsAction === 'add' && 'Adicione pontos de fidelidade ao cliente'}
+              {pointsAction === 'remove' && 'Remova pontos de fidelidade do cliente'}
+              {pointsAction === 'set' && 'Defina a quantidade exata de pontos do cliente'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="points">Quantidade de Pontos</Label>
+              <Input
+                id="points"
+                type="number"
+                min="0"
+                value={pointsAmount}
+                onChange={(e) => setPointsAmount(e.target.value)}
+                placeholder={pointsAction === 'set' ? 'Ex: 5' : 'Ex: 1'}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setPointsDialog(false)}
+                variant="outline"
+                className="flex-1"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handlePointsUpdate}
+                disabled={!pointsAmount || updatePoints.isPending}
+                className="flex-1"
+              >
+                Confirmar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 }
