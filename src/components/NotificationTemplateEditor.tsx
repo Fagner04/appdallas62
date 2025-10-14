@@ -148,7 +148,7 @@ export const NotificationTemplateEditor = ({
                 className="resize-none"
               />
               <p className="text-xs text-muted-foreground">
-                Variáveis disponíveis: {'{nome_cliente}'}, {'{nome_barbeiro}'}, {'{servico}'}, {'{data}'}, {'{horario}'}
+                Variáveis disponíveis: {'{customer_name}'}, {'{barber_name}'}, {'{service_name}'}, {'{appointment_date}'}, {'{appointment_time}'}, {'{hours_text}'}
               </p>
             </div>
             <div className="bg-muted/50 p-4 rounded-lg space-y-2">
@@ -206,10 +206,12 @@ export const NotificationTemplateEditor = ({
 
 function getDefaultMessage(type: string): string {
   const messages: Record<string, string> = {
-    confirmation: 'Olá {nome_cliente}! Seu agendamento com {nome_barbeiro} para {servico} foi confirmado para o dia {data} às {horario}. Te esperamos!',
-    reminder: 'Olá {nome_cliente}! Lembrando que seu agendamento com {nome_barbeiro} para {servico} é em 1 hora ({horario}). Te esperamos!',
-    thanks: 'Olá {nome_cliente}! Obrigado pela visita! Esperamos ter proporcionado uma excelente experiência. Até a próxima!',
-    promotion: 'Olá {nome_cliente}! Confira nossas promoções especiais! Entre em contato para mais informações.',
+    confirmation: 'Olá {customer_name}! Seu agendamento com {barber_name} para {service_name} foi confirmado para o dia {appointment_date} às {appointment_time}. Te esperamos!',
+    reminder: 'Olá {customer_name}! Lembrando que seu agendamento com {barber_name} para {service_name} é {hours_text} ({appointment_time}). Te esperamos!',
+    thanks: 'Olá {customer_name}! Obrigado pela visita! Esperamos ter proporcionado uma excelente experiência. Até a próxima!',
+    promotion: 'Olá {customer_name}! Confira nossas promoções especiais! Entre em contato para mais informações.',
+    update: 'Olá {customer_name}! Seu agendamento com {barber_name} para {service_name} foi reagendado para {appointment_date} às {appointment_time}. Te esperamos!',
+    cancellation: 'Olá {customer_name}! Seu agendamento com {barber_name} para {service_name} do dia {appointment_date} às {appointment_time} foi cancelado.',
   };
   return messages[type] || '';
 }
