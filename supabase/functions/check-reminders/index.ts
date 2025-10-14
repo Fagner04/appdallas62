@@ -25,10 +25,10 @@ Deno.serve(async (req) => {
     // Buscar agendamentos que precisam de lembrete
     const { data: appointments, error: appointmentsError } = await supabaseClient
       .from('appointments')
-      .select('id, customer_id, barber_id, date, time, service_id, customers(name, user_id, notifications_enabled), barbers(name), services(name)')
-      .eq('status', 'scheduled')
-      .gte('date', now.toISOString().split('T')[0])
-      .lte('date', futureTime.toISOString().split('T')[0]);
+      .select('id, customer_id, barber_id, appointment_date, appointment_time, service_id, customers(name, user_id, notifications_enabled), barbers(name), services(name)')
+      .in('status', ['pending', 'confirmed'])
+      .gte('appointment_date', now.toISOString().split('T')[0])
+      .lte('appointment_date', futureTime.toISOString().split('T')[0]);
 
     if (appointmentsError) {
       console.error('Error fetching appointments:', appointmentsError);
@@ -41,19 +41,29 @@ Deno.serve(async (req) => {
 
     for (const appointment of appointments || []) {
       // Combinar data e hora do agendamento
-      const appointmentDateTime = new Date(`${appointment.date}T${appointment.time}`);
+      const appointmentDateTime = new Date(`${appointment.appointment_date}T${appointment.appointment_time}`);
       const timeDiff = appointmentDateTime.getTime() - now.getTime();
       const hoursUntil = timeDiff / (1000 * 60 * 60);
 
-      // Se está entre 0.9 e 1.1 horas (window de 12 minutos)
-      if (hoursUntil >= 0.9 && hoursUntil <= 1.1) {
-        const customer = appointment.customers as any;
-        
-        if (!customer?.user_id || !customer?.notifications_enabled) {
-          console.log(`Skipping reminder for appointment ${appointment.id} - customer not configured`);
-          continue;
-        }
+      // Buscar configurações para saber quantas horas antes enviar
+      const customer = appointment.customers as any;
+      
+      if (!customer?.user_id || !customer?.notifications_enabled) {
+        console.log(`Skipping reminder for appointment ${appointment.id} - customer not configured`);
+        continue;
+      }
 
+      const { data: settings } = await supabaseClient
+        .from('notification_settings')
+        .select('*')
+        .eq('user_id', customer.user_id)
+        .maybeSingle();
+
+      const reminderHours = settings?.appointment_reminder_hours || 24;
+      const reminderWindow = 0.1; // 6 minutos de janela
+
+      // Se está no horário certo para enviar o lembrete
+      if (hoursUntil >= (reminderHours - reminderWindow) && hoursUntil <= (reminderHours + reminderWindow)) {
         // Verificar se já enviou notificação de lembrete para este agendamento
         const { data: existingNotification } = await supabaseClient
           .from('notifications')
@@ -67,13 +77,6 @@ Deno.serve(async (req) => {
           continue;
         }
 
-        // Verificar configurações de notificação do usuário
-        const { data: settings } = await supabaseClient
-          .from('notification_settings')
-          .select('*')
-          .eq('user_id', customer.user_id)
-          .maybeSingle();
-
         if (settings && !settings.appointment_reminder_enabled) {
           console.log(`Reminders disabled for user ${customer.user_id}`);
           continue;
@@ -84,7 +87,8 @@ Deno.serve(async (req) => {
         const service = appointment.services as any;
         
         const title = 'Lembrete de Agendamento';
-        const message = `Olá ${customer.name}! Seu agendamento com ${barber?.name || 'barbeiro'} para ${service?.name || 'serviço'} é em 1 hora (${appointment.time}). Te esperamos!`;
+        const hoursText = reminderHours === 1 ? '1 hora' : `${reminderHours} horas`;
+        const message = `Olá ${customer.name}! Lembrete: Seu agendamento com ${barber?.name || 'barbeiro'} para ${service?.name || 'serviço'} é em ${hoursText} (${appointment.appointment_time}). Te esperamos!`;
 
         const { error: notificationError } = await supabaseClient
           .from('notifications')
