@@ -199,6 +199,31 @@ export const useCreateAppointment = () => {
         .single();
 
       if (error) throw error;
+
+      // Create notification for admin about new appointment
+      const { data: customerData } = await supabase
+        .from('customers')
+        .select('name')
+        .eq('id', data.customer_id)
+        .single();
+
+      const { data: admins } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .or('role.eq.admin,role.eq.barber');
+
+      if (admins && customerData) {
+        const notifications = admins.map(admin => ({
+          user_id: admin.user_id,
+          title: 'Novo Agendamento',
+          message: `${customerData.name} criou um novo agendamento`,
+          type: 'booking',
+          related_id: appointment.id,
+        }));
+
+        await supabase.from('notifications').insert(notifications);
+      }
+
       return appointment;
     },
     onSuccess: () => {
@@ -208,6 +233,7 @@ export const useCreateAppointment = () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
       queryClient.invalidateQueries({ queryKey: ['customer-appointments'] });
       queryClient.invalidateQueries({ queryKey: ['upcoming-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       toast.success('Agendamento criado com sucesso!');
     },
     onError: (error) => {
@@ -227,16 +253,39 @@ export const useUpdateAppointment = () => {
         .from('appointments')
         .update(data)
         .eq('id', id)
-        .select()
+        .select('*, customer:customers(name)')
         .single();
 
       if (error) throw error;
+
+      // Create notification for admin about appointment update
+      const { data: admins } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .or('role.eq.admin,role.eq.barber');
+
+      if (admins && appointment) {
+        const customerName = (appointment as any).customer?.name || 'Um cliente';
+        const actionType = data.status === 'cancelled' ? 'cancelou' : 'editou';
+        
+        const notifications = admins.map(admin => ({
+          user_id: admin.user_id,
+          title: data.status === 'cancelled' ? 'Agendamento Cancelado' : 'Agendamento Editado',
+          message: `${customerName} ${actionType} um agendamento`,
+          type: data.status === 'cancelled' ? 'cancellation' : 'update',
+          related_id: id,
+        }));
+
+        await supabase.from('notifications').insert(notifications);
+      }
+
       return appointment;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
       queryClient.invalidateQueries({ queryKey: ['available-slots'] });
       queryClient.invalidateQueries({ queryKey: ['today-appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       toast.success('Agendamento atualizado com sucesso!');
     },
     onError: (error) => {

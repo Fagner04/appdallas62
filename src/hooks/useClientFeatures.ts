@@ -18,6 +18,7 @@ const getDefaultFeatures = (): Record<string, boolean> => ({
   view_history: true,
   view_blocked_times: true,
   delete_notifications: true,
+  view_notifications: true,
 });
 
 export const useClientFeatures = () => {

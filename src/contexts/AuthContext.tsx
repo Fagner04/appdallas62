@@ -101,14 +101,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       toast.success('Login realizado com sucesso!');
       
       // Redirect based on user role
-      const { data: roleRow } = await supabase
+      const { data: roleRow, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', data.user.id)
         .limit(1)
         .maybeSingle();
 
+      console.log('User role data:', roleRow, 'Error:', roleError);
+
       const redirectPath = roleRow?.role === 'customer' ? '/cliente' : '/dashboard';
+      console.log('Redirecting to:', redirectPath, 'User role:', roleRow?.role);
+      
       navigate(redirectPath);
     } catch (error: any) {
       toast.error(error.message || 'Erro ao fazer login');

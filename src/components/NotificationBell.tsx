@@ -23,11 +23,16 @@ import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { CheckCircle2, Clock } from 'lucide-react';
 import { useState } from 'react';
+import { useClientFeatures } from '@/hooks/useClientFeatures';
 
 export const NotificationBell = () => {
   const { user } = useAuth();
   const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification, clearAllNotifications } = useNotifications(user?.id);
   const [showClearDialog, setShowClearDialog] = useState(false);
+  const { isFeatureEnabled } = useClientFeatures();
+  
+  // Check if user is customer and if delete notifications is disabled
+  const canDeleteNotifications = user?.role !== 'customer' || isFeatureEnabled('delete_notifications');
 
   const handleNotificationClick = (notificationId: string, isRead: boolean) => {
     if (!isRead) {
@@ -64,7 +69,7 @@ export const NotificationBell = () => {
         <div className="flex items-center justify-between p-4 border-b border-border">
           <h3 className="font-semibold">Notificações</h3>
           <div className="flex gap-2">
-            {notifications?.length > 0 && (
+            {notifications?.length > 0 && canDeleteNotifications && (
               <Button 
                 variant="ghost" 
                 size="sm"
@@ -130,14 +135,16 @@ export const NotificationBell = () => {
                         })}
                       </p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={(e) => handleDeleteNotification(e, notification.id)}
-                    >
-                      <X className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-                    </Button>
+                    {canDeleteNotifications && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={(e) => handleDeleteNotification(e, notification.id)}
+                      >
+                        <X className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               ))}
