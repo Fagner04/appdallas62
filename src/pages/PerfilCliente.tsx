@@ -14,7 +14,8 @@ import {
   Loader2,
   MapPin,
   ChevronDown,
-  Shield
+  Shield,
+  LogOut
 } from 'lucide-react';
 import { useCustomerProfile } from '@/hooks/useCustomerData';
 import { useAuth } from '@/contexts/AuthContext';
@@ -35,7 +36,7 @@ import {
 } from "@/components/ui/select";
 
 export default function PerfilCliente() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   
   // Segurança: Apenas clientes podem acessar esta página
   if (!user || user.role !== 'customer') {
@@ -387,6 +388,32 @@ export default function PerfilCliente() {
               </CardContent>
             </CollapsibleContent>
           </Collapsible>
+        </Card>
+
+        {/* Sair da Conta */}
+        <Card className="shadow-elegant border-destructive/20 bg-gradient-to-br from-destructive/5 to-transparent">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <div className="p-2 rounded-lg bg-destructive/10">
+                <LogOut className="h-5 w-5 text-destructive" />
+              </div>
+              Sair da Conta
+            </CardTitle>
+            <CardDescription>
+              Encerre sua sessão de forma segura
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              onClick={logout}
+              variant="destructive"
+              className="w-full sm:w-auto shadow-elegant hover:shadow-xl transition-smooth"
+              size="lg"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Sair
+            </Button>
+          </CardContent>
         </Card>
       </div>
     </Layout>

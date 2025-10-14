@@ -101,15 +101,6 @@ export const Layout = ({ children }: LayoutProps) => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={logout}
-              className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 w-8"
-              title="Sair"
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
               onClick={() => setOpen(false)}
               className="lg:hidden -mt-1 -mr-2 bg-primary/10 hover:bg-primary/20 h-8 w-8"
             >
