@@ -148,26 +148,46 @@ export const Layout = ({ children }: LayoutProps) => {
       {/* Mobile Header + Sidebar */}
       <div className="flex flex-1 flex-col overflow-x-hidden">
         {/* Desktop Header */}
-        <header className="hidden lg:block sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
-          <div className="flex h-16 items-center justify-between px-6">
-            <h1 className="text-xl font-bold text-foreground">Dallas Barbearia</h1>
-            <div className="flex items-center gap-2">
-              {user && <NotificationBell />}
+        <header className="hidden lg:block sticky top-0 z-40 border-b border-border/50 bg-gradient-to-r from-card/95 via-card/98 to-card/95 backdrop-blur-xl supports-[backdrop-filter]:bg-card/80 shadow-sm">
+          <div className="flex h-16 items-center justify-end px-6">
+            <div className="flex items-center gap-3">
+              {user && (
+                <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-gradient-to-r from-primary/5 to-transparent border border-primary/10">
+                  <div className="flex items-center gap-2">
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-md">
+                      <User className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="text-sm font-semibold">{user.name}</span>
+                  </div>
+                  <Separator orientation="vertical" className="h-6" />
+                  <NotificationBell />
+                </div>
+              )}
             </div>
           </div>
         </header>
 
         {/* Mobile Header */}
-        <header className="lg:hidden sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
+        <header className="lg:hidden sticky top-0 z-50 border-b border-border/50 bg-gradient-to-r from-card/95 via-card/98 to-card/95 backdrop-blur-xl supports-[backdrop-filter]:bg-card/80 shadow-sm">
           <div className="flex h-16 items-center justify-between px-4">
-            <h1 className="text-xl font-bold text-foreground">
-              Dallas Barbearia
-            </h1>
+            <div className="flex items-center gap-2">
+              <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-md">
+                <Scissors className="h-5 w-5 text-white" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs font-medium text-muted-foreground">Olá,</span>
+                <span className="text-sm font-bold text-foreground">{user?.name}</span>
+              </div>
+            </div>
             <div className="flex items-center gap-2">
               {user && <NotificationBell />}
               <Sheet open={open} onOpenChange={setOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon">
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="hover:bg-primary/10 transition-smooth"
+                  >
                     <Menu className="h-6 w-6" />
                   </Button>
                 </SheetTrigger>
