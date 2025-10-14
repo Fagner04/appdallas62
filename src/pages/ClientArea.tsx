@@ -95,18 +95,16 @@ export default function ClientArea() {
                 userName={user?.name}
                 size="md"
               />
-              <div className="flex-1 space-y-3">
+              <div className="flex-1 space-y-2">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-primary/10">
-                    <User className="h-5 w-5 text-primary" />
+                    <User className="h-6 w-6 text-primary" />
                   </div>
-                  <div>
-                    <h1 className="text-xl sm:text-2xl font-bold">
-                      Olá, {user?.name}! 👋
-                    </h1>
-                    <p className="text-sm text-muted-foreground">Bem-vindo à sua área pessoal</p>
-                  </div>
+                  <h1 className="text-xl sm:text-2xl font-bold">
+                    Olá, {user?.name}! 👋
+                  </h1>
                 </div>
+                <p className="text-sm text-muted-foreground">Bem-vindo à sua área pessoal</p>
                 <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3">
                   <div className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-lg border text-sm">
                     <Mail className="h-4 w-4 text-primary flex-shrink-0" />
