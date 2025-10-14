@@ -126,38 +126,38 @@ export default function Notificacoes() {
 
   return (
     <Layout>
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 sm:space-y-6 animate-fade-in px-2 sm:px-0">
         <div className="flex items-center gap-3">
-          <div className="p-3 rounded-lg bg-primary/10">
-            <Send className="h-8 w-8 text-primary" />
+          <div className="p-2 sm:p-3 rounded-lg bg-primary/10">
+            <Send className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
           </div>
           <div>
-            <h1 className="text-4xl font-bold mb-1">Notificações</h1>
-            <p className="text-muted-foreground">Envie notificações para seus clientes</p>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-1">Notificações</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">Envie notificações para seus clientes</p>
           </div>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Send className="h-5 w-5 text-primary" />
+        <Card className="shadow-elegant">
+          <CardHeader className="px-4 sm:px-6">
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <Send className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               Enviar Notificação
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-sm">
               Envie notificações personalizadas para seus clientes
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 sm:px-6">
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Template (Opcional)</label>
+                <label className="text-sm sm:text-base font-medium">Template (Opcional)</label>
                 <Select value={selectedTemplate} onValueChange={handleTemplateSelect}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-11 sm:h-10 text-base sm:text-sm">
                     <SelectValue placeholder="Selecione um template" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-[300px]">
                     {templates?.map((template) => (
-                      <SelectItem key={template.id} value={template.id}>
+                      <SelectItem key={template.id} value={template.id} className="text-base sm:text-sm py-3 sm:py-2">
                         {template.title}
                       </SelectItem>
                     ))}
@@ -207,14 +207,14 @@ export default function Notificacoes() {
               
               {!sendToAll && (
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Cliente</label>
+                  <label className="text-sm sm:text-base font-medium">Cliente</label>
                   <Select value={selectedCustomer} onValueChange={setSelectedCustomer}>
-                    <SelectTrigger>
+                    <SelectTrigger className="h-11 sm:h-10 text-base sm:text-sm">
                       <SelectValue placeholder="Selecione o cliente" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-[300px]">
                       {customers?.map((customer) => (
-                        <SelectItem key={customer.id} value={customer.id}>
+                        <SelectItem key={customer.id} value={customer.id} className="text-base sm:text-sm py-3 sm:py-2">
                           {customer.name}
                         </SelectItem>
                       ))}
@@ -224,100 +224,102 @@ export default function Notificacoes() {
               )}
               
               <div className="space-y-2">
-                <label className="text-sm font-medium">Tipo</label>
+                <label className="text-sm sm:text-base font-medium">Tipo</label>
                 <Select value={type} onValueChange={(v: any) => setType(v)}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-11 sm:h-10 text-base sm:text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="system">Sistema</SelectItem>
-                    <SelectItem value="confirmation">Confirmação</SelectItem>
-                    <SelectItem value="reminder">Lembrete</SelectItem>
-                    <SelectItem value="promotion">Promoção</SelectItem>
+                    <SelectItem value="system" className="text-base sm:text-sm py-3 sm:py-2">Sistema</SelectItem>
+                    <SelectItem value="confirmation" className="text-base sm:text-sm py-3 sm:py-2">Confirmação</SelectItem>
+                    <SelectItem value="reminder" className="text-base sm:text-sm py-3 sm:py-2">Lembrete</SelectItem>
+                    <SelectItem value="promotion" className="text-base sm:text-sm py-3 sm:py-2">Promoção</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               
               <div className="space-y-2">
-                <label className="text-sm font-medium">Título</label>
+                <label className="text-sm sm:text-base font-medium">Título</label>
                 <Input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Título da notificação"
+                  className="h-11 sm:h-10 text-base sm:text-sm"
                 />
               </div>
               
               <div className="space-y-2">
-                <label className="text-sm font-medium">Mensagem</label>
+                <label className="text-sm sm:text-base font-medium">Mensagem</label>
                 <Textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Mensagem da notificação"
                   rows={4}
+                  className="text-base sm:text-sm resize-none"
                 />
               </div>
               
               <Button 
                 onClick={handleSendNotification} 
-                className="w-full"
+                className="w-full h-11 sm:h-10 text-base sm:text-sm font-semibold"
                 disabled={(!selectedCustomer && !sendToAll) || !title || !message || sendNotification.isPending}
               >
-                <Send className="h-4 w-4 mr-2" />
+                <Send className="h-4 w-4 sm:h-4 sm:w-4 mr-2" />
                 {sendNotification.isPending ? 'Enviando...' : sendToAll ? 'Enviar para Todos' : 'Enviar Notificação'}
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
+        <Card className="shadow-elegant">
+          <CardHeader className="px-4 sm:px-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-primary" />
-                  Templates de Notificações Automáticas
+                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                  Templates de Notificações
                 </CardTitle>
-                <CardDescription>
-                  Crie e gerencie templates para envio rápido de notificações
+                <CardDescription className="text-sm mt-1">
+                  Crie e gerencie templates para envio rápido
                 </CardDescription>
               </div>
-              <Button onClick={handleCreateTemplate} size="sm">
+              <Button onClick={handleCreateTemplate} size="sm" className="h-10 sm:h-9 text-sm">
                 <Plus className="h-4 w-4 mr-2" />
-                Novo Template
+                Novo
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 sm:px-6">
             {templates?.length === 0 ? (
               <div className="text-center py-12">
-                <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-3 opacity-50" />
-                <p className="text-muted-foreground mb-4">
+                <FileText className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-muted-foreground mb-3 opacity-50" />
+                <p className="text-sm sm:text-base text-muted-foreground mb-4">
                   Nenhum template criado ainda
                 </p>
-                <Button onClick={handleCreateTemplate} variant="outline">
+                <Button onClick={handleCreateTemplate} variant="outline" className="h-10 text-sm">
                   <Plus className="h-4 w-4 mr-2" />
                   Criar Primeiro Template
                 </Button>
               </div>
             ) : (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {templates?.map((template) => (
-                  <Card key={template.id} className="relative overflow-hidden">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <CardTitle className="text-base mb-1">{template.title}</CardTitle>
+                  <Card key={template.id} className="relative overflow-hidden hover-lift">
+                    <CardHeader className="pb-3 px-4">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <CardTitle className="text-sm sm:text-base mb-1 truncate">{template.title}</CardTitle>
                           {template.description && (
-                            <CardDescription className="text-xs">{template.description}</CardDescription>
+                            <CardDescription className="text-xs line-clamp-1">{template.description}</CardDescription>
                           )}
                         </div>
-                        <Badge variant={template.is_system ? 'default' : 'secondary'} className="ml-2">
-                          {template.is_system ? 'Sistema' : 'Customizado'}
+                        <Badge variant={template.is_system ? 'default' : 'secondary'} className="text-xs shrink-0">
+                          {template.is_system ? 'Sistema' : 'Custom'}
                         </Badge>
                       </div>
                     </CardHeader>
-                    <CardContent className="pb-3">
-                      <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                    <CardContent className="pb-3 px-4">
+                      <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 mb-3">
                         {template.message}
                       </p>
                       <div className="flex items-center gap-2">
@@ -325,7 +327,7 @@ export default function Notificacoes() {
                           size="sm"
                           variant="outline"
                           onClick={() => handleEditTemplate(template)}
-                          className="flex-1"
+                          className="flex-1 h-9 text-xs sm:text-sm"
                         >
                           <Edit className="h-3 w-3 mr-1" />
                           Editar
@@ -335,6 +337,7 @@ export default function Notificacoes() {
                             size="sm"
                             variant="destructive"
                             onClick={() => handleDeleteTemplate(template.id)}
+                            className="h-9 w-9 p-0"
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>

@@ -80,26 +80,26 @@ export default function Marketing() {
 
   return (
     <Layout>
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 sm:space-y-6 animate-fade-in px-2 sm:px-0">
         <div>
-          <h1 className="text-4xl font-bold mb-2">Marketing & Fidelidade</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">Marketing & Fidelidade</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Gerencie o programa de fidelidade e cupons dos clientes
           </p>
         </div>
 
         {/* Stats */}
-        <div className="grid gap-6 md:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 md:gap-6 grid-cols-2 md:grid-cols-4">
           {statsCards.map((stat, index) => (
             <Card key={index} className="hover-lift">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardHeader className="flex flex-row items-center justify-between pb-2 px-3 sm:px-4 pt-3 sm:pt-4">
+                <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
                   {stat.label}
                 </CardTitle>
-                <stat.icon className={`h-5 w-5 ${stat.color}`} />
+                <stat.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${stat.color}`} />
               </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{stat.value}</div>
+              <CardContent className="px-3 sm:px-4">
+                <div className="text-xl sm:text-2xl lg:text-3xl font-bold">{stat.value}</div>
               </CardContent>
             </Card>
           ))}
@@ -354,7 +354,7 @@ export default function Marketing() {
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="points">Quantidade de Pontos</Label>
+              <Label htmlFor="points" className="text-sm sm:text-base">Quantidade de Pontos</Label>
               <Input
                 id="points"
                 type="number"
@@ -362,6 +362,7 @@ export default function Marketing() {
                 value={pointsAmount}
                 onChange={(e) => setPointsAmount(e.target.value)}
                 placeholder={pointsAction === 'set' ? 'Ex: 5' : 'Ex: 1'}
+                className="h-11 sm:h-10 text-base sm:text-sm"
               />
             </div>
             <div className="flex gap-2">
