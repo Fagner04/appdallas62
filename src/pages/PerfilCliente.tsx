@@ -106,15 +106,12 @@ export default function PerfilCliente() {
         {/* Header do Perfil */}
         <div className="relative overflow-hidden rounded-xl shadow-elegant bg-card border">
           <div className="p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 rounded-lg bg-success/10">
-                <Shield className="h-6 w-6 text-success" />
+            <h1 className="text-2xl font-bold flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <User className="h-6 w-6 text-primary" />
               </div>
-              <h1 className="text-3xl font-bold flex items-center gap-2">
-                <User className="h-8 w-8 text-primary" />
-                Meu Perfil
-              </h1>
-            </div>
+              Meu Perfil
+            </h1>
             <p className="text-muted-foreground">Gerencie suas informações pessoais e preferências de forma segura</p>
           </div>
         </div>
