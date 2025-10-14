@@ -35,7 +35,7 @@ export default function PerfilCliente() {
   const { user } = useAuth();
   const { data: profile, isLoading: profileLoading } = useCustomerProfile();
   const { settings, isLoading: settingsLoading, updateSettings } = useNotificationSettings(user?.id);
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(true);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
   const handleNotificationToggle = async (key: string, value: boolean) => {
     try {
