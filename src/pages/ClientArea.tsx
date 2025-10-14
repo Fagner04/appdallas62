@@ -26,7 +26,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { formatBrasiliaDate, toBrasiliaTime } from '@/lib/timezone';
 import { ClientBookingCalendar } from '@/components/ClientBookingCalendar';
 import { AvatarUpload } from '@/components/AvatarUpload';
-import { LoyaltyCard } from '@/components/LoyaltyCard';
 
 export default function ClientArea() {
   const { user } = useAuth();
@@ -170,9 +169,6 @@ export default function ClientArea() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Programa de Fidelidade */}
-        <LoyaltyCard />
 
         {/* Meus Agendamentos */}
         <div className="space-y-6">

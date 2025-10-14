@@ -9,6 +9,7 @@ import Register from "./pages/Register";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import ClientArea from "./pages/ClientArea";
+import ClientMarketing from "./pages/ClientMarketing";
 import PerfilCliente from "./pages/PerfilCliente";
 import Agendamentos from "./pages/Agendamentos";
 import Servicos from "./pages/Servicos";
@@ -53,6 +54,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             {user?.role === 'customer' ? <ClientArea /> : <Navigate to="/dashboard" replace />}
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/cliente/marketing"
+        element={
+          <ProtectedRoute>
+            {user?.role === 'customer' ? <ClientMarketing /> : <Navigate to="/dashboard" replace />}
           </ProtectedRoute>
         }
       />

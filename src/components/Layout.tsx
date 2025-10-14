@@ -24,6 +24,7 @@ import {
   UserCog,
   User,
   X,
+  Gift,
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -36,6 +37,7 @@ const getMenuItems = (role?: string) => {
     return [
       { icon: LayoutDashboard, label: 'Minha Área', path: '/cliente' },
       { icon: Calendar, label: 'Meus Agendamentos', path: '/agendamentos' },
+      { icon: Gift, label: 'Marketing', path: '/cliente/marketing' },
       { icon: Clock, label: 'Histórico', path: '/historico' },
       { icon: User, label: 'Perfil', path: '/perfil' },
     ];
