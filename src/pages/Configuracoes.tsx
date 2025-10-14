@@ -5,10 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { User, Clock, Lock, Loader2, ChevronDown, LogOut, CreditCard } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { User, Clock, Lock, Loader2, ChevronDown, LogOut } from 'lucide-react';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
 import { useWorkingHours, useUpdateWorkingHours } from '@/hooks/useWorkingHours';
 import { usePasswordChange } from '@/hooks/usePasswordChange';
 import { useAuth } from '@/contexts/AuthContext';
@@ -26,7 +24,6 @@ const DAYS = [
 
 export default function Configuracoes() {
   const { logout } = useAuth();
-  const navigate = useNavigate();
   const { data: workingHours = [], isLoading } = useWorkingHours();
   const updateWorkingHours = useUpdateWorkingHours();
   const { changePassword, isLoading: isChangingPassword } = usePasswordChange();
@@ -321,36 +318,6 @@ export default function Configuracoes() {
             </CollapsibleContent>
           </Card>
         </Collapsible>
-
-        {/* Planos e Assinaturas */}
-        <Card 
-          className="border-primary/20 cursor-pointer hover:border-primary/40 transition-all duration-300 hover:shadow-lg"
-          onClick={() => navigate('/planos')}
-        >
-          <CardContent className="p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-1.5 rounded-lg bg-primary/10">
-                <CreditCard className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium">Planos e Assinaturas</p>
-                  <Badge variant="outline" className="text-xs">
-                    Em Desenvolvimento
-                  </Badge>
-                </div>
-                <p className="text-xs text-muted-foreground">Gerencie sua assinatura</p>
-              </div>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="transition-smooth"
-            >
-              Ver Planos
-            </Button>
-          </CardContent>
-        </Card>
 
         {/* Sair da Conta */}
         <Card className="border-destructive/10">
