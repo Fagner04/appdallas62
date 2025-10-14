@@ -279,38 +279,70 @@ export const useUpdateAppointment = () => {
 
       if (error) throw error;
 
-      // Create notification for admin about appointment update
-      const { data: admins, error: adminsError } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .or('role.eq.admin,role.eq.barber');
-
-      // Se não encontrar na user_roles, buscar todos os barbeiros ativos
-      let notificationUsers: { user_id: string }[] = admins || [];
+      // Verificar quem está fazendo a edição
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
       
-      if (!notificationUsers.length) {
-        const { data: barbers } = await supabase
-          .from('barbers')
-          .select('user_id')
-          .eq('is_active', true)
-          .not('user_id', 'is', null);
-        
-        notificationUsers = barbers?.filter(b => b.user_id).map(b => ({ user_id: b.user_id! })) || [];
+      let editorName = 'Um usuário';
+      let isAdminEdit = false;
+
+      if (currentUser) {
+        // Verificar se o usuário atual é admin ou barber
+        const { data: userRole } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', currentUser.id)
+          .single();
+
+        if (userRole && (userRole.role === 'admin' || userRole.role === 'barber')) {
+          isAdminEdit = true;
+          // Buscar nome do barbeiro se for barber
+          const { data: barberData } = await supabase
+            .from('barbers')
+            .select('name')
+            .eq('user_id', currentUser.id)
+            .single();
+          
+          editorName = barberData?.name || 'Administrador';
+        } else {
+          // É um cliente, usar o nome do cliente do agendamento
+          const customerName = (appointment as any).customer?.name || 'Um cliente';
+          editorName = customerName;
+        }
       }
 
-      if (notificationUsers.length > 0 && appointment) {
-        const customerName = (appointment as any).customer?.name || 'Um cliente';
-        const actionType = data.status === 'cancelled' ? 'cancelou' : 'editou';
-        
-        const notifications = notificationUsers.map(user => ({
-          user_id: user.user_id,
-          title: data.status === 'cancelled' ? 'Agendamento Cancelado' : 'Agendamento Editado',
-          message: `${customerName} ${actionType} um agendamento`,
-          type: data.status === 'cancelled' ? 'cancellation' : 'update',
-          related_id: id,
-        }));
+      // Create notification for admin about appointment update (apenas se não for admin editando)
+      if (!isAdminEdit) {
+        const { data: admins, error: adminsError } = await supabase
+          .from('user_roles')
+          .select('user_id')
+          .or('role.eq.admin,role.eq.barber');
 
-        await supabase.from('notifications').insert(notifications);
+        // Se não encontrar na user_roles, buscar todos os barbeiros ativos
+        let notificationUsers: { user_id: string }[] = admins || [];
+        
+        if (!notificationUsers.length) {
+          const { data: barbers } = await supabase
+            .from('barbers')
+            .select('user_id')
+            .eq('is_active', true)
+            .not('user_id', 'is', null);
+          
+          notificationUsers = barbers?.filter(b => b.user_id).map(b => ({ user_id: b.user_id! })) || [];
+        }
+
+        if (notificationUsers.length > 0 && appointment) {
+          const actionType = data.status === 'cancelled' ? 'cancelou' : 'editou';
+          
+          const notifications = notificationUsers.map(user => ({
+            user_id: user.user_id,
+            title: data.status === 'cancelled' ? 'Agendamento Cancelado' : 'Agendamento Editado',
+            message: `${editorName} ${actionType} um agendamento`,
+            type: data.status === 'cancelled' ? 'cancellation' : 'update',
+            related_id: id,
+          }));
+
+          await supabase.from('notifications').insert(notifications);
+        }
       }
 
       return appointment;
