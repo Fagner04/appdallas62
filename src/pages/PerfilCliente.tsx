@@ -19,6 +19,7 @@ import {
 import { useCustomerProfile } from '@/hooks/useCustomerData';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotificationSettings } from '@/hooks/useNotificationSettings';
+import { usePasswordChange } from '@/hooks/usePasswordChange';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -42,7 +43,12 @@ export default function PerfilCliente() {
   }
   const { data: profile, isLoading: profileLoading } = useCustomerProfile();
   const { settings, isLoading: settingsLoading, updateSettings } = useNotificationSettings(user?.id);
+  const { changePassword, isLoading: passwordLoading } = usePasswordChange();
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isSecurityOpen, setIsSecurityOpen] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const handleNotificationToggle = async (key: string, value: boolean) => {
     try {
@@ -66,6 +72,22 @@ export default function PerfilCliente() {
   const handleReminderHoursSelect = async (value: string) => {
     const hours = parseInt(value);
     await handleReminderHoursChange(hours);
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const result = await changePassword({
+      currentPassword,
+      newPassword,
+      confirmPassword,
+    });
+    
+    if (result.success) {
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setIsSecurityOpen(false);
+    }
   };
 
   if (profileLoading) {
@@ -259,6 +281,112 @@ export default function PerfilCliente() {
                     </div>
                   </>
                 )}
+              </CardContent>
+            </CollapsibleContent>
+          </Collapsible>
+        </Card>
+
+        {/* Segurança - Trocar Senha */}
+        <Card className="shadow-elegant border-primary/10">
+          <Collapsible open={isSecurityOpen} onOpenChange={setIsSecurityOpen}>
+            <CardHeader className="bg-gradient-to-r from-destructive/5 to-transparent">
+              <CollapsibleTrigger className="flex items-center justify-between w-full group">
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <div className="p-2 rounded-lg bg-destructive/10 group-hover:bg-destructive/20 transition-smooth">
+                    <Shield className="h-5 w-5 text-destructive" />
+                  </div>
+                  Segurança
+                </CardTitle>
+                <ChevronDown 
+                  className={`h-6 w-6 text-muted-foreground transition-transform duration-200 ${isSecurityOpen ? 'rotate-180' : ''}`}
+                />
+              </CollapsibleTrigger>
+              <CardDescription className="mt-2">
+                Altere sua senha e gerencie a segurança da sua conta
+              </CardDescription>
+            </CardHeader>
+            <CollapsibleContent className="animate-accordion-down">
+              <CardContent className="pt-6">
+                <form onSubmit={handlePasswordChange} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="current-password" className="text-sm font-medium">
+                      Senha Atual
+                    </Label>
+                    <Input
+                      id="current-password"
+                      type="password"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      placeholder="Digite sua senha atual"
+                      required
+                      className="bg-background"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="new-password" className="text-sm font-medium">
+                      Nova Senha
+                    </Label>
+                    <Input
+                      id="new-password"
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Digite sua nova senha (mínimo 6 caracteres)"
+                      required
+                      minLength={6}
+                      className="bg-background"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Mínimo de 6 caracteres
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm-password" className="text-sm font-medium">
+                      Confirmar Nova Senha
+                    </Label>
+                    <Input
+                      id="confirm-password"
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Confirme sua nova senha"
+                      required
+                      className="bg-background"
+                    />
+                  </div>
+
+                  <div className="flex gap-3 pt-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setCurrentPassword('');
+                        setNewPassword('');
+                        setConfirmPassword('');
+                        setIsSecurityOpen(false);
+                      }}
+                      className="flex-1"
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={passwordLoading || !currentPassword || !newPassword || !confirmPassword}
+                      className="flex-1 bg-destructive hover:bg-destructive/90"
+                    >
+                      {passwordLoading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Alterando...
+                        </>
+                      ) : (
+                        'Alterar Senha'
+                      )}
+                    </Button>
+                  </div>
+                </form>
               </CardContent>
             </CollapsibleContent>
           </Collapsible>
