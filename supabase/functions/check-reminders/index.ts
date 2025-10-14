@@ -82,13 +82,33 @@ Deno.serve(async (req) => {
           continue;
         }
 
-        // Enviar lembrete
+        // Buscar template de lembrete
+        const { data: template } = await supabaseClient
+          .from('notification_templates')
+          .select('title, message')
+          .eq('type', 'reminder')
+          .eq('is_system', true)
+          .maybeSingle();
+
         const barber = appointment.barbers as any;
         const service = appointment.services as any;
         
-        const title = 'Lembrete de Agendamento';
+        let title = 'Lembrete de Agendamento';
+        let message = '';
         const hoursText = reminderHours === 1 ? '1 hora' : `${reminderHours} horas`;
-        const message = `Olá ${customer.name}! Lembrete: Seu agendamento com ${barber?.name || 'barbeiro'} para ${service?.name || 'serviço'} é em ${hoursText} (${appointment.appointment_time}). Te esperamos!`;
+
+        if (template) {
+          title = template.title;
+          message = template.message
+            .replace('{customer_name}', customer.name)
+            .replace('{barber_name}', barber?.name || 'barbeiro')
+            .replace('{service_name}', service?.name || 'serviço')
+            .replace('{hours_text}', hoursText)
+            .replace('{appointment_time}', appointment.appointment_time);
+        } else {
+          // Fallback para mensagem padrão
+          message = `Olá ${customer.name}! Lembrete: Seu agendamento com ${barber?.name || 'barbeiro'} para ${service?.name || 'serviço'} é em ${hoursText} (${appointment.appointment_time}). Te esperamos!`;
+        }
 
         const { error: notificationError } = await supabaseClient
           .from('notifications')
