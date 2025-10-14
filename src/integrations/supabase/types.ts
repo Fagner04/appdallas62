@@ -163,6 +163,7 @@ export type Database = {
           loyalty_points: number | null
           name: string
           notes: string | null
+          notifications_enabled: boolean | null
           phone: string
           updated_at: string
           user_id: string | null
@@ -174,6 +175,7 @@ export type Database = {
           loyalty_points?: number | null
           name: string
           notes?: string | null
+          notifications_enabled?: boolean | null
           phone: string
           updated_at?: string
           user_id?: string | null
@@ -185,9 +187,49 @@ export type Database = {
           loyalty_points?: number | null
           name?: string
           notes?: string | null
+          notifications_enabled?: boolean | null
           phone?: string
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      notification_settings: {
+        Row: {
+          appointment_cancelled_enabled: boolean | null
+          appointment_confirmation_enabled: boolean | null
+          appointment_reminder_enabled: boolean | null
+          appointment_reminder_hours: number | null
+          appointment_rescheduled_enabled: boolean | null
+          created_at: string
+          id: string
+          marketing_enabled: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          appointment_cancelled_enabled?: boolean | null
+          appointment_confirmation_enabled?: boolean | null
+          appointment_reminder_enabled?: boolean | null
+          appointment_reminder_hours?: number | null
+          appointment_rescheduled_enabled?: boolean | null
+          created_at?: string
+          id?: string
+          marketing_enabled?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          appointment_cancelled_enabled?: boolean | null
+          appointment_confirmation_enabled?: boolean | null
+          appointment_reminder_enabled?: boolean | null
+          appointment_reminder_hours?: number | null
+          appointment_rescheduled_enabled?: boolean | null
+          created_at?: string
+          id?: string
+          marketing_enabled?: boolean | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -377,6 +419,36 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      working_hours: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          is_open: boolean
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          end_time?: string
+          id?: string
+          is_open?: boolean
+          start_time?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          is_open?: boolean
+          start_time?: string
+          updated_at?: string
         }
         Relationships: []
       }
