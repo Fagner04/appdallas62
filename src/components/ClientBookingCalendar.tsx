@@ -17,8 +17,14 @@ import { toast } from 'sonner';
 import { format, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { getTodayBrasilia, formatBrasiliaDate, getBrasiliaDate } from '@/lib/timezone';
+import { useNavigate } from 'react-router-dom';
 
-export function ClientBookingCalendar() {
+interface ClientBookingCalendarProps {
+  onSuccess?: () => void;
+}
+
+export function ClientBookingCalendar({ onSuccess }: ClientBookingCalendarProps = {}) {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(getBrasiliaDate());
   const [selectedService, setSelectedService] = useState<string>('');
@@ -88,6 +94,16 @@ export function ClientBookingCalendar() {
       // Reset form
       setSelectedTime('');
       toast.success('Agendamento realizado com sucesso!');
+      
+      // Call onSuccess callback if provided
+      if (onSuccess) {
+        onSuccess();
+      }
+      
+      // Redirect to appointments page after a short delay
+      setTimeout(() => {
+        navigate('/agendamentos');
+      }, 1000);
     } catch (error) {
       console.error('Erro ao criar agendamento:', error);
     }

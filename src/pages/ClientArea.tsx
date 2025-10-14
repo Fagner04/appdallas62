@@ -280,7 +280,7 @@ export default function ClientArea() {
                 Selecione serviço, barbeiro, data e horário para confirmar seu agendamento.
               </DialogDescription>
             </DialogHeader>
-            <ClientBookingCalendar />
+            <ClientBookingCalendar onSuccess={() => setIsBookingOpen(false)} />
           </DialogContent>
         </Dialog>
       </div>
