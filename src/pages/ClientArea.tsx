@@ -10,15 +10,14 @@ import {
   Calendar, 
   Clock, 
   Scissors, 
-  Mail, 
-  Phone, 
   MapPin,
   CheckCircle2,
   XCircle,
   AlertCircle,
   Loader2,
   CalendarPlus,
-  Award
+  Award,
+  Sparkles
 } from 'lucide-react';
 import { useCustomerProfile, useUpcomingAppointments, useCustomerAppointments } from '@/hooks/useCustomerData';
 import { useAuth } from '@/contexts/AuthContext';
@@ -85,31 +84,30 @@ export default function ClientArea() {
   return (
     <Layout>
       <div className="space-y-8 animate-fade-in">
-        {/* Header com perfil - Design moderno */}
-        <div className="relative overflow-hidden rounded-xl shadow-elegant bg-card border">
-          <div className="p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <AvatarUpload 
-                avatarUrl={profile?.avatar_url} 
-                userName={user?.name}
-                size="md"
-              />
-              <div className="flex-1 space-y-2">
-                <h1 className="text-xl sm:text-2xl font-bold">
-                  Olá, {user?.name}! 👋
-                </h1>
-                <p className="text-sm text-muted-foreground">Bem-vindo à sua área pessoal</p>
-                <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3">
-                  <div className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-lg border text-sm">
-                    <Mail className="h-4 w-4 text-primary flex-shrink-0" />
-                    <span className="font-medium truncate">{profile?.email || user?.email}</span>
+        {/* Header com perfil - Design super moderno */}
+        <div className="relative overflow-hidden rounded-2xl shadow-elegant bg-gradient-to-br from-card via-card to-primary/5 border border-primary/10">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5" />
+          <div className="relative p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
+              <div className="relative">
+                <div className="absolute inset-0 gradient-primary blur-2xl opacity-20 scale-110" />
+                <AvatarUpload 
+                  avatarUrl={profile?.avatar_url} 
+                  userName={user?.name}
+                  size="lg"
+                />
+              </div>
+              <div className="flex-1 space-y-3">
+                <div className="space-y-2">
+                  <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
+                    Olá, {user?.name}!
+                  </h1>
+                  <div className="flex items-center justify-center sm:justify-start gap-2">
+                    <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+                    <p className="text-sm sm:text-base text-muted-foreground font-medium">
+                      Bem-vindo à sua área pessoal
+                    </p>
                   </div>
-                  {profile?.phone && (
-                    <div className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-lg border text-sm">
-                      <Phone className="h-4 w-4 text-primary flex-shrink-0" />
-                      <span className="font-medium">{profile.phone}</span>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
