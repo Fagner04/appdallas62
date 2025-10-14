@@ -6,46 +6,81 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Bell, Send, Calendar, CheckCircle2, Clock, Plus, Sparkles } from 'lucide-react';
+import { Bell, Send, Calendar, CheckCircle2, Clock, Plus, Sparkles, Gift, MessageSquare } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNotifications, useNotificationStats } from '@/hooks/useNotifications';
+import { useNotificationTemplates } from '@/hooks/useNotificationTemplates';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { NotificationTemplateEditor } from '@/components/NotificationTemplateEditor';
 import { toast } from 'sonner';
+import { Checkbox } from '@/components/ui/checkbox';
 
 export default function Notificacoes() {
   const { user } = useAuth();
   const { notifications, sendNotification } = useNotifications(user?.id);
   const { data: stats } = useNotificationStats();
   const { data: customers } = useCustomers();
+  const { templates } = useNotificationTemplates();
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState('');
+  const [sendToAll, setSendToAll] = useState(false);
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
   const [type, setType] = useState<'confirmation' | 'reminder' | 'promotion' | 'system'>('system');
   const [editingTemplate, setEditingTemplate] = useState<any>(null);
+  const [isCreatingTemplate, setIsCreatingTemplate] = useState(false);
 
-  const handleSendNotification = () => {
-    if (!selectedCustomer || !title || !message) return;
+  const handleSendNotification = async () => {
+    if ((!selectedCustomer && !sendToAll) || !title || !message) return;
 
-    const customer = customers?.find((c) => c.id === selectedCustomer);
-    if (!customer?.user_id) return;
+    if (sendToAll) {
+      // Enviar para todos os clientes
+      const customersWithUserId = customers?.filter(c => c.user_id) || [];
+      
+      if (customersWithUserId.length === 0) {
+        toast.error('Nenhum cliente encontrado para enviar notificação');
+        return;
+      }
 
-    sendNotification.mutate({
-      user_id: customer.user_id,
-      title,
-      message,
-      type,
-      related_id: null,
-    });
+      let successCount = 0;
+      for (const customer of customersWithUserId) {
+        try {
+          await sendNotification.mutateAsync({
+            user_id: customer.user_id!,
+            title,
+            message,
+            type,
+            related_id: null,
+          });
+          successCount++;
+        } catch (error) {
+          console.error('Erro ao enviar notificação para', customer.name, error);
+        }
+      }
+
+      toast.success(`Notificação enviada para ${successCount} cliente(s)`);
+    } else {
+      // Enviar para cliente específico
+      const customer = customers?.find((c) => c.id === selectedCustomer);
+      if (!customer?.user_id) return;
+
+      sendNotification.mutate({
+        user_id: customer.user_id,
+        title,
+        message,
+        type,
+        related_id: null,
+      });
+    }
 
     setIsDialogOpen(false);
     setSelectedCustomer('');
+    setSendToAll(false);
     setTitle('');
     setMessage('');
     setType('system');
@@ -57,12 +92,17 @@ export default function Notificacoes() {
     { label: 'Pendentes', value: stats?.pending || 0, icon: Clock, color: 'text-warning' },
   ];
 
-  const templates = [
-    { type: 'confirmation', title: 'Confirmação de Agendamento', description: 'Enviada imediatamente após o agendamento', icon: Calendar },
-    { type: 'reminder', title: 'Lembrete 1h Antes', description: 'Enviada 1 hora antes do horário agendado', icon: Bell },
-    { type: 'thanks', title: 'Agradecimento Pós-Visita', description: 'Enviada após a conclusão do atendimento', icon: CheckCircle2 },
-    { type: 'promotion', title: 'Promoções e Ofertas', description: 'Enviada periodicamente com ofertas especiais', icon: Sparkles },
-  ];
+  const getIconComponent = (iconName: string) => {
+    const icons: Record<string, any> = {
+      Calendar,
+      Bell,
+      CheckCircle2,
+      Sparkles,
+      Gift,
+      MessageSquare,
+    };
+    return icons[iconName] || Bell;
+  };
 
   return (
     <Layout>
@@ -93,29 +133,42 @@ export default function Notificacoes() {
 
         {/* Notification Templates */}
         <Card>
-          <CardHeader>
-            <CardTitle>Templates de Notificações Automáticas</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Templates de Notificações</CardTitle>
+            <Button size="sm" onClick={() => setIsCreatingTemplate(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Novo Template
+            </Button>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
-              {templates.map((template) => (
-                <div key={template.type} className="p-4 rounded-lg border border-border space-y-2 hover:bg-muted/50 transition-colors">
-                  <div className="flex items-center gap-2">
-                    <template.icon className="h-5 w-5 text-primary" />
-                    <span className="font-semibold">{template.title}</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {template.description}
-                  </p>
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => setEditingTemplate(template)}
+              {templates?.map((template) => {
+                const IconComponent = getIconComponent(template.icon);
+                return (
+                  <div 
+                    key={template.id} 
+                    className="p-4 rounded-lg border border-border space-y-2 hover:bg-muted/50 transition-colors"
                   >
-                    Editar Mensagem
-                  </Button>
-                </div>
-              ))}
+                    <div className="flex items-center gap-2">
+                      <IconComponent className="h-5 w-5 text-primary" />
+                      <span className="font-semibold">{template.title}</span>
+                      {template.is_system && (
+                        <Badge variant="secondary" className="text-xs">Sistema</Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {template.description}
+                    </p>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => setEditingTemplate(template)}
+                    >
+                      Editar Mensagem
+                    </Button>
+                  </div>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
@@ -136,21 +189,41 @@ export default function Notificacoes() {
                   <DialogTitle>Enviar Notificação</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Cliente</label>
-                    <Select value={selectedCustomer} onValueChange={setSelectedCustomer}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o cliente" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {customers?.map((customer) => (
-                          <SelectItem key={customer.id} value={customer.id}>
-                            {customer.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="sendToAll" 
+                      checked={sendToAll}
+                      onCheckedChange={(checked) => {
+                        setSendToAll(checked as boolean);
+                        if (checked) {
+                          setSelectedCustomer('');
+                        }
+                      }}
+                    />
+                    <label
+                      htmlFor="sendToAll"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Enviar para todos os clientes
+                    </label>
                   </div>
+                  {!sendToAll && (
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Cliente</label>
+                      <Select value={selectedCustomer} onValueChange={setSelectedCustomer}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o cliente" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {customers?.map((customer) => (
+                            <SelectItem key={customer.id} value={customer.id}>
+                              {customer.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Tipo</label>
                     <Select value={type} onValueChange={(v: any) => setType(v)}>
@@ -185,9 +258,9 @@ export default function Notificacoes() {
                   <Button 
                     onClick={handleSendNotification} 
                     className="w-full"
-                    disabled={!selectedCustomer || !title || !message || sendNotification.isPending}
+                    disabled={(!selectedCustomer && !sendToAll) || !title || !message || sendNotification.isPending}
                   >
-                    {sendNotification.isPending ? 'Enviando...' : 'Enviar Notificação'}
+                    {sendNotification.isPending ? 'Enviando...' : sendToAll ? 'Enviar para Todos' : 'Enviar Notificação'}
                   </Button>
                 </div>
               </DialogContent>
@@ -245,6 +318,21 @@ export default function Notificacoes() {
           isOpen={!!editingTemplate}
           onClose={() => setEditingTemplate(null)}
           template={editingTemplate}
+        />
+      )}
+      
+      {isCreatingTemplate && (
+        <NotificationTemplateEditor
+          isOpen={isCreatingTemplate}
+          onClose={() => setIsCreatingTemplate(false)}
+          template={{
+            type: 'custom',
+            title: '',
+            description: '',
+            message: '',
+            icon: 'Bell',
+          }}
+          isNew={true}
         />
       )}
     </Layout>
