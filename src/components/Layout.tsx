@@ -72,6 +72,7 @@ const getMenuItems = (role?: string) => {
 export const Layout = ({ children }: LayoutProps) => {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const menuItems = getMenuItems(user?.role);
 
   useEffect(() => {
@@ -79,15 +80,20 @@ export const Layout = ({ children }: LayoutProps) => {
     console.log('Layout - Should show notification bell:', user?.role === 'customer' || user?.role === 'barber');
   }, [user]);
 
-  const SidebarContent = () => (
+  const SidebarContent = ({ isCollapsed = false }: { isCollapsed?: boolean }) => (
     <div className="flex h-full flex-col">
       <div className="border-b border-border p-6">
         <div className="flex items-start justify-between">
-          <div>
+          <div className={isCollapsed ? "hidden" : ""}>
             <h1 className="text-2xl font-bold text-foreground">
               Dallas Barbearia
             </h1>
           </div>
+          {isCollapsed && (
+            <div className="flex items-center justify-center w-full">
+              <Scissors className="h-6 w-6 text-primary" />
+            </div>
+          )}
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
@@ -123,20 +129,36 @@ export const Layout = ({ children }: LayoutProps) => {
                   : 'text-foreground hover:bg-primary-light'
               }`
             }
+            title={isCollapsed ? item.label : undefined}
           >
             <item.icon className="h-5 w-5" />
-            <span className="font-medium">{item.label}</span>
+            {!isCollapsed && <span className="font-medium">{item.label}</span>}
           </NavLink>
         ))}
       </nav>
+      
+      <div className="p-4 border-t border-border">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setCollapsed(!collapsed)}
+          className="w-full justify-center"
+          title={collapsed ? "Expandir menu" : "Recolher menu"}
+        >
+          <Menu className="h-4 w-4" />
+          {!isCollapsed && <span className="ml-2">Recolher</span>}
+        </Button>
+      </div>
     </div>
   );
 
   return (
     <div className="flex min-h-screen w-full bg-gradient-soft">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex lg:w-72 lg:flex-col border-r border-border bg-card">
-        <SidebarContent />
+      <aside className={`hidden lg:flex lg:flex-col border-r border-border bg-card transition-all duration-300 ${
+        collapsed ? 'lg:w-20' : 'lg:w-72'
+      }`}>
+        <SidebarContent isCollapsed={collapsed} />
       </aside>
 
       {/* Mobile Header + Sidebar */}
@@ -186,7 +208,7 @@ export const Layout = ({ children }: LayoutProps) => {
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="w-72 p-0 [&>button]:hidden">
-                  <SidebarContent />
+                  <SidebarContent isCollapsed={false} />
                 </SheetContent>
               </Sheet>
             </div>

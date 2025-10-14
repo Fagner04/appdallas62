@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -13,7 +13,8 @@ import {
   Bell,
   Loader2,
   MapPin,
-  ChevronDown
+  ChevronDown,
+  Shield
 } from 'lucide-react';
 import { useCustomerProfile } from '@/hooks/useCustomerData';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,6 +24,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { AvatarUpload } from '@/components/AvatarUpload';
+import { Navigate } from 'react-router-dom';
 import {
   Select,
   SelectContent,
@@ -33,6 +35,11 @@ import {
 
 export default function PerfilCliente() {
   const { user } = useAuth();
+  
+  // Segurança: Apenas clientes podem acessar esta página
+  if (!user || user.role !== 'customer') {
+    return <Navigate to="/dashboard" replace />;
+  }
   const { data: profile, isLoading: profileLoading } = useCustomerProfile();
   const { settings, isLoading: settingsLoading, updateSettings } = useNotificationSettings(user?.id);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -77,11 +84,16 @@ export default function PerfilCliente() {
         {/* Header do Perfil */}
         <div className="relative overflow-hidden rounded-xl shadow-elegant bg-card border">
           <div className="p-6">
-            <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
-              <User className="h-8 w-8 text-primary" />
-              Meu Perfil
-            </h1>
-            <p className="text-muted-foreground">Gerencie suas informações pessoais e preferências</p>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-lg bg-success/10">
+                <Shield className="h-6 w-6 text-success" />
+              </div>
+              <h1 className="text-3xl font-bold flex items-center gap-2">
+                <User className="h-8 w-8 text-primary" />
+                Meu Perfil
+              </h1>
+            </div>
+            <p className="text-muted-foreground">Gerencie suas informações pessoais e preferências de forma segura</p>
           </div>
         </div>
 
