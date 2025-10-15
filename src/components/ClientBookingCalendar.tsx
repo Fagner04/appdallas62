@@ -341,6 +341,30 @@ export function ClientBookingCalendar({ onSuccess }: ClientBookingCalendarProps 
               </div>
             )}
 
+            {/* Resumo do Valor */}
+            {selectedService && (
+              <div className="p-4 rounded-lg bg-muted/50 border space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Valor do Serviço</span>
+                  <span className={validatedCoupon ? 'line-through text-muted-foreground' : 'font-bold text-lg'}>
+                    R$ {selectedServiceData?.price}
+                  </span>
+                </div>
+                {validatedCoupon && (
+                  <>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-success font-semibold">Desconto (Cupom)</span>
+                      <span className="text-success font-semibold">- R$ {selectedServiceData?.price}</span>
+                    </div>
+                    <div className="pt-2 border-t flex items-center justify-between">
+                      <span className="font-bold">Total</span>
+                      <span className="font-bold text-2xl text-success">R$ 0,00</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
             {/* Cupom de Fidelidade */}
             <div className="space-y-2 pt-4 border-t">
               <Label htmlFor="coupon" className="flex items-center gap-2">
@@ -377,10 +401,13 @@ export function ClientBookingCalendar({ onSuccess }: ClientBookingCalendarProps 
                 </Button>
               </div>
               {validatedCoupon && (
-                <div className="p-3 rounded-lg bg-success/10 border border-success/30">
+                <div className="p-3 rounded-lg bg-success/10 border border-success/30 space-y-2">
                   <p className="text-sm text-success font-semibold flex items-center gap-2">
                     <Gift className="h-4 w-4" />
                     Cupom válido! Corte grátis aplicado 🎉
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    O valor do seu corte será R$ 0,00 com este cupom!
                   </p>
                 </div>
               )}
