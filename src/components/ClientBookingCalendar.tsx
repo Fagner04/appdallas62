@@ -140,17 +140,17 @@ export function ClientBookingCalendar({ onSuccess }: ClientBookingCalendarProps 
         appointmentData.notes = `Cupom aplicado: ${validatedCoupon.code}`;
       }
 
-      await createAppointment.mutateAsync(appointmentData);
+      const appointment = await createAppointment.mutateAsync(appointmentData);
 
-      // Se usou cupom, marcar como resgatado
-      if (validatedCoupon) {
-        await supabase
-          .from('loyalty_coupons')
-          .update({ 
-            is_redeemed: true, 
-            redeemed_at: new Date().toISOString()
-          })
-          .eq('id', validatedCoupon.id);
+      // Se usou cupom, resgatar via Edge Function e vincular ao agendamento
+      if (validatedCoupon && appointment?.id) {
+        const { data, error } = await supabase.functions.invoke('redeem-coupon', {
+          body: { code: validatedCoupon.code, appointment_id: appointment.id },
+        });
+        if (error || !data?.success) {
+          console.error('Erro ao resgatar cupom:', error || data);
+          toast.error('Não foi possível resgatar o cupom.');
+        }
       }
 
       // Reset form

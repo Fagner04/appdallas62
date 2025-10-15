@@ -23,58 +23,21 @@ export default function ClientMarketing() {
 
   const handleGenerateCoupon = async () => {
     if (!user?.id || points < 10) return;
-    
     setGeneratingCoupon(true);
     try {
-      // Buscar customer_id
-      const { data: customerData } = await supabase
-        .from('customers')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
+      const { data, error } = await supabase.functions.invoke('generate-coupon', {
+        body: {},
+      });
+      if (error) throw error;
 
-      if (!customerData) {
-        toast.error('Erro ao identificar cliente');
-        return;
+      if (data?.success) {
+        toast.success(`Cupom gerado com sucesso! Código: ${data.code} 🎉`);
+        await refetch();
+      } else {
+        toast.error(data?.error || 'Erro ao gerar cupom');
       }
-
-      // Gerar código único
-      const couponCode = 'CUPOM-' + Math.random().toString(36).substring(2, 10).toUpperCase();
-      
-      // Criar o cupom
-      const { error: couponError } = await supabase
-        .from('loyalty_coupons')
-        .insert({
-          customer_id: customerData.id,
-          code: couponCode,
-          expires_at: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString()
-        });
-
-      if (couponError) throw couponError;
-
-      // Resetar pontos para 0
-      const { error: updateError } = await supabase
-        .from('customers')
-        .update({ loyalty_points: 0 })
-        .eq('id', customerData.id);
-
-      if (updateError) throw updateError;
-
-      // Registrar no histórico
-      await supabase
-        .from('loyalty_history')
-        .insert({
-          customer_id: customerData.id,
-          points_change: -10,
-          points_balance: 0,
-          action: 'coupon_generated',
-          description: `Cupom de fidelidade gerado: ${couponCode}`
-        });
-
-      toast.success(`Cupom gerado com sucesso! Código: ${couponCode} 🎉`);
-      refetch();
-    } catch (error) {
-      console.error('Erro ao gerar cupom:', error);
+    } catch (err) {
+      console.error('Erro ao gerar cupom (edge):', err);
       toast.error('Erro ao gerar cupom');
     } finally {
       setGeneratingCoupon(false);

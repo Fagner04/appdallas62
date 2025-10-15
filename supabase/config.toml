@@ -1,1 +1,7 @@
 project_id = "qeevcauhornyqrfeevwc"
+
+[functions.generate-coupon]
+verify_jwt = true
+
+[functions.redeem-coupon]
+verify_jwt = true
