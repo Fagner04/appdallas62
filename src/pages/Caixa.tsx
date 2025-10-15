@@ -67,34 +67,38 @@ export default function Caixa() {
 
   return (
     <Layout>
-      <div className="space-y-6 animate-fade-in">
-        <div className="flex items-center justify-between">
+      <div className="space-y-4 sm:space-y-6 animate-fade-in">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-4xl font-bold mb-2">Caixa do Dia</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-1 sm:mb-2">Caixa do Dia</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
               Controle financeiro - {new Date().toLocaleDateString('pt-BR')}
             </p>
           </div>
           <div className="flex gap-2">
             <Button 
               variant="outline"
-              className="gap-2"
+              size="default"
+              className="gap-2 flex-1 sm:flex-initial"
               onClick={() => {
                 setTransactionType('expense');
                 setOpen(true);
               }}
             >
-              <Minus className="h-5 w-5" />
-              Nova Saída
+              <Minus className="h-4 w-4 sm:h-5 sm:w-5" />
+              <span className="hidden sm:inline">Nova Saída</span>
+              <span className="sm:hidden">Saída</span>
             </Button>
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
                 <Button 
-                  className="gap-2"
+                  size="default"
+                  className="gap-2 flex-1 sm:flex-initial"
                   onClick={() => setTransactionType('income')}
                 >
-                  <Plus className="h-5 w-5" />
-                  Nova Entrada
+                  <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="hidden sm:inline">Nova Entrada</span>
+                  <span className="sm:hidden">Entrada</span>
                 </Button>
               </DialogTrigger>
               <DialogContent>
@@ -177,55 +181,55 @@ export default function Caixa() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid gap-6 md:grid-cols-3">
-          <Card className="hover-lift">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+        <div className="grid gap-3 sm:gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+          <Card className="hover-lift transition-smooth">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
                 Total Entradas
               </CardTitle>
-              <div className="p-2 rounded-lg bg-success/10">
-                <TrendingUp className="h-5 w-5 text-success" />
+              <div className="p-1.5 sm:p-2 rounded-lg bg-success/10">
+                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-success" />
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-success">R$ {stats?.income.toFixed(2)}</div>
-              <p className="text-xs text-muted-foreground mt-2">
+            <CardContent className="pt-2">
+              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-success">R$ {stats?.income.toFixed(2)}</div>
+              <p className="text-xs text-muted-foreground mt-1 sm:mt-2">
                 {stats?.incomeCount} transações
               </p>
             </CardContent>
           </Card>
 
-          <Card className="hover-lift">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+          <Card className="hover-lift transition-smooth">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
                 Total Saídas
               </CardTitle>
-              <div className="p-2 rounded-lg bg-destructive/10">
-                <TrendingDown className="h-5 w-5 text-destructive" />
+              <div className="p-1.5 sm:p-2 rounded-lg bg-destructive/10">
+                <TrendingDown className="h-4 w-4 sm:h-5 sm:w-5 text-destructive" />
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-destructive">R$ {stats?.expenses.toFixed(2)}</div>
-              <p className="text-xs text-muted-foreground mt-2">
+            <CardContent className="pt-2">
+              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-destructive">R$ {stats?.expenses.toFixed(2)}</div>
+              <p className="text-xs text-muted-foreground mt-1 sm:mt-2">
                 {stats?.expenseCount} transações
               </p>
             </CardContent>
           </Card>
 
-          <Card className="hover-lift">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+          <Card className="hover-lift transition-smooth sm:col-span-2 md:col-span-1">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
                 Saldo do Dia
               </CardTitle>
-              <div className="p-2 rounded-lg bg-primary-light">
-                <DollarSign className="h-5 w-5 text-primary" />
+              <div className="p-1.5 sm:p-2 rounded-lg bg-primary-light">
+                <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               </div>
             </CardHeader>
-            <CardContent>
-              <div className={`text-3xl font-bold ${(stats?.balance ?? 0) >= 0 ? 'text-success' : 'text-destructive'}`}>
+            <CardContent className="pt-2">
+              <div className={`text-xl sm:text-2xl lg:text-3xl font-bold ${(stats?.balance ?? 0) >= 0 ? 'text-success' : 'text-destructive'}`}>
                 R$ {stats?.balance.toFixed(2)}
               </div>
-              <p className="text-xs text-muted-foreground mt-2">
+              <p className="text-xs text-muted-foreground mt-1 sm:mt-2">
                 Saldo líquido do dia
               </p>
             </CardContent>
@@ -235,43 +239,43 @@ export default function Caixa() {
         {/* Transactions List */}
         <Card>
           <CardHeader>
-            <CardTitle>Movimentações de Hoje</CardTitle>
+            <CardTitle className="text-base sm:text-lg">Movimentações de Hoje</CardTitle>
           </CardHeader>
           <CardContent>
             {transactions.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
+              <div className="text-center py-8 text-sm sm:text-base text-muted-foreground">
                 Nenhuma transação registrada hoje
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {transactions.map((transaction) => (
                   <div
                     key={transaction.id}
-                    className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-smooth group"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 rounded-lg border border-border hover:bg-muted/50 transition-smooth group"
                   >
-                    <div className="flex items-center gap-4">
-                      <div className={`p-2 rounded-lg ${
+                    <div className="flex items-start sm:items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                      <div className={`p-1.5 sm:p-2 rounded-lg shrink-0 ${
                         transaction.type === 'income' ? 'bg-success/10' : 'bg-destructive/10'
                       }`}>
                         {transaction.type === 'income' ? (
-                          <TrendingUp className="h-5 w-5 text-success" />
+                          <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-success" />
                         ) : (
-                          <TrendingDown className="h-5 w-5 text-destructive" />
+                          <TrendingDown className="h-4 w-4 sm:h-5 sm:w-5 text-destructive" />
                         )}
                       </div>
-                      <div>
-                        <div className="font-semibold">{transaction.category || 'Sem categoria'}</div>
-                        <div className="text-sm text-muted-foreground">{transaction.description}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-sm sm:text-base truncate">{transaction.category || 'Sem categoria'}</div>
+                        <div className="text-xs sm:text-sm text-muted-foreground truncate">{transaction.description}</div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 ml-auto">
                       <div className="text-right">
-                        <div className={`text-xl font-bold ${
+                        <div className={`text-lg sm:text-xl font-bold ${
                           transaction.type === 'income' ? 'text-success' : 'text-destructive'
                         }`}>
                           {transaction.type === 'income' ? '+' : '-'}R$ {Number(transaction.amount).toFixed(2)}
                         </div>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-xs sm:text-sm text-muted-foreground">
                           {new Date(transaction.created_at).toLocaleTimeString('pt-BR', { 
                             hour: '2-digit', 
                             minute: '2-digit' 
@@ -281,7 +285,7 @@ export default function Caixa() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="sm:opacity-0 sm:group-hover:opacity-100 transition-opacity shrink-0"
                         onClick={() => openDeleteDialog(transaction.id)}
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
