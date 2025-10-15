@@ -1,27 +1,27 @@
-import { useState } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Scissors, ArrowLeft } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { useState } from "react";
+import { Link, Navigate, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Scissors, ArrowLeft } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export default function Login() {
   const { login, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
-  const [resetEmail, setResetEmail] = useState('');
+  const [resetEmail, setResetEmail] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
 
   if (isAuthenticated) {
-    const redirectPath = user?.role === 'customer' ? '/cliente' : '/dashboard';
+    const redirectPath = user?.role === "customer" ? "/cliente" : "/dashboard";
     return <Navigate to={redirectPath} replace />;
   }
 
@@ -31,7 +31,7 @@ export default function Login() {
     try {
       await login(email, password);
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error("Login failed:", error);
     } finally {
       setLoading(false);
     }
@@ -48,11 +48,11 @@ export default function Login() {
 
       if (error) throw error;
 
-      toast.success('Email de recuperação enviado! Verifique sua caixa de entrada.');
+      toast.success("Email de recuperação enviado! Verifique sua caixa de entrada.");
       setResetDialogOpen(false);
-      setResetEmail('');
+      setResetEmail("");
     } catch (error: any) {
-      toast.error(error.message || 'Erro ao enviar email de recuperação');
+      toast.error(error.message || "Erro ao enviar email de recuperação");
     } finally {
       setResetLoading(false);
     }
@@ -62,12 +62,7 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-soft p-4">
       <Card className="w-full max-w-md shadow-elegant">
         <div className="p-4 pb-0">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('/')}
-            className="gap-2"
-          >
+          <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="gap-2">
             <ArrowLeft className="h-4 w-4" />
             Voltar
           </Button>
@@ -77,7 +72,7 @@ export default function Login() {
             <Scissors className="h-8 w-8 text-white" />
           </div>
           <div>
-            <CardTitle className="text-3xl">Dallas Barbearia</CardTitle>
+            <CardTitle className="text-3xl">Agenda Fácil </CardTitle>
             <CardDescription className="text-base mt-2">
               Entre com suas credenciais para acessar o sistema
             </CardDescription>
@@ -117,7 +112,7 @@ export default function Login() {
               </button>
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Entrando...' : 'Entrar'}
+              {loading ? "Entrando..." : "Entrar"}
             </Button>
           </form>
           <div className="mt-6 text-center text-sm">
@@ -134,9 +129,7 @@ export default function Login() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Recuperar Senha</DialogTitle>
-            <DialogDescription>
-              Digite seu email para receber um link de recuperação de senha
-            </DialogDescription>
+            <DialogDescription>Digite seu email para receber um link de recuperação de senha</DialogDescription>
           </DialogHeader>
           <form onSubmit={handlePasswordReset} className="space-y-4">
             <div className="space-y-2">
@@ -151,16 +144,11 @@ export default function Login() {
               />
             </div>
             <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setResetDialogOpen(false)}
-                className="flex-1"
-              >
+              <Button type="button" variant="outline" onClick={() => setResetDialogOpen(false)} className="flex-1">
                 Cancelar
               </Button>
               <Button type="submit" disabled={resetLoading} className="flex-1">
-                {resetLoading ? 'Enviando...' : 'Enviar Link'}
+                {resetLoading ? "Enviando..." : "Enviar Link"}
               </Button>
             </div>
           </form>
