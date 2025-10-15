@@ -148,15 +148,33 @@ export default function Marketing() {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="active">
-              <TabsList>
-                <TabsTrigger value="active">
-                  Cupons Ativos ({activeCoupons.length})
+              <TabsList className="grid w-full grid-cols-3 h-auto gap-1 p-1">
+                <TabsTrigger 
+                  value="active"
+                  className="text-xs sm:text-sm py-2 px-2 sm:px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                >
+                  <span className="hidden sm:inline">Cupons Ativos</span>
+                  <span className="sm:hidden">Ativos</span>
+                  <Badge variant="secondary" className="ml-1 text-xs px-1.5 py-0">
+                    {activeCoupons.length}
+                  </Badge>
                 </TabsTrigger>
-                <TabsTrigger value="redeemed">
-                  Cupons Resgatados ({redeemedCoupons.length})
+                <TabsTrigger 
+                  value="redeemed"
+                  className="text-xs sm:text-sm py-2 px-2 sm:px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                >
+                  <span className="hidden sm:inline">Cupons Resgatados</span>
+                  <span className="sm:hidden">Resgatados</span>
+                  <Badge variant="secondary" className="ml-1 text-xs px-1.5 py-0">
+                    {redeemedCoupons.length}
+                  </Badge>
                 </TabsTrigger>
-                <TabsTrigger value="points">
-                  Pontos dos Clientes
+                <TabsTrigger 
+                  value="points"
+                  className="text-xs sm:text-sm py-2 px-2 sm:px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                >
+                  <span className="hidden sm:inline">Pontos dos Clientes</span>
+                  <span className="sm:hidden">Pontos</span>
                 </TabsTrigger>
               </TabsList>
 
