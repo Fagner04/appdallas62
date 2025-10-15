@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { useAppointments, useCreateAppointment, useUpdateAppointment, useDeleteAppointment, useAvailableTimeSlots, AppointmentWithDetails } from '@/hooks/useAppointments';
 import { useCustomers } from '@/hooks/useCustomers';
@@ -19,6 +20,7 @@ import { useBlockedTimes, useCreateBlockedTime, useDeleteBlockedTime } from '@/h
 import { useAuth } from '@/contexts/AuthContext';
 import { getTodayBrasilia, formatBrasiliaDate, toBrasiliaTime } from '@/lib/timezone';
 import { DigitalClock } from '@/components/DigitalClock';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Agendamentos() {
   const { user } = useAuth();
@@ -44,6 +46,9 @@ export default function Agendamentos() {
     end_time: '09:00',
     reason: '',
   });
+  const [couponCode, setCouponCode] = useState('');
+  const [validatedCoupon, setValidatedCoupon] = useState<{ code: string; id: string } | null>(null);
+  const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
 
   const { data: appointments, isLoading } = useAppointments(selectedDate);
   const { data: customers } = useCustomers();
@@ -77,6 +82,49 @@ export default function Agendamentos() {
     }
   }, [editingAppointment]);
 
+  const handleValidateCoupon = async () => {
+    if (!couponCode.trim()) {
+      toast.error('Digite um código de cupom');
+      return;
+    }
+
+    if (!formData.customer_id) {
+      toast.error('Selecione um cliente primeiro');
+      return;
+    }
+
+    setIsValidatingCoupon(true);
+    try {
+      const { data: coupons, error } = await supabase
+        .from('loyalty_coupons')
+        .select('*')
+        .eq('code', couponCode.toUpperCase())
+        .eq('customer_id', formData.customer_id)
+        .eq('is_redeemed', false)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (!coupons) {
+        toast.error('Cupom inválido ou já utilizado');
+        return;
+      }
+
+      if (coupons.expires_at && new Date(coupons.expires_at) < new Date()) {
+        toast.error('Cupom expirado');
+        return;
+      }
+
+      setValidatedCoupon({ code: coupons.code, id: coupons.id });
+      toast.success('Cupom validado! O valor será R$ 0,00');
+    } catch (error) {
+      console.error('Erro ao validar cupom:', error);
+      toast.error('Erro ao validar cupom');
+    } finally {
+      setIsValidatingCoupon(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -93,7 +141,7 @@ export default function Agendamentos() {
         },
       });
     } else {
-      await createAppointment.mutateAsync({
+      const appointment = await createAppointment.mutateAsync({
         customer_id: formData.customer_id,
         appointment_date: formData.date,
         appointment_time: formData.time,
@@ -101,6 +149,23 @@ export default function Agendamentos() {
         barber_id: formData.barber_id,
         notes: formData.notes,
       });
+
+      // Se houver cupom validado, resgatar o cupom
+      if (validatedCoupon && appointment) {
+        try {
+          const { data, error } = await supabase.functions.invoke('redeem-coupon', {
+            body: { code: validatedCoupon.code, appointment_id: appointment.id }
+          });
+
+          if (error) throw error;
+          if (!data.success) {
+            toast.error(data.error || 'Erro ao aplicar cupom');
+          }
+        } catch (error) {
+          console.error('Erro ao resgatar cupom:', error);
+          toast.error('Agendamento criado, mas erro ao aplicar cupom');
+        }
+      }
     }
 
     handleDialogClose();
@@ -135,6 +200,8 @@ export default function Agendamentos() {
       barber_id: '',
       notes: '',
     });
+    setCouponCode('');
+    setValidatedCoupon(null);
   };
 
   const handleStatusChange = async (appointmentId: string, newStatus: 'pending' | 'confirmed' | 'completed' | 'cancelled') => {
@@ -468,6 +535,99 @@ export default function Agendamentos() {
                       placeholder="Adicione observações sobre o agendamento"
                     />
                   </div>
+
+                  {!editingAppointment && formData.customer_id && (
+                    <div className="space-y-3 p-4 rounded-lg border border-accent/20 bg-accent/5">
+                      <div className="flex items-center gap-2">
+                        <Award className="h-5 w-5 text-accent" />
+                        <Label className="text-base font-semibold">Cupom de Fidelidade</Label>
+                      </div>
+                      
+                      {!validatedCoupon ? (
+                        <div className="space-y-2">
+                          <div className="flex gap-2">
+                            <Input
+                              placeholder="Digite o código do cupom"
+                              value={couponCode}
+                              onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                              className="flex-1"
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={handleValidateCoupon}
+                              disabled={isValidatingCoupon || !couponCode.trim()}
+                            >
+                              {isValidatingCoupon ? 'Validando...' : 'Validar'}
+                            </Button>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Cliente pode usar cupom para corte grátis
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between p-3 rounded-lg bg-success/10 border border-success/20">
+                            <div className="flex items-center gap-2">
+                              <Award className="h-4 w-4 text-success" />
+                              <span className="font-semibold text-success">Cupom validado!</span>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setValidatedCoupon(null);
+                                setCouponCode('');
+                              }}
+                            >
+                              Remover
+                            </Button>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Código: {validatedCoupon.code}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {formData.service_id && (
+                    <div className="space-y-2 p-4 rounded-lg bg-muted/50 border">
+                      <h4 className="font-semibold text-sm">Resumo do Valor</h4>
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-sm">
+                          <span>Serviço:</span>
+                          <span className={validatedCoupon ? 'line-through text-muted-foreground' : 'font-bold'}>
+                            R$ {services?.find(s => s.id === formData.service_id)?.price}
+                          </span>
+                        </div>
+                        {validatedCoupon && (
+                          <>
+                            <div className="flex justify-between text-sm text-accent">
+                              <span>Desconto (Cupom):</span>
+                              <span className="font-bold">
+                                - R$ {services?.find(s => s.id === formData.service_id)?.price}
+                              </span>
+                            </div>
+                            <Separator className="my-2" />
+                            <div className="flex justify-between text-base font-bold">
+                              <span>Total:</span>
+                              <span className="text-success">R$ 0,00</span>
+                            </div>
+                          </>
+                        )}
+                        {!validatedCoupon && (
+                          <div className="flex justify-between text-base font-bold pt-2 border-t">
+                            <span>Total:</span>
+                            <span className="text-success">
+                              R$ {services?.find(s => s.id === formData.service_id)?.price}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   <Button type="submit" className="w-full" disabled={createAppointment.isPending || updateAppointment.isPending}>
                     {editingAppointment ? 'Atualizar Agendamento' : 'Criar Agendamento'}
