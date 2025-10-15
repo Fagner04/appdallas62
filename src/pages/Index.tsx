@@ -38,7 +38,7 @@ const Index = () => {
             <div className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-full gradient-primary shadow-glow mb-4">
               <Scissors className="w-10 h-10 sm:w-12 sm:h-12 text-primary-foreground" />
             </div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-foreground">Agendamentos Oline</h1>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-foreground">Agendamentos Online</h1>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
               Sistema completo de agendamento para barbearias. Gerencie seus horários, clientes e serviços de forma
               profissional.
@@ -86,9 +86,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="py-6 border-t border-border/50 bg-card/50">
         <div className="container mx-auto px-4">
-          <p className="text-center text-sm text-muted-foreground">
-            &copy; Todos os direitos reservados Dallas - 2025 ♡
-          </p>
+          <p className="text-center text-sm text-muted-foreground">&copy; Sistema de agendamento barbeaaria - 2025 ♡</p>
         </div>
       </footer>
     </div>
