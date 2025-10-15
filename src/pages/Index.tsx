@@ -86,7 +86,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="py-6 border-t border-border/50 bg-card/50">
         <div className="container mx-auto px-4">
-          <p className="text-center text-sm text-muted-foreground">&copy; Sistema de agendamento barbeaaria - 2025 ♡</p>
+          <p className="text-center text-sm text-muted-foreground">&copy; Dallas Barbearia 2025 ♡</p>
         </div>
       </footer>
     </div>
