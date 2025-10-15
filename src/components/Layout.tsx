@@ -25,6 +25,7 @@ import {
   User,
   X,
   Gift,
+  HelpCircle,
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -40,6 +41,7 @@ const getMenuItems = (role?: string) => {
       { icon: Gift, label: 'Marketing', path: '/cliente/marketing' },
       { icon: Clock, label: 'Histórico', path: '/historico' },
       { icon: User, label: 'Perfil', path: '/perfil' },
+      { icon: HelpCircle, label: 'Ajuda', path: '/ajuda' },
     ];
   }
 
