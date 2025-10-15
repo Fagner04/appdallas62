@@ -1,6 +1,6 @@
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Scissors, Calendar, Users, Clock } from 'lucide-react';
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Scissors, Calendar, Users, Clock } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -8,24 +8,24 @@ const Index = () => {
   const features = [
     {
       icon: Calendar,
-      title: 'Agendamento Fácil',
-      description: 'Agende seus horários com apenas alguns cliques'
+      title: "Agendamento Fácil",
+      description: "Agende seus horários com apenas alguns cliques",
     },
     {
       icon: Scissors,
-      title: 'Profissionais Qualificados',
-      description: 'Equipe especializada em cortes modernos'
+      title: "Profissionais Qualificados",
+      description: "Equipe especializada em cortes modernos",
     },
     {
       icon: Clock,
-      title: 'Horários Flexíveis',
-      description: 'Atendimento nos melhores horários para você'
+      title: "Horários Flexíveis",
+      description: "Atendimento nos melhores horários para você",
     },
     {
       icon: Users,
-      title: 'Atendimento Personalizado',
-      description: 'Cada cliente é único e especial'
-    }
+      title: "Atendimento Personalizado",
+      description: "Cada cliente é único e especial",
+    },
   ];
 
   return (
@@ -38,12 +38,10 @@ const Index = () => {
             <div className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-full gradient-primary shadow-glow mb-4">
               <Scissors className="w-10 h-10 sm:w-12 sm:h-12 text-primary-foreground" />
             </div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-foreground">
-              Dallas Barbearia
-            </h1>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-foreground">Agendamentos Oline</h1>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-              Sistema completo de agendamento para barbearias. 
-              Gerencie seus horários, clientes e serviços de forma profissional.
+              Sistema completo de agendamento para barbearias. Gerencie seus horários, clientes e serviços de forma
+              profissional.
             </p>
           </div>
 
@@ -52,7 +50,7 @@ const Index = () => {
             <Button
               size="lg"
               className="w-full sm:w-auto text-base sm:text-lg px-8 py-6 shadow-elegant hover-lift"
-              onClick={() => navigate('/login')}
+              onClick={() => navigate("/login")}
             >
               Entrar
             </Button>
@@ -60,7 +58,7 @@ const Index = () => {
               size="lg"
               variant="outline"
               className="w-full sm:w-auto text-base sm:text-lg px-8 py-6 hover-lift"
-              onClick={() => navigate('/register')}
+              onClick={() => navigate("/register")}
             >
               Registrar
             </Button>
@@ -77,12 +75,8 @@ const Index = () => {
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-light mb-4">
                   <feature.icon className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-lg font-semibold text-card-foreground mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {feature.description}
-                </p>
+                <h3 className="text-lg font-semibold text-card-foreground mb-2">{feature.title}</h3>
+                <p className="text-sm text-muted-foreground">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -93,7 +87,7 @@ const Index = () => {
       <footer className="py-6 border-t border-border/50 bg-card/50">
         <div className="container mx-auto px-4">
           <p className="text-center text-sm text-muted-foreground">
-           &copy; Todos os direitos reservados Dallas - 2025 ♡
+            &copy; Todos os direitos reservados Dallas - 2025 ♡
           </p>
         </div>
       </footer>
