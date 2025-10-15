@@ -552,6 +552,12 @@ export default function Agendamentos() {
                                 {appointment.barber?.name || 'Barbeiro'}
                               </span>
                             </div>
+                            {appointment.loyalty_coupons && appointment.loyalty_coupons.length > 0 && (
+                              <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-accent/10 border border-accent/20">
+                                <Award className="h-3 w-3 sm:h-4 sm:w-4 text-accent" />
+                                <span className="text-xs sm:text-sm font-bold text-accent">Grátis</span>
+                              </div>
+                            )}
                           </div>
                         </div>
                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">

@@ -113,7 +113,8 @@ export const useUpcomingAppointments = () => {
         .select(`
           *,
           service:services(name, price, duration),
-          barber:barbers(id)
+          barber:barbers(id),
+          loyalty_coupons!loyalty_coupons_redeemed_appointment_id_fkey(id, code, is_redeemed)
         `)
         .eq('customer_id', customer.id)
         .gte('appointment_date', today)

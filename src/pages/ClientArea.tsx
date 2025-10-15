@@ -226,11 +226,18 @@ export default function ClientArea() {
                               {formatTime(appointment.appointment_time)}
                             </span>
                           </div>
-                          <div className="flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-lg bg-success/10 border border-success/20 text-sm">
-                            <span className="font-bold text-success">
-                              R$ {appointment.service?.price}
-                            </span>
-                          </div>
+                          {appointment.loyalty_coupons && appointment.loyalty_coupons.length > 0 ? (
+                            <div className="flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-lg bg-accent/10 border border-accent/20 text-sm">
+                              <Award className="h-4 w-4 text-accent" />
+                              <span className="font-bold text-accent">Grátis</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-lg bg-success/10 border border-success/20 text-sm">
+                              <span className="font-bold text-success">
+                                R$ {appointment.service?.price}
+                              </span>
+                            </div>
+                          )}
                           <div className="flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-lg bg-muted border border-border text-sm">
                             <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
                             <span className="font-medium">{appointment.service?.duration} min</span>

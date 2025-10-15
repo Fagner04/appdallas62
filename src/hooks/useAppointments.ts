@@ -20,6 +20,7 @@ export interface AppointmentWithDetails extends Appointment {
   customer: { name: string; phone?: string } | null;
   service: { name: string; duration: number; price: number } | null;
   barber: { id: string; name?: string } | null;
+  loyalty_coupons?: { id: string; code: string; is_redeemed: boolean }[];
 }
 
 export interface CreateAppointmentData {
@@ -52,7 +53,8 @@ export const useAppointments = (date?: string) => {
           *,
           customer:customers(name, phone),
           service:services(name, duration, price),
-          barber:barbers(id, name)
+          barber:barbers(id, name),
+          loyalty_coupons!loyalty_coupons_redeemed_appointment_id_fkey(id, code, is_redeemed)
         `)
         .order('appointment_time', { ascending: true });
 
