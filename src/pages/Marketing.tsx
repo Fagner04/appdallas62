@@ -286,15 +286,17 @@ export default function Marketing() {
                     {customers.map((customer) => (
                       <Card key={customer.id} className="border-primary/20">
                         <CardHeader className="pb-3">
-                          <div className="flex items-center justify-between gap-2">
-                            <CardTitle className="text-base sm:text-lg truncate">{customer.name}</CardTitle>
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div className="flex-1 min-w-0">
+                              <CardTitle className="text-base sm:text-lg truncate">{customer.name}</CardTitle>
+                              <CardDescription className="text-xs sm:text-sm mt-1">
+                                <span className="font-semibold">{customer.loyalty_points || 0}</span> pontos
+                              </CardDescription>
+                            </div>
                             <div className="p-2 rounded-lg bg-primary/10 shrink-0">
                               <Award className="h-4 w-4 text-primary" />
                             </div>
                           </div>
-                          <CardDescription className="text-xs sm:text-sm">
-                            <span className="font-semibold">{customer.loyalty_points || 0}</span> pontos
-                          </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-2">
                           <div className="flex flex-col sm:flex-row gap-2">
