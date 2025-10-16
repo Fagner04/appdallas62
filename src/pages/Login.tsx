@@ -72,7 +72,7 @@ export default function Login() {
             <Scissors className="h-8 w-8 text-white" />
           </div>
           <div>
-            <CardTitle className="text-3xl">Dallas Barbearia </CardTitle>
+            <CardTitle className="text-3xl">BarberClick </CardTitle>
             <CardDescription className="text-base mt-2">
               Entre com suas credenciais para acessar o sistema
             </CardDescription>
