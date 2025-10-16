@@ -6,10 +6,11 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { User, Clock, Lock, Loader2, ChevronDown, LogOut, CreditCard } from 'lucide-react';
+import { User, Clock, Lock, Loader2, ChevronDown, LogOut, CreditCard, Store, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { useWorkingHours, useUpdateWorkingHours } from '@/hooks/useWorkingHours';
 import { usePasswordChange } from '@/hooks/usePasswordChange';
+import { useMyBarbershop } from '@/hooks/useBarbershops';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -27,9 +28,12 @@ const DAYS = [
 export default function Configuracoes() {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const { data: barbershop, isLoading: isLoadingBarbershop } = useMyBarbershop();
   const { data: workingHours = [], isLoading } = useWorkingHours();
   const updateWorkingHours = useUpdateWorkingHours();
   const { changePassword, isLoading: isChangingPassword } = usePasswordChange();
+
+  const [copiedId, setCopiedId] = useState(false);
 
   const [hours, setHours] = useState<Record<number, { isOpen: boolean; start: string; end: string }>>({
     1: { isOpen: true, start: '09:00', end: '18:00' },
@@ -105,6 +109,15 @@ export default function Configuracoes() {
     }
   };
 
+  const copyBarbershopId = () => {
+    if (barbershop?.id) {
+      navigator.clipboard.writeText(barbershop.id);
+      setCopiedId(true);
+      toast.success('ID copiado!');
+      setTimeout(() => setCopiedId(false), 2000);
+    }
+  };
+
   return (
     <Layout>
       <div className="space-y-6 animate-fade-in">
@@ -133,25 +146,80 @@ export default function Configuracoes() {
             </CardHeader>
             <CollapsibleContent>
               <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome da Barbearia</Label>
-                <Input id="name" defaultValue="Dallas Barbearia" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Telefone</Label>
-                <Input id="phone" defaultValue="(11) 98765-4321" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" defaultValue="contato@dallasbarbearia.com" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="address">Endereço</Label>
-                <Input id="address" defaultValue="Rua das Flores, 123 - São Paulo" />
-              </div>
-            </div>
-            <Button onClick={handleSave}>Salvar Alterações</Button>
+                {isLoadingBarbershop ? (
+                  <div className="flex justify-center p-8">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  </div>
+                ) : barbershop ? (
+                  <>
+                    {/* Barbershop ID */}
+                    <div className="space-y-2 p-4 bg-muted/50 rounded-lg border border-border">
+                      <div className="flex items-center justify-between">
+                        <Label className="flex items-center gap-2">
+                          <Store className="h-4 w-4 text-primary" />
+                          ID da Barbearia
+                        </Label>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={copyBarbershopId}
+                        >
+                          {copiedId ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                      <Input 
+                        value={barbershop.id} 
+                        readOnly 
+                        className="font-mono text-sm bg-background"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Este ID identifica sua barbearia no sistema multi-tenant
+                      </p>
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="name">Nome da Barbearia</Label>
+                        <Input id="name" value={barbershop.name} readOnly />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="slug">Link Personalizado</Label>
+                        <Input id="slug" value={barbershop.slug} readOnly />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="phone">Telefone</Label>
+                        <Input id="phone" value={barbershop.phone || 'Não informado'} readOnly />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input id="email" type="email" value={barbershop.email || 'Não informado'} readOnly />
+                      </div>
+                      <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="address">Endereço</Label>
+                        <Input id="address" value={barbershop.address || 'Não informado'} readOnly />
+                      </div>
+                    </div>
+                    
+                    <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-md text-sm border border-blue-200 dark:border-blue-900">
+                      <p className="font-medium text-blue-900 dark:text-blue-100 mb-1">ℹ️ Link de Cadastro de Clientes</p>
+                      <code className="text-blue-800 dark:text-blue-200 break-all">
+                        {window.location.origin}/cadastro/{barbershop.slug}
+                      </code>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    Nenhuma barbearia cadastrada. 
+                    <Button 
+                      variant="link" 
+                      onClick={() => navigate('/cadastro-barbearia')}
+                      className="ml-1"
+                    >
+                      Cadastre agora
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </CollapsibleContent>
           </Card>
