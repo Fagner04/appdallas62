@@ -24,10 +24,20 @@ export default function Login() {
     document.title = "Login | BarberClick";
   }, []);
 
-  if (isAuthenticated) {
-    const redirectPath = user?.role === "customer" ? "/cliente" : "/dashboard";
-    return <Navigate to={redirectPath} replace />;
-  }
+  // Redirect authenticated users, respecting the 'next' parameter
+  useEffect(() => {
+    if (isAuthenticated) {
+      const params = new URLSearchParams(window.location.search);
+      const next = params.get('next');
+      
+      if (next) {
+        navigate(next, { replace: true });
+      } else {
+        const redirectPath = user?.role === "customer" ? "/cliente" : "/dashboard";
+        navigate(redirectPath, { replace: true });
+      }
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
