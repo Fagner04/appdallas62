@@ -99,6 +99,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) throw error;
 
       toast.success('Login realizado com sucesso!');
+
+      // If there's a next param, honor it first
+      const params = new URLSearchParams(window.location.search);
+      const next = params.get('next');
+      if (next) {
+        navigate(next);
+        return;
+      }
       
       // Redirect based on user role
       const { data: roleRow, error: roleError } = await supabase
