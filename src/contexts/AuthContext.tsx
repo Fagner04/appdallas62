@@ -37,6 +37,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .eq('id', userId)
           .maybeSingle();
 
+        // Check if user owns a barbershop
+        const { data: barbershop } = await supabase
+          .from('barbershops')
+          .select('id')
+          .eq('owner_id', userId)
+          .maybeSingle();
+
+        // If user owns barbershop, they're admin
+        if (barbershop) {
+          setUser({
+            id: userId,
+            name: profile?.full_name || email?.split('@')[0] || 'Usuário',
+            email: email || '',
+            role: 'admin',
+          });
+          return;
+        }
+
+        // Otherwise check role from user_roles
         const { data: roleRow } = await supabase
           .from('user_roles')
           .select('role')
@@ -108,19 +127,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
       
-      // Redirect based on user role
-      const { data: roleRow, error: roleError } = await supabase
+      // Check if user owns a barbershop
+      const { data: barbershop } = await supabase
+        .from('barbershops')
+        .select('id')
+        .eq('owner_id', data.user.id)
+        .maybeSingle();
+
+      // If user owns a barbershop, redirect to dashboard
+      if (barbershop) {
+        navigate('/dashboard');
+        return;
+      }
+
+      // Otherwise check user role
+      const { data: roleRow } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', data.user.id)
         .limit(1)
         .maybeSingle();
 
-      console.log('User role data:', roleRow, 'Error:', roleError);
-
       const redirectPath = roleRow?.role === 'customer' ? '/cliente' : '/dashboard';
-      console.log('Redirecting to:', redirectPath, 'User role:', roleRow?.role);
-      
       navigate(redirectPath);
     } catch (error: any) {
       toast.error(error.message || 'Erro ao fazer login');
