@@ -84,6 +84,31 @@ export default function CadastroBarbearia() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-soft p-4">
+        <Card className="w-full max-w-md shadow-elegant">
+          <CardHeader className="space-y-4 text-center">
+            <div className="mx-auto w-16 h-16 rounded-full gradient-primary flex items-center justify-center shadow-glow">
+              <Scissors className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <CardTitle className="text-3xl">Entrar para Cadastrar</CardTitle>
+              <CardDescription className="text-base mt-2">
+                Para criar sua barbearia, faça login e voltaremos para esta página automaticamente.
+              </CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Button className="w-full" onClick={() => navigate(`/login?next=${encodeURIComponent('/cadastro-barbearia')}`)}>
+              Entrar para cadastrar
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (generatedLink) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-soft p-4">
