@@ -120,6 +120,11 @@ export default function Login() {
               {loading ? "Entrando..." : "Entrar"}
             </Button>
           </form>
+          <div className="mt-6 text-center text-sm">
+            <Link to="/cadastro-barbearia" className="text-primary hover:underline font-medium">
+              Cadastrar Barbearia
+            </Link>
+          </div>
         </CardContent>
       </Card>
 
