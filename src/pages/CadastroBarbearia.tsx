@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,10 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Scissors, ArrowLeft, Copy, Check } from "lucide-react";
 import { useCreateBarbershop } from "@/hooks/useBarbershops";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 export default function CadastroBarbearia() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const createBarbershop = useCreateBarbershop();
   
   const [name, setName] = useState("");
@@ -19,6 +21,13 @@ export default function CadastroBarbearia() {
   const [address, setAddress] = useState("");
   const [generatedLink, setGeneratedLink] = useState("");
   const [copied, setCopied] = useState(false);
+
+  // Redirect to login if not authenticated when form is submitted
+  useEffect(() => {
+    if (generatedLink && !isAuthenticated) {
+      navigate(`/login?next=${encodeURIComponent('/cadastro-barbearia')}`);
+    }
+  }, [generatedLink, isAuthenticated, navigate]);
 
   const generateSlug = (text: string) => {
     return text
@@ -41,6 +50,13 @@ export default function CadastroBarbearia() {
     
     if (!name || !slug) {
       toast.error('Nome e slug são obrigatórios');
+      return;
+    }
+
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      toast.info('Você precisa fazer login primeiro');
+      navigate(`/login?next=${encodeURIComponent('/cadastro-barbearia')}`);
       return;
     }
 

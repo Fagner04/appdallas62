@@ -116,7 +116,7 @@ export default function Login() {
             </Button>
           </form>
           <div className="mt-6 text-center text-sm">
-            <Link to={`/login?next=${encodeURIComponent('/cadastro-barbearia')}`} className="text-primary hover:underline font-medium">
+            <Link to="/cadastro-barbearia" className="text-primary hover:underline font-medium">
               Cadastrar Barbearia
             </Link>
           </div>
