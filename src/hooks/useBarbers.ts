@@ -33,9 +33,21 @@ export const useBarbers = () => {
   return useQuery({
     queryKey: ['barbers'],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      const { data: barbershop } = await supabase
+        .from('barbershops')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single();
+
+      if (!barbershop) return [];
+
       const { data, error } = await supabase
         .from('barbers')
         .select('*')
+        .eq('barbershop_id', barbershop.id)
         .eq('is_active', true)
         .order('created_at');
 
@@ -49,9 +61,21 @@ export const useAllBarbers = () => {
   return useQuery({
     queryKey: ['all-barbers'],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      const { data: barbershop } = await supabase
+        .from('barbershops')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single();
+
+      if (!barbershop) return [];
+
       const { data, error } = await supabase
         .from('barbers')
         .select('*')
+        .eq('barbershop_id', barbershop.id)
         .order('created_at');
 
       if (error) throw error;
@@ -65,9 +89,23 @@ export const useCreateBarber = () => {
 
   return useMutation({
     mutationFn: async (data: CreateBarberData) => {
+      // Get the user's barbershop first
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      const { data: barbershop, error: barbershopError } = await supabase
+        .from('barbershops')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single();
+
+      if (barbershopError || !barbershop) {
+        throw new Error('Barbearia não encontrada. Cadastre sua barbearia primeiro.');
+      }
+
       const { data: barber, error } = await supabase
         .from('barbers')
-        .insert([data])
+        .insert([{ ...data, barbershop_id: barbershop.id }])
         .select()
         .single();
 
@@ -79,9 +117,9 @@ export const useCreateBarber = () => {
       queryClient.invalidateQueries({ queryKey: ['all-barbers'] });
       toast.success('Barbeiro cadastrado com sucesso!');
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Erro ao cadastrar barbeiro:', error);
-      toast.error('Erro ao cadastrar barbeiro');
+      toast.error(error.message || 'Erro ao cadastrar barbeiro');
     },
   });
 };
