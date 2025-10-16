@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import Login from "./pages/Login";
-import Register from "./pages/Register";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import ClientArea from "./pages/ClientArea";
@@ -52,7 +51,6 @@ const AppRoutes = () => {
         element={isAuthenticated ? <Navigate to={getDefaultRoute()} replace /> : <Index />} 
       />
       <Route path="/login" element={isAuthenticated ? <Navigate to={getDefaultRoute()} replace /> : <Login />} />
-      <Route path="/register" element={isAuthenticated ? <Navigate to={getDefaultRoute()} replace /> : <Register />} />
       <Route
         path="/cadastro-barbearia"
         element={

@@ -56,14 +56,6 @@ const Index = () => {
             </Button>
             <Button
               size="lg"
-              variant="outline"
-              className="w-full sm:w-auto text-base sm:text-lg px-8 py-6 hover-lift"
-              onClick={() => navigate("/register")}
-            >
-              Registrar
-            </Button>
-            <Button
-              size="lg"
               variant="secondary"
               className="w-full sm:w-auto text-base sm:text-lg px-8 py-6 hover-lift gap-2"
               onClick={() => navigate("/cadastro-barbearia")}
