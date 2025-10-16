@@ -9,6 +9,8 @@ import Register from "./pages/Register";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import ClientArea from "./pages/ClientArea";
+import CadastroBarbearia from "./pages/CadastroBarbearia";
+import CadastroCliente from "./pages/CadastroCliente";
 import ClientMarketing from "./pages/ClientMarketing";
 import PerfilCliente from "./pages/PerfilCliente";
 import Agendamentos from "./pages/Agendamentos";
@@ -51,6 +53,8 @@ const AppRoutes = () => {
       />
       <Route path="/login" element={isAuthenticated ? <Navigate to={getDefaultRoute()} replace /> : <Login />} />
       <Route path="/register" element={isAuthenticated ? <Navigate to={getDefaultRoute()} replace /> : <Register />} />
+      <Route path="/cadastro-barbearia" element={<CadastroBarbearia />} />
+      <Route path="/cadastro/:slug" element={<CadastroCliente />} />
       <Route
         path="/cliente"
         element={

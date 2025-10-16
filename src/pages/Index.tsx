@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Scissors, Calendar, Users, Clock } from "lucide-react";
+import { Scissors, Calendar, Users, Clock, Store } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -61,6 +61,15 @@ const Index = () => {
               onClick={() => navigate("/register")}
             >
               Registrar
+            </Button>
+            <Button
+              size="lg"
+              variant="secondary"
+              className="w-full sm:w-auto text-base sm:text-lg px-8 py-6 hover-lift gap-2"
+              onClick={() => navigate("/cadastro-barbearia")}
+            >
+              <Store className="h-5 w-5" />
+              Cadastrar Barbearia
             </Button>
           </div>
 
