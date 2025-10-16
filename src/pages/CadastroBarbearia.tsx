@@ -11,7 +11,7 @@ import { toast } from "sonner";
 
 export default function CadastroBarbearia() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, register } = useAuth();
   const createBarbershop = useCreateBarbershop();
   
   const [name, setName] = useState("");
@@ -21,13 +21,12 @@ export default function CadastroBarbearia() {
   const [address, setAddress] = useState("");
   const [generatedLink, setGeneratedLink] = useState("");
   const [copied, setCopied] = useState(false);
-
-  // Redirect to login if not authenticated when form is submitted
-  useEffect(() => {
-    if (generatedLink && !isAuthenticated) {
-      navigate(`/login?next=${encodeURIComponent('/cadastro-barbearia')}`);
-    }
-  }, [generatedLink, isAuthenticated, navigate]);
+  
+  // Campos para criar conta
+  const [ownerName, setOwnerName] = useState("");
+  const [ownerEmail, setOwnerEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const generateSlug = (text: string) => {
     return text
@@ -49,31 +48,55 @@ export default function CadastroBarbearia() {
     e.preventDefault();
     
     if (!name || !slug) {
-      toast.error('Nome e slug são obrigatórios');
+      toast.error('Nome e slug da barbearia são obrigatórios');
       return;
     }
 
-    // Check if user is authenticated
+    // Se não estiver autenticado, validar campos de cadastro
     if (!isAuthenticated) {
-      toast.info('Você precisa fazer login primeiro');
-      navigate(`/login?next=${encodeURIComponent('/cadastro-barbearia')}`);
-      return;
+      if (!ownerName || !ownerEmail || !password) {
+        toast.error('Preencha todos os campos obrigatórios');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        toast.error('As senhas não coincidem');
+        return;
+      }
+
+      if (password.length < 6) {
+        toast.error('A senha deve ter no mínimo 6 caracteres');
+        return;
+      }
+
+      try {
+        // Criar conta primeiro
+        await register(ownerEmail, password, ownerName);
+        toast.success('Conta criada! Criando sua barbearia...');
+        
+        // Aguardar um pouco para garantir que a autenticação foi processada
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      } catch (error: any) {
+        toast.error(error.message || 'Erro ao criar conta');
+        return;
+      }
     }
 
     try {
       await createBarbershop.mutateAsync({
         name,
         slug,
-        phone,
-        email,
+        phone: phone || ownerEmail,
+        email: email || ownerEmail,
         address,
       });
 
       const link = `${window.location.origin}/cadastro/${slug}`;
       setGeneratedLink(link);
       toast.success('Barbearia criada! Compartilhe o link com seus clientes.');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao criar barbearia:', error);
+      toast.error(error.message || 'Erro ao criar barbearia');
     }
   };
 
@@ -83,31 +106,6 @@ export default function CadastroBarbearia() {
     toast.success('Link copiado!');
     setTimeout(() => setCopied(false), 2000);
   };
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-soft p-4">
-        <Card className="w-full max-w-md shadow-elegant">
-          <CardHeader className="space-y-4 text-center">
-            <div className="mx-auto w-16 h-16 rounded-full gradient-primary flex items-center justify-center shadow-glow">
-              <Scissors className="h-8 w-8 text-white" />
-            </div>
-            <div>
-              <CardTitle className="text-3xl">Entrar para Cadastrar</CardTitle>
-              <CardDescription className="text-base mt-2">
-                Para criar sua barbearia, faça login e voltaremos para esta página automaticamente.
-              </CardDescription>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Button className="w-full" onClick={() => navigate(`/login?next=${encodeURIComponent('/cadastro-barbearia')}`)}>
-              Entrar para cadastrar
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   if (generatedLink) {
     return (
@@ -176,6 +174,67 @@ export default function CadastroBarbearia() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {!isAuthenticated && (
+              <>
+                <div className="pb-4 border-b">
+                  <h3 className="font-semibold text-lg mb-1">Seus Dados</h3>
+                  <p className="text-sm text-muted-foreground">Crie sua conta para gerenciar a barbearia</p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="ownerName">Seu Nome Completo *</Label>
+                  <Input
+                    id="ownerName"
+                    placeholder="João Silva"
+                    value={ownerName}
+                    onChange={(e) => setOwnerName(e.target.value)}
+                    required={!isAuthenticated}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="ownerEmail">Seu Email *</Label>
+                  <Input
+                    id="ownerEmail"
+                    type="email"
+                    placeholder="seu@email.com"
+                    value={ownerEmail}
+                    onChange={(e) => setOwnerEmail(e.target.value)}
+                    required={!isAuthenticated}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="password">Senha *</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Mínimo 6 caracteres"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required={!isAuthenticated}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirmar Senha *</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="Digite a senha novamente"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required={!isAuthenticated}
+                  />
+                </div>
+
+                <div className="pt-4 border-b">
+                  <h3 className="font-semibold text-lg mb-1">Dados da Barbearia</h3>
+                  <p className="text-sm text-muted-foreground">Informações do seu negócio</p>
+                </div>
+              </>
+            )}
+            
             <div className="space-y-2">
               <Label htmlFor="name">Nome da Barbearia *</Label>
               <Input
