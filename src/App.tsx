@@ -40,20 +40,22 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 const AppRoutes = () => {
   const { isAuthenticated, user } = useAuth();
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const next = params.get('next') || undefined;
 
   // Redirect based on user role
   const getDefaultRoute = () => {
     if (!user) return '/login';
     return user.role === 'customer' ? '/cliente' : '/dashboard';
   };
-
   return (
     <Routes>
       <Route 
         path="/" 
         element={isAuthenticated ? <Navigate to={getDefaultRoute()} replace /> : <Index />} 
       />
-      <Route path="/login" element={isAuthenticated ? <Navigate to={getDefaultRoute()} replace /> : <Login />} />
+      <Route path="/login" element={isAuthenticated ? <Navigate to={next ?? getDefaultRoute()} replace /> : <Login />} />
       <Route path="/cadastro-barbearia" element={<CadastroBarbearia />} />
       <Route path="/cadastro/:slug" element={<CadastroCliente />} />
       <Route
