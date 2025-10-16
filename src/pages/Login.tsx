@@ -116,9 +116,8 @@ export default function Login() {
             </Button>
           </form>
           <div className="mt-6 text-center text-sm">
-            <span className="text-muted-foreground">Não tem uma conta? </span>
-            <Link to="/register" className="text-primary hover:underline font-medium">
-              Cadastre-se
+            <Link to="/cadastro-barbearia" className="text-primary hover:underline font-medium">
+              Cadastrar Barbearia
             </Link>
           </div>
         </CardContent>

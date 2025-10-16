@@ -53,7 +53,14 @@ const AppRoutes = () => {
       />
       <Route path="/login" element={isAuthenticated ? <Navigate to={getDefaultRoute()} replace /> : <Login />} />
       <Route path="/register" element={isAuthenticated ? <Navigate to={getDefaultRoute()} replace /> : <Register />} />
-      <Route path="/cadastro-barbearia" element={<CadastroBarbearia />} />
+      <Route
+        path="/cadastro-barbearia"
+        element={
+          <ProtectedRoute>
+            <CadastroBarbearia />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/cadastro/:slug" element={<CadastroCliente />} />
       <Route
         path="/cliente"
