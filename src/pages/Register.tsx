@@ -97,7 +97,7 @@ export default function Register() {
           </div>
           <div>
             <CardTitle className="text-3xl">Criar Conta</CardTitle>
-            <CardDescription className="text-base mt-2">Cadastre-se para acessar o sistema BarberClick</CardDescription>
+            <CardDescription className="text-base mt-2">Cadastre-se para acessar o sistema</CardDescription>
           </div>
         </CardHeader>
         <CardContent>
