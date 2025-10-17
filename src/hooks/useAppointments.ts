@@ -231,28 +231,49 @@ export const useCreateAppointment = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
-      const { data: barbershop } = await supabase
+      let barbershopId: string | null = null;
+
+      // Primeiro tentar buscar como dono da barbearia
+      const { data: ownedBarbershop } = await supabase
         .from('barbershops')
         .select('id')
         .eq('owner_id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (!barbershop) throw new Error('Barbearia não encontrada');
+      if (ownedBarbershop) {
+        barbershopId = ownedBarbershop.id;
+      } else {
+        // Se não for dono, buscar como cliente
+        const { data: customer } = await supabase
+          .from('customers')
+          .select('barbershop_id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (customer?.barbershop_id) {
+          barbershopId = customer.barbershop_id;
+        } else {
+          throw new Error('Barbearia não encontrada. Você não está associado a nenhuma barbearia.');
+        }
+      }
 
       const { data: appointment, error } = await supabase
         .from('appointments')
-        .insert([{ ...data, barbershop_id: barbershop.id }])
+        .insert([{ ...data, barbershop_id: barbershopId }])
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro detalhado ao criar agendamento:', error);
+        throw error;
+      }
 
       // Create notification for admin about new appointment
       const { data: customerData } = await supabase
         .from('customers')
         .select('name')
         .eq('id', data.customer_id)
-        .single();
+        .maybeSingle();
 
       // Buscar admins e barbers da tabela user_roles
       const { data: admins, error: adminsError } = await supabase
@@ -265,11 +286,11 @@ export const useCreateAppointment = () => {
       // Se não encontrar na user_roles, buscar todos os barbeiros ativos
       let notificationUsers: { user_id: string }[] = admins || [];
       
-      if (!notificationUsers.length) {
+      if (!notificationUsers.length && barbershopId) {
         const { data: barbers } = await supabase
           .from('barbers')
           .select('user_id')
-          .eq('barbershop_id', barbershop.id)
+          .eq('barbershop_id', barbershopId)
           .eq('is_active', true)
           .not('user_id', 'is', null);
         
@@ -305,9 +326,9 @@ export const useCreateAppointment = () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       toast.success('Agendamento criado com sucesso!');
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Erro ao criar agendamento:', error);
-      toast.error('Erro ao criar agendamento');
+      toast.error(error?.message || 'Erro ao criar agendamento');
     },
   });
 };
