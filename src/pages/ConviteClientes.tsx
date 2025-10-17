@@ -8,12 +8,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Mail, UserPlus, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { useMyBarbershop } from '@/hooks/useBarbershops';
+import { useCreateCustomer } from '@/hooks/useCustomers';
 
 export default function ConviteClientes() {
   const { data: barbershop } = useMyBarbershop();
+  const createCustomer = useCreateCustomer();
   const [emailConvite, setEmailConvite] = useState('');
   const [nomeConvite, setNomeConvite] = useState('');
   const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(false);
   
   // Formulário de cadastro direto
   const [formData, setFormData] = useState({
@@ -60,9 +63,28 @@ export default function ConviteClientes() {
       return;
     }
 
-    // Aqui você implementaria o cadastro direto
-    toast.success(`Cliente ${formData.nome} cadastrado com sucesso!`);
-    setFormData({ nome: '', email: '', telefone: '', senha: '' });
+    if (formData.senha.length < 6) {
+      toast.error('A senha deve ter no mínimo 6 caracteres');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await createCustomer.mutateAsync({
+        name: formData.nome,
+        email: formData.email,
+        phone: formData.telefone,
+        createAccount: true,
+        password: formData.senha,
+      });
+
+      setFormData({ nome: '', email: '', telefone: '', senha: '' });
+    } catch (error) {
+      console.error('Erro ao cadastrar cliente:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -216,9 +238,9 @@ export default function ConviteClientes() {
                       minLength={6}
                     />
                   </div>
-                  <Button type="submit" className="w-full gap-2">
+                  <Button type="submit" className="w-full gap-2" disabled={loading}>
                     <UserPlus className="h-4 w-4" />
-                    Cadastrar Cliente
+                    {loading ? 'Cadastrando...' : 'Cadastrar Cliente'}
                   </Button>
                 </form>
               </CardContent>
