@@ -80,6 +80,18 @@ export const useCreateCustomer = () => {
 
       // Se createAccount for true, criar conta no Supabase Auth
       if (data.createAccount && data.email && data.password) {
+        // Verificar se já existe um cliente com esse email
+        const { data: existingCustomer } = await supabase
+          .from('customers')
+          .select('id, user_id')
+          .eq('email', data.email)
+          .eq('barbershop_id', barbershop.id)
+          .maybeSingle();
+
+        if (existingCustomer?.user_id) {
+          throw new Error('Já existe uma conta para este email');
+        }
+
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email: data.email,
           password: data.password,
@@ -88,10 +100,15 @@ export const useCreateCustomer = () => {
               full_name: data.name,
               phone: data.phone,
             },
+            emailRedirectTo: `${window.location.origin}/`,
           },
         });
 
         if (authError) {
+          // Melhor tratamento de erros de rate limit
+          if (authError.message.includes('rate_limit') || authError.message.includes('rate limit')) {
+            throw new Error('Muitas tentativas. Aguarde alguns segundos antes de tentar novamente.');
+          }
           throw new Error(`Erro ao criar conta: ${authError.message}`);
         }
 
@@ -99,6 +116,23 @@ export const useCreateCustomer = () => {
 
         if (!userId) {
           throw new Error('Erro ao criar conta: ID do usuário não retornado');
+        }
+
+        // Se já existe um cliente sem user_id, atualizar com o novo user_id
+        if (existingCustomer && !existingCustomer.user_id) {
+          const { data: updatedCustomer, error: updateError } = await supabase
+            .from('customers')
+            .update({
+              user_id: userId,
+              name: data.name,
+              phone: data.phone,
+            })
+            .eq('id', existingCustomer.id)
+            .select()
+            .single();
+
+          if (updateError) throw updateError;
+          return updatedCustomer;
         }
       }
 
@@ -118,7 +152,13 @@ export const useCreateCustomer = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // Tratar erro de duplicação
+        if (error.code === '23505') {
+          throw new Error('Cliente já cadastrado');
+        }
+        throw error;
+      }
       return customer;
     },
     onSuccess: (_, variables) => {
