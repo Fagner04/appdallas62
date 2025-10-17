@@ -126,6 +126,7 @@ export const useCreateCustomer = () => {
               user_id: userId,
               name: data.name,
               phone: data.phone,
+              barbershop_id: barbershop.id, // Garantir que a barbearia seja definida
             })
             .eq('id', existingCustomer.id)
             .select()
