@@ -28,6 +28,7 @@ import {
   Gift,
   HelpCircle,
   ChevronDown,
+  Shield,
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -77,7 +78,7 @@ const getMenuItems = (role?: string) => {
 const getSettingsMenuItems = () => {
   return [
     { icon: UserCircle, label: 'Convite de Clientes', path: '/convite-clientes' },
-    { icon: Settings, label: 'Controle de Clientes', path: '/controle-clientes' },
+    { icon: Shield, label: 'Controle de Clientes', path: '/controle-clientes' },
     { icon: User, label: 'Perfil', path: '/configuracoes' },
   ];
 };
