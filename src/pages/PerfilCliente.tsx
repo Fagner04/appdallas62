@@ -120,60 +120,6 @@ export default function PerfilCliente() {
           </div>
         </div>
 
-        {/* Cadastrar Barbearia */}
-        <Card className="shadow-elegant border-primary/10 bg-gradient-to-br from-primary/5 to-transparent">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <CardTitle className="flex items-center gap-2 text-xl">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <Store className="h-5 w-5 text-primary" />
-                  </div>
-                  Cadastrar Barbearia
-                </CardTitle>
-                <CardDescription>
-                  Você é dono de uma barbearia? Cadastre seu negócio e comece a gerenciar agendamentos
-                </CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="p-4 rounded-lg bg-card border">
-                <h4 className="font-semibold mb-2">Benefícios de cadastrar sua barbearia:</h4>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li className="flex items-start gap-2">
-                    <span className="text-primary mt-0.5">✓</span>
-                    <span>Gerencie agendamentos online de forma profissional</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-primary mt-0.5">✓</span>
-                    <span>Controle financeiro e relatórios completos</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-primary mt-0.5">✓</span>
-                    <span>Sistema de fidelidade para seus clientes</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-primary mt-0.5">✓</span>
-                    <span>Notificações automáticas e lembretes</span>
-                  </li>
-                </ul>
-              </div>
-              
-              <Button 
-                onClick={() => navigate('/cadastro-barbearia')} 
-                className="w-full shadow-elegant hover-lift"
-                size="lg"
-              >
-                <Store className="mr-2 h-5 w-5" />
-                Cadastrar Minha Barbearia
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Configurações de Notificações */}
         <Card className="shadow-elegant border-primary/10">
           <Collapsible open={isNotificationsOpen} onOpenChange={setIsNotificationsOpen}>
@@ -469,6 +415,16 @@ export default function PerfilCliente() {
             </Button>
           </CardContent>
         </Card>
+
+        {/* Botão Flutuante para Cadastrar Barbearia */}
+        <Button
+          onClick={() => navigate('/cadastro-barbearia')}
+          size="lg"
+          className="fixed bottom-6 right-6 h-16 w-16 rounded-full shadow-2xl hover:scale-110 transition-all duration-300 z-50 group gradient-primary"
+          title="Cadastrar Barbearia"
+        >
+          <Store className="h-7 w-7 text-white group-hover:rotate-12 transition-transform duration-300" />
+        </Button>
       </div>
     </Layout>
   );
