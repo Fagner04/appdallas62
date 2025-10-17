@@ -9,15 +9,29 @@ export interface Service {
   price: number;
   duration: number;
   is_active: boolean;
+  barbershop_id: string | null;
 }
 
 export const useServices = () => {
   return useQuery({
     queryKey: ['services'],
     queryFn: async () => {
+      // Buscar o barbershop_id do usuário logado
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      const { data: barbershop } = await supabase
+        .from('barbershops')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single();
+
+      if (!barbershop) throw new Error('Barbearia não encontrada');
+
       const { data, error } = await supabase
         .from('services')
         .select('*')
+        .eq('barbershop_id', barbershop.id)
         .eq('is_active', true)
         .order('name');
 
@@ -31,10 +45,22 @@ export const useCreateService = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (service: Omit<Service, 'id' | 'is_active'>) => {
+    mutationFn: async (service: Omit<Service, 'id' | 'is_active' | 'barbershop_id'>) => {
+      // Buscar o barbershop_id do usuário logado
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      const { data: barbershop } = await supabase
+        .from('barbershops')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single();
+
+      if (!barbershop) throw new Error('Barbearia não encontrada');
+
       const { data, error } = await supabase
         .from('services')
-        .insert([service])
+        .insert([{ ...service, barbershop_id: barbershop.id }])
         .select()
         .single();
 
