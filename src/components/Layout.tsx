@@ -1,6 +1,8 @@
 import { ReactNode, useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, NavLink } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -79,6 +81,63 @@ export const Layout = ({ children }: LayoutProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const menuItems = getMenuItems(user?.role);
 
+  // Buscar nome da barbearia
+  const { data: barbershopName } = useQuery({
+    queryKey: ['barbershop-name', user?.id],
+    queryFn: async () => {
+      if (!user) return 'Barbearia';
+      
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser) return 'Barbearia';
+
+      // Tentar buscar como dono
+      const { data: ownedBarbershop } = await supabase
+        .from('barbershops')
+        .select('name')
+        .eq('owner_id', authUser.id)
+        .maybeSingle();
+
+      if (ownedBarbershop) return ownedBarbershop.name;
+
+      // Buscar como cliente
+      const { data: customer } = await supabase
+        .from('customers')
+        .select('barbershop_id')
+        .eq('user_id', authUser.id)
+        .maybeSingle();
+
+      if (customer?.barbershop_id) {
+        const { data: barbershop } = await supabase
+          .from('barbershops')
+          .select('name')
+          .eq('id', customer.barbershop_id)
+          .single();
+        
+        return barbershop?.name || 'Barbearia';
+      }
+
+      // Buscar como barbeiro
+      const { data: barber } = await supabase
+        .from('barbers')
+        .select('barbershop_id')
+        .eq('user_id', authUser.id)
+        .maybeSingle();
+
+      if (barber?.barbershop_id) {
+        const { data: barbershop } = await supabase
+          .from('barbershops')
+          .select('name')
+          .eq('id', barber.barbershop_id)
+          .single();
+        
+        return barbershop?.name || 'Barbearia';
+      }
+
+      return 'Barbearia';
+    },
+    enabled: !!user,
+  });
+
   useEffect(() => {
     console.log('Layout - User role:', user?.role);
     console.log('Layout - Should show notification bell:', user?.role === 'customer' || user?.role === 'barber');
@@ -90,7 +149,7 @@ export const Layout = ({ children }: LayoutProps) => {
         <div className="flex items-start justify-between">
           <div className={isCollapsed ? "hidden" : ""}>
             <h1 className="text-xl font-bold text-foreground">
-              Dallas Barbearia
+              {barbershopName || 'Barbearia'}
             </h1>
           </div>
           {isCollapsed && (
