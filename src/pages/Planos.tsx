@@ -147,18 +147,27 @@ export default function Planos() {
                   )}
                 </div>
               ) : subscriptionStatus.hasActiveSubscription ? (
-                <div className="flex items-center justify-between p-3 sm:p-4 bg-green-50 dark:bg-green-950/30 rounded-lg border border-green-200 dark:border-green-800">
-                  <div className="flex-1">
-                    <p className="font-semibold text-sm sm:text-base text-green-900 dark:text-green-100">
-                      Assinatura Ativa
-                    </p>
-                    <p className="text-xs sm:text-sm text-green-700 dark:text-green-300 mt-0.5">
-                      Acesso completo ativo
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-green-700 dark:text-green-300">
-                    <Check className="h-4 w-4 sm:h-5 sm:w-5" />
-                    <span className="text-sm font-semibold">Ativo</span>
+                <div className="space-y-3">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 sm:p-4 bg-green-50 dark:bg-green-950/30 rounded-lg border border-green-200 dark:border-green-800">
+                    <div className="flex-1">
+                      <p className="font-semibold text-sm sm:text-base text-green-900 dark:text-green-100">
+                        {subscriptionStatus.planName || 'Assinatura Ativa'}
+                      </p>
+                      <p className="text-xs sm:text-sm text-green-700 dark:text-green-300 mt-0.5">
+                        Acesso completo ativo
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="text-right">
+                        <p className="text-2xl sm:text-3xl font-bold text-green-600 dark:text-green-400">
+                          {subscriptionStatus.daysLeftInSubscription}
+                        </p>
+                        <p className="text-xs sm:text-sm text-green-700 dark:text-green-300">
+                          {subscriptionStatus.daysLeftInSubscription === 1 ? 'dia' : 'dias'}
+                        </p>
+                      </div>
+                      <Check className="h-5 w-5 text-green-700 dark:text-green-300 ml-2" />
+                    </div>
                   </div>
                 </div>
               ) : (
