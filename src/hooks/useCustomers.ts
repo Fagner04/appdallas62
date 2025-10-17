@@ -118,6 +118,33 @@ export const useCreateCustomer = () => {
           throw new Error('Erro ao criar conta: ID do usuário não retornado');
         }
 
+        // O trigger handle_new_user cria automaticamente um registro de cliente
+        // Precisamos atualizar esse registro com o barbershop_id correto
+        const { data: autoCreatedCustomer } = await supabase
+          .from('customers')
+          .select('id')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+        if (autoCreatedCustomer) {
+          // Atualizar o registro criado pelo trigger com os dados corretos
+          const { data: updatedCustomer, error: updateError } = await supabase
+            .from('customers')
+            .update({
+              name: data.name,
+              phone: data.phone,
+              email: data.email,
+              notes: data.notes,
+              barbershop_id: barbershop.id, // CRÍTICO: Definir a barbearia correta
+            })
+            .eq('id', autoCreatedCustomer.id)
+            .select()
+            .single();
+
+          if (updateError) throw updateError;
+          return updatedCustomer;
+        }
+
         // Se já existe um cliente sem user_id, atualizar com o novo user_id
         if (existingCustomer && !existingCustomer.user_id) {
           const { data: updatedCustomer, error: updateError } = await supabase
@@ -126,7 +153,7 @@ export const useCreateCustomer = () => {
               user_id: userId,
               name: data.name,
               phone: data.phone,
-              barbershop_id: barbershop.id, // Garantir que a barbearia seja definida
+              barbershop_id: barbershop.id,
             })
             .eq('id', existingCustomer.id)
             .select()
