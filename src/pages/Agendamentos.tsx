@@ -3,7 +3,7 @@ import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar as CalendarIcon, Plus, Clock, User, Scissors, Pencil, Trash2, Ban, Lock, Unlock, Award } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -97,7 +97,16 @@ export default function Agendamentos() {
         notes: editingAppointment.notes || '',
       });
     }
-  }, [editingAppointment]);
+
+  useEffect(() => {
+    if (user?.role === 'customer' && customers) {
+      const self = (customers as any[]).find((c) => c.user_id === user.id) || (customers?.length === 1 ? (customers as any[])[0] : null);
+      if (self && formData.customer_id !== self.id) {
+        setFormData((prev) => ({ ...prev, customer_id: self.id }));
+      }
+    }
+  }, [user?.role, user?.id, customers, formData.customer_id]);
+
 
   const handleValidateCoupon = async () => {
     if (!couponCode.trim()) {
@@ -345,6 +354,7 @@ export default function Agendamentos() {
                 <DialogContent className="w-[95vw] sm:w-full max-w-lg p-4 sm:p-6">
                   <DialogHeader>
                     <DialogTitle>Bloquear Horário</DialogTitle>
+                    <DialogDescription className="sr-only">Selecione barbeiro, data e intervalo para bloquear.</DialogDescription>
                   </DialogHeader>
                   <form onSubmit={handleBlockTimeSubmit} className="space-y-4">
                     <div className="space-y-2">
@@ -437,26 +447,31 @@ export default function Agendamentos() {
                   <DialogTitle>
                     {editingAppointment ? 'Editar Agendamento' : 'Criar Novo Agendamento'}
                   </DialogTitle>
+                  <DialogDescription className="sr-only">Preencha os dados do agendamento.</DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="customer">Cliente</Label>
-                    <Select 
-                      value={formData.customer_id} 
-                      onValueChange={(value) => setFormData({ ...formData, customer_id: value })}
-                      required
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o cliente" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {customers?.map((customer) => (
-                          <SelectItem key={customer.id} value={customer.id}>
-                            {customer.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    {user?.role === 'customer' ? (
+                      <Input id="customer" value={(customers?.find((c: any) => c.user_id === user?.id)?.name || customers?.[0]?.name || 'Meu perfil')} readOnly disabled />
+                    ) : (
+                      <Select 
+                        value={formData.customer_id} 
+                        onValueChange={(value) => setFormData({ ...formData, customer_id: value })}
+                        required
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o cliente" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {customers?.map((customer) => (
+                            <SelectItem key={customer.id} value={customer.id}>
+                              {customer.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                   </div>
 
                   <div className="space-y-2">

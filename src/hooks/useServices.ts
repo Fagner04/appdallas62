@@ -16,22 +16,54 @@ export const useServices = () => {
   return useQuery({
     queryKey: ['services'],
     queryFn: async () => {
-      // Buscar o barbershop_id do usuário logado
+      // Buscar o barbershop_id do usuário logado (owner, barber ou customer)
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
-      const { data: barbershop } = await supabase
+      let barbershopId: string | null = null;
+
+      // Tenta como proprietário
+      const { data: ownedBarbershop } = await supabase
         .from('barbershops')
         .select('id')
         .eq('owner_id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (!barbershop) throw new Error('Barbearia não encontrada');
+      if (ownedBarbershop) {
+        barbershopId = ownedBarbershop.id;
+      } else {
+        // Tenta como barbeiro
+        const { data: barber } = await supabase
+          .from('barbers')
+          .select('barbershop_id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (barber?.barbershop_id) {
+          barbershopId = barber.barbershop_id;
+        } else {
+          // Tenta como cliente
+          const { data: customer } = await supabase
+            .from('customers')
+            .select('barbershop_id')
+            .eq('user_id', user.id)
+            .maybeSingle();
+
+          if (customer?.barbershop_id) {
+            barbershopId = customer.barbershop_id;
+          }
+        }
+      }
+
+      if (!barbershopId) {
+        // Sem barbearia associada – retornar vazio para não quebrar a UI
+        return [] as Service[];
+      }
 
       const { data, error } = await supabase
         .from('services')
         .select('*')
-        .eq('barbershop_id', barbershop.id)
+        .eq('barbershop_id', barbershopId)
         .eq('is_active', true)
         .order('name');
 

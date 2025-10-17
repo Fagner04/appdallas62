@@ -64,7 +64,20 @@ export const useCustomers = () => {
         }
       }
 
-      if (!barbershopId) return [];
+      if (!barbershopId) {
+        // Se for cliente sem vínculo de barbearia como owner/barber, retornar apenas o próprio registro
+        const { data: selfCustomer } = await supabase
+          .from('customers')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (selfCustomer) {
+          console.log('Customers loaded (self):', [selfCustomer]);
+          return [selfCustomer] as Customer[];
+        }
+        return [] as Customer[];
+      }
 
       const { data, error } = await supabase
         .from('customers')
