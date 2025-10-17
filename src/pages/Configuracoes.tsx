@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { User, Clock, Lock, Loader2, ChevronDown, LogOut, CreditCard, Store, Copy, Check, Shield, Calendar as CalendarIcon, DollarSign, Ban, Eye, Trash2 } from 'lucide-react';
+import { User, Clock, Lock, Loader2, ChevronDown, LogOut, CreditCard, Store, Copy, Check, Shield, Calendar as CalendarIcon, DollarSign, Ban, Eye, Trash2, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
 import { useWorkingHours, useUpdateWorkingHours } from '@/hooks/useWorkingHours';
 import { usePasswordChange } from '@/hooks/usePasswordChange';
@@ -17,6 +17,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useClientFeatures } from '@/hooks/useClientFeatures';
 import { Separator } from '@/components/ui/separator';
+import { useNotificationSettings } from '@/hooks/useNotificationSettings';
 
 const DAYS = [
   { value: 1, label: 'Segunda' },
@@ -58,6 +59,10 @@ export default function Configuracoes() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isWorkingHoursOpen, setIsWorkingHoursOpen] = useState(false);
   const [isSecurityOpen, setIsSecurityOpen] = useState(false);
+  const [isWhatsAppOpen, setIsWhatsAppOpen] = useState(false);
+
+  const { settings: notificationSettings, updateSettings } = useNotificationSettings(authUser?.id);
+  const [whatsappPhone, setWhatsappPhone] = useState('');
 
   useEffect(() => {
     if (workingHours.length > 0) {
@@ -72,6 +77,12 @@ export default function Configuracoes() {
       setHours(hoursMap);
     }
   }, [workingHours]);
+
+  useEffect(() => {
+    if (notificationSettings?.whatsapp_phone) {
+      setWhatsappPhone(notificationSettings.whatsapp_phone);
+    }
+  }, [notificationSettings]);
 
   const handleSaveWorkingHours = async () => {
     const data = Object.entries(hours).map(([day, config]) => ({
@@ -440,6 +451,91 @@ export default function Configuracoes() {
                         )}
                       </Button>
                     </form>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+
+            {/* WhatsApp Configuration */}
+            <Collapsible open={isWhatsAppOpen} onOpenChange={setIsWhatsAppOpen}>
+              <Card>
+                <CardHeader>
+                  <CollapsibleTrigger className="w-full">
+                    <CardTitle className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-2">
+                        <MessageSquare className="h-5 w-5" />
+                        Notificações WhatsApp
+                      </div>
+                      <ChevronDown 
+                        className={`h-5 w-5 transition-transform duration-200 ${
+                          isWhatsAppOpen ? 'rotate-180' : ''
+                        }`}
+                      />
+                    </CardTitle>
+                  </CollapsibleTrigger>
+                  <CardDescription className="text-left px-6">
+                    Configure o recebimento de notificações via WhatsApp
+                  </CardDescription>
+                </CardHeader>
+                <CollapsibleContent>
+                  <CardContent className="space-y-4">
+                    <div className="bg-muted/50 p-3 rounded-md text-sm">
+                      <p className="font-medium mb-1">📱 Como funciona:</p>
+                      <p className="text-muted-foreground">Ao ativar, você receberá notificações importantes sobre seus agendamentos diretamente no WhatsApp.</p>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 rounded-lg border border-border">
+                      <div className="flex-1">
+                        <Label htmlFor="whatsapp-enabled" className="font-medium cursor-pointer">
+                          Ativar Notificações WhatsApp
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          Receba confirmações e lembretes no WhatsApp
+                        </p>
+                      </div>
+                      <Switch
+                        id="whatsapp-enabled"
+                        checked={notificationSettings?.whatsapp_enabled || false}
+                        onCheckedChange={(checked) => {
+                          updateSettings.mutate({ whatsapp_enabled: checked });
+                        }}
+                      />
+                    </div>
+
+                    {notificationSettings?.whatsapp_enabled && (
+                      <div className="space-y-2">
+                        <Label htmlFor="whatsapp-phone">Número do WhatsApp</Label>
+                        <Input
+                          id="whatsapp-phone"
+                          type="tel"
+                          placeholder="+5562999999999"
+                          value={whatsappPhone}
+                          onChange={(e) => setWhatsappPhone(e.target.value)}
+                          className="font-mono"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Formato: +55 seguido do DDD e número (ex: +5562999999999)
+                        </p>
+                        <Button
+                          onClick={() => {
+                            if (whatsappPhone) {
+                              updateSettings.mutate({ whatsapp_phone: whatsappPhone });
+                            }
+                          }}
+                          disabled={!whatsappPhone || updateSettings.isPending}
+                          className="w-full"
+                        >
+                          {updateSettings.isPending ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Salvando...
+                            </>
+                          ) : (
+                            'Salvar Número'
+                          )}
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </CollapsibleContent>
               </Card>

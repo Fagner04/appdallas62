@@ -11,6 +11,8 @@ export interface NotificationSettings {
   appointment_cancelled_enabled: boolean;
   appointment_rescheduled_enabled: boolean;
   marketing_enabled: boolean;
+  whatsapp_enabled: boolean;
+  whatsapp_phone: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -45,6 +47,8 @@ export const useNotificationSettings = (userId?: string) => {
             appointment_cancelled_enabled: true,
             appointment_rescheduled_enabled: true,
             marketing_enabled: false,
+            whatsapp_enabled: false,
+            whatsapp_phone: null,
           })
           .select()
           .single();
