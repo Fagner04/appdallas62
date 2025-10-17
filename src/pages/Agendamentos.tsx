@@ -14,7 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { useAppointments, useCreateAppointment, useUpdateAppointment, useDeleteAppointment, useAvailableTimeSlots, AppointmentWithDetails } from '@/hooks/useAppointments';
 import { useCustomers } from '@/hooks/useCustomers';
-import { useBarbers } from '@/hooks/useBarbers';
+import { useBarbers, useClientBarbers } from '@/hooks/useBarbers';
 import { useServices } from '@/hooks/useServices';
 import { useBlockedTimes, useCreateBlockedTime, useDeleteBlockedTime } from '@/hooks/useBlockedTimes';
 import { useAuth } from '@/contexts/AuthContext';
@@ -52,7 +52,10 @@ export default function Agendamentos() {
 
   const { data: appointments, isLoading } = useAppointments(selectedDate);
   const { data: customers } = useCustomers();
-  const { data: barbers } = useBarbers();
+  const { data: ownerBarbers = [], isLoading: ownerBarbersLoading } = useBarbers();
+  const { data: clientBarbers = [], isLoading: clientBarbersLoading } = useClientBarbers();
+  const barbers = (user?.role === 'customer' ? clientBarbers : ownerBarbers);
+  const barbersLoading = (user?.role === 'customer' ? clientBarbersLoading : ownerBarbersLoading);
   const { data: services } = useServices();
   const { data: blockedTimes } = useBlockedTimes(blockFormData.barber_id, selectedDate);
   const createAppointment = useCreateAppointment();

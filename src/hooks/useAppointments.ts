@@ -98,9 +98,19 @@ export const useAppointments = (date?: string) => {
           barbershopId = barber.barbershop_id;
         }
       }
+      // If still not found, try as customer
+      if (!barbershopId) {
+        const { data: customer } = await supabase
+          .from('customers')
+          .select('barbershop_id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        if (customer?.barbershop_id) {
+          barbershopId = customer.barbershop_id;
+        }
+      }
 
       if (!barbershopId) return [];
-
       let query = supabase
         .from('appointments')
         .select(`
