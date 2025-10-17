@@ -116,7 +116,7 @@ export default function CadastroBarbearia() {
       }
 
       try {
-        await register(accountResult.data.ownerEmail, accountResult.data.password, accountResult.data.ownerName);
+        await register(accountResult.data.ownerName, accountResult.data.ownerEmail, accountResult.data.password);
         toast.success('Conta criada! Criando sua barbearia...');
         await new Promise((r) => setTimeout(r, 1000));
       } catch (err: any) {
