@@ -133,10 +133,10 @@ export const useAvailableTimeSlots = (date: string, barberId: string, serviceDur
       // Fetch existing appointments for the barber on this date
       const { data: appointments, error: appointmentsError } = await supabase
         .from('appointments')
-        .select('appointment_time, service_id')
+        .select('appointment_time, service_id, status')
         .eq('barber_id', barberId)
         .eq('appointment_date', date)
-        .neq('status', 'cancelled');
+        .in('status', ['pending', 'confirmed', 'completed']);
 
       if (appointmentsError) throw appointmentsError;
 
@@ -239,7 +239,9 @@ export const useAvailableTimeSlots = (date: string, barberId: string, serviceDur
 
         // Check if slot overlaps with existing appointments
         const hasAppointmentConflict = appointments?.some(apt => {
-          const aptStart = timeToMinutes(apt.appointment_time);
+          // Remove seconds from appointment_time if present (HH:mm:ss -> HH:mm)
+          const aptTimeStr = apt.appointment_time.substring(0, 5);
+          const aptStart = timeToMinutes(aptTimeStr);
           const service = services?.find(s => s.id === apt.service_id);
           const aptEnd = aptStart + (service?.duration || 30);
           
