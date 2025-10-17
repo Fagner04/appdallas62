@@ -102,13 +102,25 @@ export const useAvailableTimeSlots = (date: string, barberId: string, serviceDur
         .from('working_hours' as any)
         .select('*')
         .eq('day_of_week', dayOfWeek)
-        .single();
+        .maybeSingle();
 
-      if (hoursError) throw hoursError;
+      if (hoursError) {
+        console.error('Error fetching working hours:', hoursError);
+      }
 
-      // Se o dia está fechado, retornar array vazio
-      if (!workingHours || !(workingHours as any).is_open) {
-        return [];
+      // Se o dia está fechado ou não há horários configurados, usar horários padrão
+      let workStart = 8 * 60; // 08:00
+      let workEnd = 20 * 60;  // 20:00
+      
+      if (workingHours) {
+        if (!(workingHours as any).is_open) {
+          return []; // Dia fechado
+        }
+        // Usar horários configurados
+        const [startHour, startMin] = (workingHours as any).start_time.split(':').map(Number);
+        const [endHour, endMin] = (workingHours as any).end_time.split(':').map(Number);
+        workStart = startHour * 60 + startMin;
+        workEnd = endHour * 60 + endMin;
       }
 
       // Fetch service durations for existing appointments
@@ -118,11 +130,6 @@ export const useAvailableTimeSlots = (date: string, barberId: string, serviceDur
         .select('id, duration')
         .in('id', serviceIds);
 
-      // Usar horários de funcionamento configurados
-      const [startHour, startMin] = (workingHours as any).start_time.split(':').map(Number);
-      const [endHour, endMin] = (workingHours as any).end_time.split(':').map(Number);
-      const workStart = startHour * 60 + startMin;
-      const workEnd = endHour * 60 + endMin;
       const slotDuration = 30;  // 30 minutes per slot
 
       // Create all possible time slots

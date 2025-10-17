@@ -63,10 +63,11 @@ export default function Agendamentos() {
 
   // Get selected service duration for available slots
   const selectedService = services?.find(s => s.id === formData.service_id);
-  const { data: availableSlots } = useAvailableTimeSlots(
+  const serviceDuration = selectedService?.duration || 30; // Default 30 minutes
+  const { data: availableSlots, isLoading: isLoadingSlots } = useAvailableTimeSlots(
     formData.date,
     formData.barber_id,
-    selectedService?.duration || 0
+    serviceDuration
   );
 
   useEffect(() => {
@@ -500,31 +501,40 @@ export default function Agendamentos() {
                       value={formData.time} 
                       onValueChange={(value) => setFormData({ ...formData, time: value })}
                       required
-                      disabled={!formData.barber_id || !formData.service_id || !formData.date || !availableSlots || availableSlots.length === 0}
+                      disabled={!formData.barber_id || !formData.service_id || !formData.date || isLoadingSlots}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder={
-                          !formData.barber_id || !formData.service_id 
+                          isLoadingSlots
+                            ? "Carregando horários..."
+                            : !formData.barber_id || !formData.service_id 
                             ? "Selecione barbeiro e serviço primeiro"
                             : availableSlots && availableSlots.length === 0
-                            ? "Nenhum horário disponível"
+                            ? "Nenhum horário disponível nesta data"
                             : "Selecione um horário disponível"
                         } />
                       </SelectTrigger>
                       <SelectContent>
-                        {availableSlots && availableSlots.length > 0 && availableSlots.map((slot) => (
-                          <SelectItem key={slot} value={slot}>
-                            {slot}
-                          </SelectItem>
-                        ))}
+                        {availableSlots && availableSlots.length > 0 ? (
+                          availableSlots.map((slot) => (
+                            <SelectItem key={slot} value={slot}>
+                              {slot}
+                            </SelectItem>
+                          ))
+                        ) : !isLoadingSlots && formData.barber_id && formData.service_id && (
+                          <div className="p-2 text-sm text-muted-foreground text-center">
+                            Nenhum horário disponível
+                          </div>
+                        )}
                       </SelectContent>
                     </Select>
-                    {formData.barber_id && formData.service_id && formData.date && (
-                      <p className="text-xs text-muted-foreground">
-                        {availableSlots?.length || 0} horários disponíveis
-                      </p>
-                    )}
                   </div>
+
+                  {formData.barber_id && formData.service_id && formData.date && (
+                    <p className="text-xs text-muted-foreground">
+                      {availableSlots?.length || 0} horários disponíveis
+                    </p>
+                  )}
 
                   <div className="space-y-2">
                     <Label htmlFor="notes">Observações (opcional)</Label>
