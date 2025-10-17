@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { SubscriptionGuard } from "@/components/SubscriptionGuard";
 import Login from "./pages/Login";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
@@ -86,7 +87,9 @@ const AppRoutes = () => {
         path="/dashboard"
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <SubscriptionGuard>
+              <Dashboard />
+            </SubscriptionGuard>
           </ProtectedRoute>
         }
       />
@@ -94,7 +97,9 @@ const AppRoutes = () => {
         path="/agendamentos"
         element={
           <ProtectedRoute>
-            <Agendamentos />
+            <SubscriptionGuard>
+              <Agendamentos />
+            </SubscriptionGuard>
           </ProtectedRoute>
         }
       />
@@ -102,7 +107,9 @@ const AppRoutes = () => {
         path="/servicos"
         element={
           <ProtectedRoute>
-            <Servicos />
+            <SubscriptionGuard>
+              <Servicos />
+            </SubscriptionGuard>
           </ProtectedRoute>
         }
       />
@@ -110,7 +117,9 @@ const AppRoutes = () => {
         path="/barbeiros"
         element={
           <ProtectedRoute>
-            <Barbeiros />
+            <SubscriptionGuard>
+              <Barbeiros />
+            </SubscriptionGuard>
           </ProtectedRoute>
         }
       />
@@ -118,7 +127,9 @@ const AppRoutes = () => {
         path="/clientes"
         element={
           <ProtectedRoute>
-            <Clientes />
+            <SubscriptionGuard>
+              <Clientes />
+            </SubscriptionGuard>
           </ProtectedRoute>
         }
       />
@@ -126,7 +137,9 @@ const AppRoutes = () => {
         path="/caixa"
         element={
           <ProtectedRoute>
-            <Caixa />
+            <SubscriptionGuard>
+              <Caixa />
+            </SubscriptionGuard>
           </ProtectedRoute>
         }
       />
@@ -134,7 +147,9 @@ const AppRoutes = () => {
         path="/relatorios"
         element={
           <ProtectedRoute>
-            <Relatorios />
+            <SubscriptionGuard>
+              <Relatorios />
+            </SubscriptionGuard>
           </ProtectedRoute>
         }
       />
@@ -142,7 +157,9 @@ const AppRoutes = () => {
         path="/notificacoes"
         element={
           <ProtectedRoute>
-            <Notificacoes />
+            <SubscriptionGuard>
+              <Notificacoes />
+            </SubscriptionGuard>
           </ProtectedRoute>
         }
       />
@@ -150,7 +167,9 @@ const AppRoutes = () => {
         path="/configuracoes"
         element={
           <ProtectedRoute>
-            <Configuracoes />
+            <SubscriptionGuard>
+              <Configuracoes />
+            </SubscriptionGuard>
           </ProtectedRoute>
         }
       />
@@ -158,7 +177,9 @@ const AppRoutes = () => {
         path="/agenda-barbeiro"
         element={
           <ProtectedRoute>
-            <AgendaBarbeiro />
+            <SubscriptionGuard>
+              <AgendaBarbeiro />
+            </SubscriptionGuard>
           </ProtectedRoute>
         }
       />
@@ -166,7 +187,9 @@ const AppRoutes = () => {
         path="/controle-clientes"
         element={
           <ProtectedRoute>
-            <ControleClientes />
+            <SubscriptionGuard>
+              <ControleClientes />
+            </SubscriptionGuard>
           </ProtectedRoute>
         }
       />
@@ -174,7 +197,9 @@ const AppRoutes = () => {
         path="/historico"
         element={
           <ProtectedRoute>
-            <HistoricoCliente />
+            <SubscriptionGuard>
+              <HistoricoCliente />
+            </SubscriptionGuard>
           </ProtectedRoute>
         }
       />
@@ -182,7 +207,9 @@ const AppRoutes = () => {
         path="/marketing"
         element={
           <ProtectedRoute>
-            <Marketing />
+            <SubscriptionGuard>
+              <Marketing />
+            </SubscriptionGuard>
           </ProtectedRoute>
         }
       />
