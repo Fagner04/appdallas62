@@ -123,3 +123,41 @@ export const useDeleteService = () => {
     },
   });
 };
+
+// Hook para clientes visualizarem serviços da sua barbearia
+export const useClientServices = () => {
+  return useQuery({
+    queryKey: ['client-services'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      // Buscar a barbearia do cliente
+      const { data: customer } = await supabase
+        .from('customers')
+        .select('barbershop_id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (!customer?.barbershop_id) {
+        console.log('Cliente sem barbearia associada');
+        return [];
+      }
+
+      // Buscar serviços ativos da barbearia do cliente
+      const { data, error } = await supabase
+        .from('services')
+        .select('*')
+        .eq('barbershop_id', customer.barbershop_id)
+        .eq('is_active', true)
+        .order('name');
+
+      if (error) {
+        console.error('Erro ao buscar serviços:', error);
+        throw error;
+      }
+
+      return data as Service[];
+    },
+  });
+};

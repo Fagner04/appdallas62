@@ -7,11 +7,11 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, Clock, Scissors, Ban, Gift, CheckCircle } from 'lucide-react';
-import { useServices } from '@/hooks/useServices';
-import { useBarbers } from '@/hooks/useBarbers';
+import { useClientServices } from '@/hooks/useServices';
+import { useClientBarbers } from '@/hooks/useBarbers';
 import { useAvailableTimeSlots, useCreateAppointment } from '@/hooks/useAppointments';
 import { useBlockedTimes } from '@/hooks/useBlockedTimes';
-import { useWorkingHours } from '@/hooks/useWorkingHours';
+import { useClientWorkingHours } from '@/hooks/useWorkingHours';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -35,8 +35,8 @@ export function ClientBookingCalendar({ onSuccess }: ClientBookingCalendarProps 
   const [validatedCoupon, setValidatedCoupon] = useState<any>(null);
   const [validatingCoupon, setValidatingCoupon] = useState(false);
 
-  const { data: services = [], isLoading: servicesLoading } = useServices();
-  const { data: barbers = [], isLoading: barbersLoading } = useBarbers();
+  const { data: services = [], isLoading: servicesLoading } = useClientServices();
+  const { data: barbers = [], isLoading: barbersLoading, error: barbersError } = useClientBarbers();
   
   // Get customer profile to get customer_id
   const { data: customerProfile } = useQuery({
@@ -71,7 +71,7 @@ export function ClientBookingCalendar({ onSuccess }: ClientBookingCalendarProps 
   const { data: dateBlockedTimes = [] } = useBlockedTimes(selectedBarber, formattedDate);
 
   // Buscar horários de funcionamento
-  const { data: workingHours = [] } = useWorkingHours();
+  const { data: workingHours = [] } = useClientWorkingHours();
 
   const createAppointment = useCreateAppointment();
 
@@ -197,7 +197,21 @@ export function ClientBookingCalendar({ onSuccess }: ClientBookingCalendarProps 
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6 p-4 sm:p-6">
-        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6">
+        {barbers.length === 0 && !barbersLoading ? (
+          <div className="text-center py-8 space-y-4">
+            <div className="p-4 rounded-full bg-muted/50 w-16 h-16 mx-auto flex items-center justify-center">
+              <Scissors className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold">Nenhum barbeiro disponível</h3>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                Você ainda não está associado a uma barbearia ou a barbearia não possui barbeiros cadastrados. 
+                Entre em contato com a administração para mais informações.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6">
           {/* Calendar */}
           <div className="space-y-4 order-2 lg:order-1">
             <Label>Selecione a Data</Label>
@@ -433,6 +447,7 @@ export function ClientBookingCalendar({ onSuccess }: ClientBookingCalendarProps 
             </Button>
           </div>
         </div>
+        )}
       </CardContent>
     </Card>
   );

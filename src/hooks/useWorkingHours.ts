@@ -108,3 +108,35 @@ export const useUpdateWorkingHours = () => {
     },
   });
 };
+
+// Hook para clientes visualizarem horários de funcionamento da sua barbearia
+export const useClientWorkingHours = () => {
+  return useQuery({
+    queryKey: ['client-working-hours'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      // Buscar a barbearia do cliente
+      const { data: customer } = await supabase
+        .from('customers')
+        .select('barbershop_id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (!customer?.barbershop_id) {
+        console.log('Cliente sem barbearia associada');
+        return [];
+      }
+
+      const { data, error } = await supabase
+        .from('working_hours' as any)
+        .select('*')
+        .eq('barbershop_id', customer.barbershop_id)
+        .order('day_of_week', { ascending: true });
+
+      if (error) throw error;
+      return (data as unknown) as WorkingHours[];
+    },
+  });
+};

@@ -174,3 +174,41 @@ export const useDeleteBarber = () => {
     },
   });
 };
+
+// Hook para clientes visualizarem barbeiros da sua barbearia
+export const useClientBarbers = () => {
+  return useQuery({
+    queryKey: ['client-barbers'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      // Buscar a barbearia do cliente
+      const { data: customer } = await supabase
+        .from('customers')
+        .select('barbershop_id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (!customer?.barbershop_id) {
+        console.log('Cliente sem barbearia associada');
+        return [];
+      }
+
+      // Buscar barbeiros ativos da barbearia do cliente
+      const { data, error } = await supabase
+        .from('barbers')
+        .select('*')
+        .eq('barbershop_id', customer.barbershop_id)
+        .eq('is_active', true)
+        .order('name');
+
+      if (error) {
+        console.error('Erro ao buscar barbeiros:', error);
+        throw error;
+      }
+
+      return data as Barber[];
+    },
+  });
+};
