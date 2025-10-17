@@ -1,11 +1,10 @@
 import { ReactNode, useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate, NavLink, useLocation } from 'react-router-dom';
+import { useNavigate, NavLink } from 'react-router-dom';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { NotificationBell } from '@/components/NotificationBell';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   LayoutDashboard,
   Users,
@@ -27,8 +26,6 @@ import {
   X,
   Gift,
   HelpCircle,
-  ChevronDown,
-  Shield,
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -72,14 +69,7 @@ const getMenuItems = (role?: string) => {
     { icon: BarChart3, label: 'Relatórios', path: '/relatorios' },
     { icon: FileText, label: 'Marketing', path: '/marketing' },
     { icon: Bell, label: 'Notificações', path: '/notificacoes' },
-    { icon: User, label: 'Perfil', path: '/configuracoes' },
-  ];
-};
-
-const getSettingsMenuItems = () => {
-  return [
-    { icon: UserCircle, label: 'Convite de Clientes', path: '/convite-clientes' },
-    { icon: Shield, label: 'Controle de Clientes', path: '/controle-clientes' },
+    { icon: Settings, label: 'Configurações', path: '/configuracoes' },
   ];
 };
 
@@ -87,21 +77,12 @@ export const Layout = ({ children }: LayoutProps) => {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const location = useLocation();
   const menuItems = getMenuItems(user?.role);
-  const settingsItems = user?.role === 'admin' ? getSettingsMenuItems() : [];
 
   useEffect(() => {
     console.log('Layout - User role:', user?.role);
     console.log('Layout - Should show notification bell:', user?.role === 'customer' || user?.role === 'barber');
-    
-    // Auto-open settings menu if on a settings page
-    const settingsPaths = ['/convite-clientes', '/controle-clientes'];
-    if (settingsPaths.includes(location.pathname)) {
-      setSettingsOpen(true);
-    }
-  }, [user, location.pathname]);
+  }, [user]);
 
   const SidebarContent = ({ isCollapsed = false }: { isCollapsed?: boolean }) => (
     <div className="flex h-full flex-col">
@@ -149,45 +130,6 @@ export const Layout = ({ children }: LayoutProps) => {
             {!isCollapsed && <span className="font-medium">{item.label}</span>}
           </NavLink>
         ))}
-        
-        {user?.role === 'admin' && settingsItems.length > 0 && (
-          <Collapsible open={settingsOpen} onOpenChange={setSettingsOpen}>
-            <CollapsibleTrigger asChild>
-              <button
-                className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-foreground hover:bg-primary-light transition-smooth"
-                title={isCollapsed ? "Configurações" : undefined}
-              >
-                <Settings className="h-5 w-5" />
-                {!isCollapsed && (
-                  <>
-                    <span className="flex-1 text-left font-medium">Configurações</span>
-                    <ChevronDown className={`h-4 w-4 transition-transform ${settingsOpen ? 'rotate-180' : ''}`} />
-                  </>
-                )}
-              </button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-1">
-              {settingsItems.map((item) => (
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setOpen(false)}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 rounded-lg px-4 py-2 ml-4 transition-smooth ${
-                      isActive
-                        ? 'bg-primary text-primary-foreground shadow-elegant'
-                        : 'text-foreground hover:bg-primary-light'
-                    }`
-                  }
-                  title={isCollapsed ? item.label : undefined}
-                >
-                  <item.icon className="h-4 w-4" />
-                  {!isCollapsed && <span className="text-sm font-medium">{item.label}</span>}
-                </NavLink>
-              ))}
-            </CollapsibleContent>
-          </Collapsible>
-        )}
       </nav>
       
       <div className="p-4 border-t border-border hidden lg:block">
