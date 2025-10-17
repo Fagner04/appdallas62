@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Clock, Scissors, Ban, Gift, CheckCircle } from 'lucide-react';
+import { Loader2, Clock, Scissors, Ban, Gift, CheckCircle, AlertCircle } from 'lucide-react';
 import { useClientServices } from '@/hooks/useServices';
 import { useClientBarbers } from '@/hooks/useBarbers';
 import { useAvailableTimeSlots, useCreateAppointment } from '@/hooks/useAppointments';
@@ -39,18 +39,35 @@ export function ClientBookingCalendar({ onSuccess }: ClientBookingCalendarProps 
   const { data: barbers = [], isLoading: barbersLoading, error: barbersError } = useClientBarbers();
   
   // Get customer profile to get customer_id
-  const { data: customerProfile } = useQuery({
+  const { data: customerProfile, error: customerError } = useQuery({
     queryKey: ['customer-profile', user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('customers')
-        .select('id')
+        .select('id, barbershop_id')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
+      
+      if (error) {
+        console.error('Error fetching customer profile:', error);
+        throw error;
+      }
+      
+      if (!data) {
+        console.error('Customer not found for user:', user.id);
+        throw new Error('Perfil de cliente não encontrado');
+      }
+      
+      if (!data.barbershop_id) {
+        console.error('Customer has no barbershop_id:', data);
+        throw new Error('Cliente não está associado a nenhuma barbearia');
+      }
+      
       return data;
     },
-    enabled: !!user?.id
+    enabled: !!user?.id,
+    retry: 2
   });
   
   const selectedServiceData = services.find(s => s.id === selectedService);
@@ -197,7 +214,19 @@ export function ClientBookingCalendar({ onSuccess }: ClientBookingCalendarProps 
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6 p-4 sm:p-6">
-        {barbers.length === 0 && !barbersLoading ? (
+        {customerError ? (
+          <div className="text-center py-8 space-y-4">
+            <div className="p-4 rounded-full bg-destructive/10 w-16 h-16 mx-auto flex items-center justify-center">
+              <AlertCircle className="h-8 w-8 text-destructive" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold text-destructive">Erro ao carregar perfil</h3>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                {customerError.message || 'Não foi possível carregar seu perfil de cliente. Por favor, entre em contato com a administração.'}
+              </p>
+            </div>
+          </div>
+        ) : barbers.length === 0 && !barbersLoading ? (
           <div className="text-center py-8 space-y-4">
             <div className="p-4 rounded-full bg-muted/50 w-16 h-16 mx-auto flex items-center justify-center">
               <Scissors className="h-8 w-8 text-muted-foreground" />
