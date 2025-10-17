@@ -107,19 +107,6 @@ export default function PerfilCliente() {
   return (
     <Layout>
       <div className="space-y-8 animate-fade-in">
-        {/* Header do Perfil */}
-        <div className="relative overflow-hidden rounded-xl shadow-elegant bg-card border">
-          <div className="p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <User className="h-6 w-6 text-primary" />
-              </div>
-              <h1 className="text-2xl font-bold">Meu Perfil</h1>
-            </div>
-            <p className="text-muted-foreground">Gerencie suas informações pessoais e preferências de forma segura</p>
-          </div>
-        </div>
-
         {/* Dados do Cliente */}
         <Card className="shadow-elegant border-primary/10">
           <CardHeader>
