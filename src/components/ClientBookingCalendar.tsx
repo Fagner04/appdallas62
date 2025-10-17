@@ -100,6 +100,18 @@ export function ClientBookingCalendar({ onSuccess }: ClientBookingCalendarProps 
     serviceDuration
   );
 
+  // Debug logs
+  console.log('ClientBookingCalendar Debug:', {
+    selectedDate: formattedDate,
+    selectedBarber,
+    selectedService,
+    serviceDuration,
+    availableSlots,
+    slotsLoading,
+    barbersCount: barbers.length,
+    servicesCount: services.length
+  });
+
   // Buscar todos os horários bloqueados do barbeiro para marcar no calendário
   const { data: allBlockedTimes = [] } = useBlockedTimes(selectedBarber);
   

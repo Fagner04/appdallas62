@@ -140,6 +140,8 @@ export const useAvailableTimeSlots = (date: string, barberId: string, serviceDur
   return useQuery({
     queryKey: ['available-time-slots', date, barberId, serviceDuration],
     queryFn: async () => {
+      console.log('useAvailableTimeSlots called with:', { date, barberId, serviceDuration });
+      
       // Fetch existing appointments for the barber on this date
       const { data: appointments, error: appointmentsError } = await supabase
         .from('appointments')
@@ -148,7 +150,10 @@ export const useAvailableTimeSlots = (date: string, barberId: string, serviceDur
         .eq('appointment_date', date)
         .in('status', ['pending', 'confirmed', 'completed']);
 
-      if (appointmentsError) throw appointmentsError;
+      if (appointmentsError) {
+        console.error('Error fetching appointments:', appointmentsError);
+        throw appointmentsError;
+      }
 
       // Fetch blocked times for the barber on this date
       const { data: blockedTimes, error: blockedError } = await supabase
@@ -194,6 +199,7 @@ export const useAvailableTimeSlots = (date: string, barberId: string, serviceDur
 
       // Se o dia está fechado, retornar vazio
       if (!(workingHours as any).is_open) {
+        console.warn('Day is closed:', dayOfWeek);
         return [];
       }
 
@@ -202,6 +208,8 @@ export const useAvailableTimeSlots = (date: string, barberId: string, serviceDur
       const [endHour, endMin] = (workingHours as any).end_time.split(':').map(Number);
       const workStart = startHour * 60 + startMin;
       const workEnd = endHour * 60 + endMin;
+
+      console.log('Working hours:', { workStart, workEnd, dayOfWeek });
 
       // Fetch service durations for existing appointments
       const serviceIds = appointments?.map(apt => apt.service_id) || [];
@@ -270,6 +278,8 @@ export const useAvailableTimeSlots = (date: string, barberId: string, serviceDur
 
         return !hasAppointmentConflict && !hasBlockedConflict;
       });
+
+      console.log('Available slots generated:', availableSlots.length, availableSlots);
 
       return availableSlots;
     },
