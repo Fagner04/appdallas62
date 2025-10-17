@@ -9,6 +9,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { User, Clock, Lock, Loader2, ChevronDown, LogOut, CreditCard, Store, Copy, Check, Shield, Calendar as CalendarIcon, DollarSign, Ban, Eye, Trash2, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
+import { WhatsAppQRConnect } from '@/components/WhatsAppQRConnect';
 import { useWorkingHours, useUpdateWorkingHours } from '@/hooks/useWorkingHours';
 import { usePasswordChange } from '@/hooks/usePasswordChange';
 import { useMyBarbershop } from '@/hooks/useBarbershops';
@@ -514,8 +515,30 @@ export default function Configuracoes() {
                             <li>Acesse <a href="https://developers.facebook.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Meta for Developers</a></li>
                             <li>Crie um aplicativo e adicione o produto WhatsApp Business</li>
                             <li>Configure um número de telefone de teste ou conecte seu número</li>
-                            <li>Copie o Token de Acesso e o Phone Number ID abaixo</li>
+                            <li>Copie o Token de Acesso e o Phone Number ID</li>
                           </ol>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                          <Separator className="flex-1" />
+                          <span className="text-xs text-muted-foreground">Configuração Rápida</span>
+                          <Separator className="flex-1" />
+                        </div>
+
+                        <div className="flex justify-center">
+                          <WhatsAppQRConnect
+                            onCredentialsScanned={(token, phoneId) => {
+                              setWhatsappToken(token);
+                              setWhatsappPhoneId(phoneId);
+                              toast.success('Credenciais carregadas via QR code!');
+                            }}
+                          />
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                          <Separator className="flex-1" />
+                          <span className="text-xs text-muted-foreground">Ou configure manualmente</span>
+                          <Separator className="flex-1" />
                         </div>
                         
                         <div className="space-y-2">
