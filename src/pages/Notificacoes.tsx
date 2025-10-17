@@ -310,55 +310,90 @@ export default function Notificacoes() {
           </CardHeader>
           <CardContent className="px-4 sm:px-6">
             {templates?.length === 0 ? (
-              <div className="text-center py-12">
-                <FileText className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-muted-foreground mb-3 opacity-50" />
-                <p className="text-sm sm:text-base text-muted-foreground mb-4">
-                  Nenhum template criado ainda
+              <div className="text-center py-16 px-4">
+                <div className="relative inline-block mb-6">
+                  <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
+                  <div className="relative p-4 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 border-2 border-primary/20">
+                    <FileText className="h-12 w-12 sm:h-14 sm:w-14 text-primary animate-pulse" />
+                  </div>
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold mb-2">Nenhum template criado ainda</h3>
+                <p className="text-sm sm:text-base text-muted-foreground mb-6 max-w-md mx-auto">
+                  Crie templates personalizados para enviar notificações de forma rápida e eficiente
                 </p>
-                <Button onClick={handleCreateTemplate} variant="outline" className="h-10 text-sm">
-                  <Plus className="h-4 w-4 mr-2" />
+                <Button 
+                  onClick={handleCreateTemplate} 
+                  size="lg"
+                  className="h-11 sm:h-12 px-6 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  <Plus className="h-5 w-5 mr-2" />
                   Criar Primeiro Template
                 </Button>
               </div>
             ) : (
-              <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {templates?.map((template) => (
-                  <Card key={template.id} className="relative overflow-hidden hover-lift">
-                    <CardHeader className="pb-3 px-4">
-                      <div className="flex items-start justify-between gap-2">
+                  <Card 
+                    key={template.id} 
+                    className="relative overflow-hidden group transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 border-2 hover:border-primary/20"
+                  >
+                    {/* Gradient background */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    
+                    {/* Accent line */}
+                    <div className={`absolute top-0 left-0 right-0 h-1 ${template.is_system ? 'bg-gradient-to-r from-primary via-primary/80 to-primary/60' : 'bg-gradient-to-r from-secondary via-secondary/80 to-secondary/60'}`} />
+                    
+                    <CardHeader className="pb-3 px-5 pt-5 relative">
+                      <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
-                          <CardTitle className="text-sm sm:text-base mb-1 truncate">{template.title}</CardTitle>
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className={`p-2 rounded-lg ${template.is_system ? 'bg-primary/10' : 'bg-secondary/10'} group-hover:scale-110 transition-transform duration-300`}>
+                              <FileText className={`h-4 w-4 ${template.is_system ? 'text-primary' : 'text-secondary'}`} />
+                            </div>
+                            <CardTitle className="text-base sm:text-lg font-bold truncate">
+                              {template.title}
+                            </CardTitle>
+                          </div>
                           {template.description && (
-                            <CardDescription className="text-xs line-clamp-1">{template.description}</CardDescription>
+                            <CardDescription className="text-xs sm:text-sm line-clamp-1 ml-10">
+                              {template.description}
+                            </CardDescription>
                           )}
                         </div>
-                        <Badge variant={template.is_system ? 'default' : 'secondary'} className="text-xs shrink-0">
+                        <Badge 
+                          variant={template.is_system ? 'default' : 'secondary'} 
+                          className="text-xs font-semibold shrink-0 shadow-sm"
+                        >
                           {template.is_system ? 'Sistema' : 'Custom'}
                         </Badge>
                       </div>
                     </CardHeader>
-                    <CardContent className="pb-3 px-4">
-                      <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 mb-3">
-                        {template.message}
-                      </p>
+                    
+                    <CardContent className="pb-4 px-5 relative">
+                      <div className="bg-muted/30 rounded-lg p-3 mb-4 border border-border/50">
+                        <p className="text-xs sm:text-sm text-foreground/80 line-clamp-3 leading-relaxed">
+                          {template.message}
+                        </p>
+                      </div>
+                      
                       <div className="flex items-center gap-2">
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => handleEditTemplate(template)}
-                          className="flex-1 h-9 text-xs sm:text-sm"
+                          className="flex-1 h-10 text-xs sm:text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-all duration-200"
                         >
-                          <Edit className="h-3 w-3 mr-1" />
+                          <Edit className="h-3.5 w-3.5 mr-2" />
                           Editar
                         </Button>
                         {!template.is_system && (
                           <Button
                             size="sm"
-                            variant="destructive"
+                            variant="outline"
                             onClick={() => handleDeleteTemplate(template.id)}
-                            className="h-9 w-9 p-0"
+                            className="h-10 w-10 p-0 hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-all duration-200"
                           >
-                            <Trash2 className="h-3 w-3" />
+                            <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         )}
                       </div>
