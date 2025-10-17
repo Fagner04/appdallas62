@@ -39,7 +39,7 @@ export function ClientBookingCalendar({ onSuccess }: ClientBookingCalendarProps 
   const { data: barbers = [], isLoading: barbersLoading, error: barbersError } = useClientBarbers();
   
   // Get customer profile to get customer_id
-  const { data: customerProfile, error: customerError } = useQuery({
+  const { data: customerProfile, error: customerError, isLoading: customerLoading } = useQuery({
     queryKey: ['customer-profile', user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
@@ -56,12 +56,31 @@ export function ClientBookingCalendar({ onSuccess }: ClientBookingCalendarProps 
       
       if (!data) {
         console.error('Customer not found for user:', user.id);
-        throw new Error('Perfil de cliente não encontrado');
-      }
-      
-      if (!data.barbershop_id) {
-        console.error('Customer has no barbershop_id:', data);
-        throw new Error('Cliente não está associado a nenhuma barbearia');
+        
+        // Try to auto-create customer record if there's only one active barbershop
+        const { data: shops } = await supabase
+          .from('barbershops')
+          .select('id')
+          .eq('is_active', true);
+        
+        if (shops && shops.length === 1) {
+          const { data: newCustomer, error: createError } = await supabase
+            .from('customers')
+            .insert([{
+              user_id: user.id,
+              name: user.name || 'Cliente',
+              phone: '',
+              barbershop_id: shops[0].id
+            }])
+            .select('id, barbershop_id')
+            .single();
+          
+          if (!createError && newCustomer) {
+            return newCustomer;
+          }
+        }
+        
+        throw new Error('Perfil de cliente não encontrado. Entre em contato com a administração.');
       }
       
       return data;
@@ -214,7 +233,11 @@ export function ClientBookingCalendar({ onSuccess }: ClientBookingCalendarProps 
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6 p-4 sm:p-6">
-        {customerError ? (
+        {customerLoading || barbersLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : customerError ? (
           <div className="text-center py-8 space-y-4">
             <div className="p-4 rounded-full bg-destructive/10 w-16 h-16 mx-auto flex items-center justify-center">
               <AlertCircle className="h-8 w-8 text-destructive" />
