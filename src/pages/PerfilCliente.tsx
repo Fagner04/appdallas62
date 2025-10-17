@@ -107,6 +107,28 @@ export default function PerfilCliente() {
   return (
     <Layout>
       <div className="space-y-8 animate-fade-in">
+        {/* Cadastrar Barbearia */}
+        <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-1.5 rounded-lg bg-primary/10">
+                <Store className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">Cadastrar Barbearia</p>
+                <p className="text-xs text-muted-foreground">Configure seu negócio</p>
+              </div>
+            </div>
+            <Button
+              onClick={() => navigate('/cadastro-barbearia')}
+              size="sm"
+              className="transition-smooth"
+            >
+              Cadastrar
+            </Button>
+          </CardContent>
+        </Card>
+
         {/* Dados do Cliente */}
         <Card className="shadow-elegant border-primary/10">
           <CardHeader>
@@ -450,28 +472,6 @@ export default function PerfilCliente() {
               className="transition-smooth"
             >
               Sair
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Cadastrar Barbearia */}
-        <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-1.5 rounded-lg bg-primary/10">
-                <Store className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm font-medium">Cadastrar Barbearia</p>
-                <p className="text-xs text-muted-foreground">Configure seu negócio</p>
-              </div>
-            </div>
-            <Button
-              onClick={() => navigate('/cadastro-barbearia')}
-              size="sm"
-              className="transition-smooth"
-            >
-              Cadastrar
             </Button>
           </CardContent>
         </Card>
