@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { 
   Calendar, 
   Clock, 
@@ -17,20 +18,28 @@ import {
   Loader2,
   CalendarPlus,
   Award,
-  Sparkles
+  Sparkles,
+  Ban
 } from 'lucide-react';
 import { useCustomerProfile, useUpcomingAppointments, useCustomerAppointments } from '@/hooks/useCustomerData';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatBrasiliaDate, toBrasiliaTime } from '@/lib/timezone';
 import { ClientBookingCalendar } from '@/components/ClientBookingCalendar';
 import { AvatarUpload } from '@/components/AvatarUpload';
+import { useUpdateAppointment } from '@/hooks/useAppointments';
+import { useClientFeatures } from '@/hooks/useClientFeatures';
+import { toast } from 'sonner';
 
 export default function ClientArea() {
   const { user } = useAuth();
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<string | null>(null);
   const { data: profile, isLoading: profileLoading } = useCustomerProfile();
   const { data: upcomingAppointments = [], isLoading: upcomingLoading } = useUpcomingAppointments();
   const { data: allAppointments = [], isLoading: allLoading } = useCustomerAppointments();
+  const updateAppointment = useUpdateAppointment();
+  const { isFeatureEnabled } = useClientFeatures();
 
   const getStatusConfig = (status: string) => {
     const configs = {
@@ -70,6 +79,29 @@ export default function ClientArea() {
   const formatTime = (time: string) => {
     return time?.substring(0, 5) || '';
   };
+
+  const handleCancelAppointment = (appointmentId: string) => {
+    setSelectedAppointment(appointmentId);
+    setCancelDialogOpen(true);
+  };
+
+  const confirmCancelAppointment = async () => {
+    if (!selectedAppointment) return;
+
+    try {
+      await updateAppointment.mutateAsync({
+        id: selectedAppointment,
+        data: { status: 'cancelled' }
+      });
+      toast.success('Agendamento cancelado com sucesso!');
+      setCancelDialogOpen(false);
+      setSelectedAppointment(null);
+    } catch (error) {
+      toast.error('Erro ao cancelar agendamento');
+    }
+  };
+
+  const canCancelAppointments = isFeatureEnabled('cancel_appointments');
 
   if (profileLoading || upcomingLoading) {
     return (
@@ -244,13 +276,26 @@ export default function ClientArea() {
                           </div>
                         </div>
                       </div>
-                      <Badge 
-                        variant="outline" 
-                        className={`${statusConfig.color} flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 border text-xs sm:text-sm font-semibold w-fit`}
-                      >
-                        <StatusIcon className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                        {statusConfig.label}
-                      </Badge>
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <Badge 
+                          variant="outline" 
+                          className={`${statusConfig.color} flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 border text-xs sm:text-sm font-semibold w-fit`}
+                        >
+                          <StatusIcon className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                          {statusConfig.label}
+                        </Badge>
+                        {canCancelAppointments && appointment.status !== 'cancelled' && appointment.status !== 'completed' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleCancelAppointment(appointment.id)}
+                            className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20"
+                          >
+                            <Ban className="h-4 w-4" />
+                            Cancelar
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -286,6 +331,38 @@ export default function ClientArea() {
             <ClientBookingCalendar onSuccess={() => setIsBookingOpen(false)} />
           </DialogContent>
         </Dialog>
+
+        {/* Dialog de confirmação de cancelamento */}
+        <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <Ban className="h-5 w-5 text-destructive" />
+                Cancelar Agendamento
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja cancelar este agendamento? Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Não, manter</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmCancelAppointment}
+                className="bg-destructive hover:bg-destructive/90"
+                disabled={updateAppointment.isPending}
+              >
+                {updateAppointment.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Cancelando...
+                  </>
+                ) : (
+                  'Sim, cancelar'
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </Layout>
   );
