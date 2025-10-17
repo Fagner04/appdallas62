@@ -17,6 +17,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string, phone?: string) => Promise<void>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
   isAuthenticated: boolean;
 }
 
@@ -28,51 +29,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchUserData = async (userId: string, email?: string | null) => {
-      try {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('full_name')
-          .eq('id', userId)
-          .maybeSingle();
+  const fetchUserData = async (userId: string, email?: string | null) => {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', userId)
+        .maybeSingle();
 
-        // Check if user owns a barbershop
-        const { data: barbershop } = await supabase
-          .from('barbershops')
-          .select('id')
-          .eq('owner_id', userId)
-          .maybeSingle();
+      // Check if user owns a barbershop
+      const { data: barbershop } = await supabase
+        .from('barbershops')
+        .select('id')
+        .eq('owner_id', userId)
+        .maybeSingle();
 
-        // If user owns barbershop, they're admin
-        if (barbershop) {
-          setUser({
-            id: userId,
-            name: profile?.full_name || email?.split('@')[0] || 'Usuário',
-            email: email || '',
-            role: 'admin',
-          });
-          return;
-        }
-
-        // Otherwise check role from user_roles
-        const { data: roleRow } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', userId)
-          .limit(1)
-          .maybeSingle();
-
+      // If user owns barbershop, they're admin
+      if (barbershop) {
         setUser({
           id: userId,
           name: profile?.full_name || email?.split('@')[0] || 'Usuário',
           email: email || '',
-          role: (roleRow?.role || 'customer') as 'admin' | 'barber' | 'customer',
+          role: 'admin',
         });
-      } catch (err) {
-        console.error('Failed to fetch user data:', err);
+        return;
       }
-    };
+
+      // Otherwise check role from user_roles
+      const { data: roleRow } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .limit(1)
+        .maybeSingle();
+
+      setUser({
+        id: userId,
+        name: profile?.full_name || email?.split('@')[0] || 'Usuário',
+        email: email || '',
+        role: (roleRow?.role || 'customer') as 'admin' | 'barber' | 'customer',
+      });
+    } catch (err) {
+      console.error('Failed to fetch user data:', err);
+    }
+  };
+
+  useEffect(() => {
 
     // Set up auth state listener FIRST (sync updates only)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -153,7 +155,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const redirectPath = roleRow?.role === 'customer' ? '/cliente' : '/dashboard';
       navigate(redirectPath);
     } catch (error: any) {
-      toast.error(error.message || 'Erro ao fazer login');
+      const code = error?.code || error?.status || '';
+      if (code === 'email_not_confirmed') {
+        toast.error('Email não confirmado. Verifique sua caixa de entrada para confirmar sua conta.');
+      } else if (code === 'invalid_credentials' || error?.message?.toLowerCase()?.includes('invalid login credentials')) {
+        toast.error('Credenciais inválidas. Confira email e senha. Se acabou de criar a conta, confirme o email antes de entrar.');
+      } else {
+        toast.error(error.message || 'Erro ao fazer login');
+      }
       throw error;
     }
   };
@@ -187,6 +196,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const refreshUser = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      await fetchUserData(session.user.id, session.user.email);
+    }
+  };
+
   const logout = async () => {
     try {
       await supabase.auth.signOut();
@@ -215,6 +231,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login,
         register,
         logout,
+        refreshUser,
         isAuthenticated: !!user && !!session,
       }}
     >

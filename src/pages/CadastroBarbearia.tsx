@@ -12,7 +12,7 @@ import { z } from "zod";
 
 export default function CadastroBarbearia() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, refreshUser } = useAuth();
   const createBarbershop = useCreateBarbershop();
   
   const [name, setName] = useState("");
@@ -78,6 +78,9 @@ export default function CadastroBarbearia() {
         email: shopResult.data.email || undefined,
         address: shopResult.data.address || undefined,
       });
+
+      // Atualiza os dados do usuário para identificá-lo como admin
+      await refreshUser();
 
       const link = `${window.location.origin}/cadastro/${shopResult.data.slug}`;
       setGeneratedLink(link);
