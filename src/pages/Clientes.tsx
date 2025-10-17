@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Users, Plus, Mail, Phone, Calendar, Pencil, Trash2, Bell, BellOff, Search } from 'lucide-react';
+import { Users, Plus, Mail, Phone, Calendar, Pencil, Trash2, Bell, BellOff, Search, Copy, Check, UserPlus, Send } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCustomers, useCreateCustomer, useUpdateCustomer, useDeleteCustomer, Customer } from '@/hooks/useCustomers';
+import { useMyBarbershop } from '@/hooks/useBarbershops';
 import { toast } from 'sonner';
 
 export default function Clientes() {
@@ -18,6 +20,9 @@ export default function Clientes() {
   const [customerToDelete, setCustomerToDelete] = useState<string | null>(null);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [copied, setCopied] = useState(false);
+  const [inviteLoading, setInviteLoading] = useState(false);
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -27,10 +32,23 @@ export default function Clientes() {
     password: '',
   });
 
+  // Convite states
+  const [inviteData, setInviteData] = useState({
+    nome: '',
+    email: '',
+    telefone: '',
+    senha: '',
+  });
+
   const { data: customers, isLoading } = useCustomers();
+  const { data: barbershop } = useMyBarbershop();
   const createCustomer = useCreateCustomer();
   const updateCustomer = useUpdateCustomer();
   const deleteCustomer = useDeleteCustomer();
+
+  const linkConvite = barbershop?.slug 
+    ? `${window.location.origin}/cadastro/${barbershop.slug}`
+    : '';
 
   useEffect(() => {
     if (editingCustomer) {
@@ -124,25 +142,94 @@ export default function Clientes() {
     customer.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(linkConvite);
+      setCopied(true);
+      toast.success('Link copiado!');
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      toast.error('Erro ao copiar link');
+    }
+  };
+
+  const handleCadastrarConvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!inviteData.nome || !inviteData.email || !inviteData.senha) {
+      toast.error('Preencha todos os campos obrigatórios');
+      return;
+    }
+
+    if (inviteData.senha.length < 6) {
+      toast.error('A senha deve ter no mínimo 6 caracteres');
+      return;
+    }
+
+    setInviteLoading(true);
+
+    try {
+      await createCustomer.mutateAsync({
+        name: inviteData.nome,
+        email: inviteData.email,
+        phone: inviteData.telefone,
+        createAccount: true,
+        password: inviteData.senha,
+      });
+
+      setInviteData({ nome: '', email: '', telefone: '', senha: '' });
+    } catch (error) {
+      console.error('Erro ao cadastrar cliente:', error);
+    } finally {
+      setInviteLoading(false);
+    }
+  };
+
   return (
     <Layout>
-      <div className="space-y-6 animate-fade-in">
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold mb-2">Clientes</h1>
-              <p className="text-muted-foreground">Gerencie sua base de clientes</p>
-            </div>
-            <Dialog open={open} onOpenChange={(isOpen) => {
-              setOpen(isOpen);
-              if (!isOpen) handleDialogClose();
-            }}>
-              <DialogTrigger asChild>
-                <Button className="gap-2">
-                  <Plus className="h-5 w-5" />
-                  Novo Cliente
-                </Button>
-              </DialogTrigger>
+      <div className="space-y-4 sm:space-y-6 animate-fade-in px-2 sm:px-0">
+        <div>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">Clientes</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Gerencie sua base de clientes e convites</p>
+        </div>
+
+        <Tabs defaultValue="lista" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 h-auto mb-4">
+            <TabsTrigger value="lista" className="gap-2 text-xs sm:text-sm py-2">
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">Lista de</span> Clientes
+            </TabsTrigger>
+            <TabsTrigger value="convite" className="gap-2 text-xs sm:text-sm py-2">
+              <Send className="h-4 w-4" />
+              Convidar<span className="hidden sm:inline"> Cliente</span>
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Tab: Lista de Clientes */}
+          <TabsContent value="lista" className="space-y-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+              {/* Campo de Busca */}
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Buscar cliente por nome..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 text-sm"
+                />
+              </div>
+
+              <Dialog open={open} onOpenChange={(isOpen) => {
+                setOpen(isOpen);
+                if (!isOpen) handleDialogClose();
+              }}>
+                <DialogTrigger asChild>
+                  <Button className="gap-2 w-full sm:w-auto">
+                    <Plus className="h-4 w-4" />
+                    <span className="text-sm">Novo Cliente</span>
+                  </Button>
+                </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>
@@ -226,34 +313,31 @@ export default function Clientes() {
                 </form>
               </DialogContent>
             </Dialog>
-          </div>
+            </div>
 
-          {/* Campo de Busca */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Buscar cliente por nome..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </div>
-
-        {isLoading ? (
-          <div className="text-center py-8">Carregando clientes...</div>
-        ) : !customers || customers.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            Nenhum cliente cadastrado ainda
-          </div>
-        ) : !filteredCustomers || filteredCustomers.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            Nenhum cliente encontrado com esse nome
-          </div>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-2">
-            {filteredCustomers.map((customer) => (
+            {isLoading ? (
+              <div className="text-center py-8 text-sm">Carregando clientes...</div>
+            ) : !customers || customers.length === 0 ? (
+              <Card className="border-dashed">
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Users className="h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-center text-muted-foreground text-sm">
+                    Nenhum cliente cadastrado ainda
+                  </p>
+                </CardContent>
+              </Card>
+            ) : !filteredCustomers || filteredCustomers.length === 0 ? (
+              <Card className="border-dashed">
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Search className="h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-center text-muted-foreground text-sm">
+                    Nenhum cliente encontrado com esse nome
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
+                {filteredCustomers.map((customer) => (
               <Card key={customer.id} className="hover-lift">
                 <CardHeader>
                   <div className="flex items-start justify-between">
@@ -337,6 +421,120 @@ export default function Clientes() {
             ))}
           </div>
         )}
+          </TabsContent>
+
+          {/* Tab: Convidar Clientes */}
+          <TabsContent value="convite" className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              {/* Card: Link de Convite */}
+              <Card className="shadow-elegant">
+                <CardHeader className="pb-3 sm:pb-6">
+                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                    <Copy className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                    Link de Cadastro
+                  </CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">
+                    Compartilhe este link com seus clientes
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3 sm:space-y-4">
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Input 
+                      value={linkConvite} 
+                      readOnly 
+                      className="flex-1 text-xs sm:text-sm bg-muted"
+                    />
+                    <Button onClick={handleCopyLink} variant="outline" className="w-full sm:w-auto gap-2">
+                      {copied ? (
+                        <>
+                          <Check className="h-4 w-4" />
+                          <span className="text-sm">Copiado</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-4 w-4" />
+                          <span className="text-sm">Copiar</span>
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    Os clientes poderão se cadastrar usando este link
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Card: Cadastro Direto */}
+              <Card className="shadow-elegant">
+                <CardHeader className="pb-3 sm:pb-6">
+                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                    <UserPlus className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                    Cadastro Direto
+                  </CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">
+                    Cadastre o cliente diretamente no sistema
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleCadastrarConvite} className="space-y-3 sm:space-y-4">
+                    <div className="space-y-1.5 sm:space-y-2">
+                      <Label htmlFor="invite-nome" className="text-sm">Nome Completo *</Label>
+                      <Input
+                        id="invite-nome"
+                        value={inviteData.nome}
+                        onChange={(e) => setInviteData({ ...inviteData, nome: e.target.value })}
+                        placeholder="Digite o nome completo"
+                        className="text-sm"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-1.5 sm:space-y-2">
+                      <Label htmlFor="invite-email" className="text-sm">Email *</Label>
+                      <Input
+                        id="invite-email"
+                        type="email"
+                        value={inviteData.email}
+                        onChange={(e) => setInviteData({ ...inviteData, email: e.target.value })}
+                        placeholder="cliente@exemplo.com"
+                        className="text-sm"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-1.5 sm:space-y-2">
+                      <Label htmlFor="invite-telefone" className="text-sm">Telefone</Label>
+                      <Input
+                        id="invite-telefone"
+                        value={inviteData.telefone}
+                        onChange={(e) => setInviteData({ ...inviteData, telefone: e.target.value })}
+                        placeholder="(00) 00000-0000"
+                        className="text-sm"
+                      />
+                    </div>
+                    <div className="space-y-1.5 sm:space-y-2">
+                      <Label htmlFor="invite-senha" className="text-sm">Senha *</Label>
+                      <Input
+                        id="invite-senha"
+                        type="password"
+                        value={inviteData.senha}
+                        onChange={(e) => setInviteData({ ...inviteData, senha: e.target.value })}
+                        placeholder="Mínimo 6 caracteres"
+                        className="text-sm"
+                        required
+                        minLength={6}
+                      />
+                    </div>
+                    <Button type="submit" className="w-full gap-2 h-10 sm:h-11" disabled={inviteLoading}>
+                      <UserPlus className="h-4 w-4" />
+                      <span className="text-sm sm:text-base">
+                        {inviteLoading ? 'Cadastrando...' : 'Cadastrar Cliente'}
+                      </span>
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
