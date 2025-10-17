@@ -2,14 +2,18 @@ import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CreditCard, Check, AlertCircle } from 'lucide-react';
+import { CreditCard, Check, AlertCircle, Clock, Calendar } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useState } from "react";
+import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 export default function Planos() {
   const [loading, setLoading] = useState<string | null>(null);
+  const { data: subscriptionStatus, isLoading: isLoadingStatus } = useSubscriptionStatus();
 
   const handleSubscribe = async (planId: string, planName: string, price: number, interval: string) => {
     try {
@@ -102,6 +106,79 @@ export default function Planos() {
             </p>
           </div>
         </div>
+
+        {/* Status da Assinatura */}
+        {!isLoadingStatus && subscriptionStatus && (
+          <Card className="border-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                Status da Sua Conta
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {subscriptionStatus.isInTrial ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <div>
+                      <p className="font-semibold text-blue-900 dark:text-blue-100">
+                        Período de Teste Ativo
+                      </p>
+                      <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                        Você está no período gratuito de avaliação
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                        {subscriptionStatus.daysLeftInTrial}
+                      </p>
+                      <p className="text-sm text-blue-700 dark:text-blue-300">
+                        {subscriptionStatus.daysLeftInTrial === 1 ? 'dia restante' : 'dias restantes'}
+                      </p>
+                    </div>
+                  </div>
+                  {subscriptionStatus.daysLeftInTrial <= 3 && (
+                    <Alert className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950/30">
+                      <AlertCircle className="h-4 w-4 text-yellow-600" />
+                      <AlertDescription className="text-yellow-800 dark:text-yellow-200">
+                        Seu período de teste está acabando! Assine um plano para continuar usando todas as funcionalidades.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </div>
+              ) : subscriptionStatus.hasActiveSubscription ? (
+                <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-950/30 rounded-lg border border-green-200 dark:border-green-800">
+                  <div>
+                    <p className="font-semibold text-green-900 dark:text-green-100">
+                      Assinatura Ativa
+                    </p>
+                    <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+                      Você tem acesso completo a todas as funcionalidades
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
+                    <Check className="h-5 w-5" />
+                    <span className="font-semibold">Ativo</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-950/30 rounded-lg border border-red-200 dark:border-red-800">
+                    <div>
+                      <p className="font-semibold text-red-900 dark:text-red-100">
+                        Período de Teste Encerrado
+                      </p>
+                      <p className="text-sm text-red-700 dark:text-red-300 mt-1">
+                        Assine um plano para continuar usando
+                      </p>
+                    </div>
+                    <AlertCircle className="h-8 w-8 text-red-600" />
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto">
           {plans.map((plan) => (
