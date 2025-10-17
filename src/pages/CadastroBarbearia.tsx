@@ -80,12 +80,35 @@ export default function CadastroBarbearia() {
     }
 
     if (!isAuthenticated) {
+      // Validar dados da conta
       const accountInput = {
         ownerName: ownerName.trim(),
         ownerEmail: ownerEmail.trim(),
         password,
         confirmPassword,
       };
+
+      // Verificação adicional antes de validar com zod
+      if (!accountInput.ownerName) {
+        toast.error('Por favor, informe seu nome completo');
+        return;
+      }
+
+      if (!accountInput.ownerEmail) {
+        toast.error('Por favor, informe seu email');
+        return;
+      }
+
+      if (!password) {
+        toast.error('Por favor, informe uma senha');
+        return;
+      }
+
+      if (!confirmPassword) {
+        toast.error('Por favor, confirme sua senha');
+        return;
+      }
+
       const accountResult = accountSchema.safeParse(accountInput);
       if (!accountResult.success) {
         toast.error(accountResult.error.errors[0]?.message || 'Dados da conta inválidos');
@@ -95,9 +118,9 @@ export default function CadastroBarbearia() {
       try {
         await register(accountResult.data.ownerEmail, accountResult.data.password, accountResult.data.ownerName);
         toast.success('Conta criada! Criando sua barbearia...');
-        await new Promise((r) => setTimeout(r, 800));
+        await new Promise((r) => setTimeout(r, 1000));
       } catch (err: any) {
-        toast.error(err?.message || 'Erro ao criar conta');
+        toast.error(err?.message || 'Erro ao criar conta. Tente novamente.');
         return;
       }
     }
@@ -115,7 +138,7 @@ export default function CadastroBarbearia() {
       setGeneratedLink(link);
       toast.success('Barbearia criada! Compartilhe o link com seus clientes.');
     } catch (err: any) {
-      toast.error(err?.message || 'Erro ao criar barbearia');
+      toast.error(err?.message || 'Erro ao criar barbearia. Tente novamente.');
     }
   };
 
