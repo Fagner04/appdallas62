@@ -15,7 +15,9 @@ import {
   MapPin,
   ChevronDown,
   Shield,
-  LogOut
+  LogOut,
+  Store,
+  ArrowRight
 } from 'lucide-react';
 import { useCustomerProfile } from '@/hooks/useCustomerData';
 import { useAuth } from '@/contexts/AuthContext';
@@ -26,7 +28,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { AvatarUpload } from '@/components/AvatarUpload';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import {
   Select,
   SelectContent,
@@ -37,6 +39,7 @@ import {
 
 export default function PerfilCliente() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   
   // Segurança: Apenas clientes podem acessar esta página
   if (!user || user.role !== 'customer') {
@@ -116,6 +119,60 @@ export default function PerfilCliente() {
             <p className="text-muted-foreground">Gerencie suas informações pessoais e preferências de forma segura</p>
           </div>
         </div>
+
+        {/* Cadastrar Barbearia */}
+        <Card className="shadow-elegant border-primary/10 bg-gradient-to-br from-primary/5 to-transparent">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <Store className="h-5 w-5 text-primary" />
+                  </div>
+                  Cadastrar Barbearia
+                </CardTitle>
+                <CardDescription>
+                  Você é dono de uma barbearia? Cadastre seu negócio e comece a gerenciar agendamentos
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-card border">
+                <h4 className="font-semibold mb-2">Benefícios de cadastrar sua barbearia:</h4>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-0.5">✓</span>
+                    <span>Gerencie agendamentos online de forma profissional</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-0.5">✓</span>
+                    <span>Controle financeiro e relatórios completos</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-0.5">✓</span>
+                    <span>Sistema de fidelidade para seus clientes</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-0.5">✓</span>
+                    <span>Notificações automáticas e lembretes</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <Button 
+                onClick={() => navigate('/cadastro-barbearia')} 
+                className="w-full shadow-elegant hover-lift"
+                size="lg"
+              >
+                <Store className="mr-2 h-5 w-5" />
+                Cadastrar Minha Barbearia
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Configurações de Notificações */}
         <Card className="shadow-elegant border-primary/10">

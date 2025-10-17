@@ -152,7 +152,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .limit(1)
         .maybeSingle();
 
-      const redirectPath = roleRow?.role === 'customer' ? '/cadastro-barbearia' : '/dashboard';
+      const redirectPath = roleRow?.role === 'customer' ? '/cliente' : '/dashboard';
       navigate(redirectPath);
     } catch (error: any) {
       const code = error?.code || error?.status || '';
@@ -176,7 +176,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: cleanEmail,
         password: cleanPassword,
         options: {
-          emailRedirectTo: `${window.location.origin}/cadastro-barbearia`,
+          emailRedirectTo: `${window.location.origin}/cliente`,
           data: {
             full_name: cleanName,
             phone: (phone || '').trim(),
@@ -188,8 +188,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       toast.success('Conta criada com sucesso! Verifique seu email.');
       
-      // Após criar conta, leve o usuário para cadastrar a barbearia
-      navigate('/cadastro-barbearia');
+      // Após criar conta, leve o usuário para área do cliente
+      navigate('/cliente');
     } catch (error: any) {
       toast.error(error.message || 'Erro ao criar conta');
       throw error;
