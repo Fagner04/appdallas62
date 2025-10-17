@@ -89,49 +89,61 @@ export default function ConviteClientes() {
 
   return (
     <Layout>
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 sm:space-y-6 animate-fade-in px-2 sm:px-0">
         <div>
-          <h1 className="text-4xl font-bold mb-2">Convite de Clientes</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">Convite de Clientes</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Convide novos clientes para acessar o app ou cadastre-os diretamente
           </p>
         </div>
 
         <Tabs defaultValue="link" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="link">Link de Cadastro</TabsTrigger>
-            <TabsTrigger value="email">Enviar por Email</TabsTrigger>
-            <TabsTrigger value="direto">Cadastro Direto</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 h-auto">
+            <TabsTrigger value="link" className="text-xs sm:text-sm px-2 py-2">
+              Link
+            </TabsTrigger>
+            <TabsTrigger value="email" className="text-xs sm:text-sm px-2 py-2">
+              Email
+            </TabsTrigger>
+            <TabsTrigger value="direto" className="text-xs sm:text-sm px-2 py-2">
+              Cadastro
+            </TabsTrigger>
           </TabsList>
 
           {/* Tab: Link de Cadastro */}
           <TabsContent value="link">
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Copy className="h-5 w-5" />
+              <CardHeader className="pb-3 sm:pb-6">
+                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                  <Copy className="h-4 w-4 sm:h-5 sm:w-5" />
                   Link de Cadastro
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-xs sm:text-sm">
                   Copie e compartilhe este link com seus clientes
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center gap-2">
+              <CardContent className="space-y-3 sm:space-y-4">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                   <Input 
                     value={linkConvite} 
                     readOnly 
-                    className="flex-1"
+                    className="flex-1 text-xs sm:text-sm"
                   />
-                  <Button onClick={handleCopyLink} variant="outline">
+                  <Button onClick={handleCopyLink} variant="outline" className="w-full sm:w-auto">
                     {copied ? (
-                      <Check className="h-4 w-4" />
+                      <>
+                        <Check className="h-4 w-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Copiado</span>
+                      </>
                     ) : (
-                      <Copy className="h-4 w-4" />
+                      <>
+                        <Copy className="h-4 w-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Copiar</span>
+                      </>
                     )}
                   </Button>
                 </div>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   Os clientes poderão se cadastrar usando este link
                 </p>
               </CardContent>
@@ -141,41 +153,43 @@ export default function ConviteClientes() {
           {/* Tab: Enviar por Email */}
           <TabsContent value="email">
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Mail className="h-5 w-5" />
+              <CardHeader className="pb-3 sm:pb-6">
+                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                  <Mail className="h-4 w-4 sm:h-5 sm:w-5" />
                   Enviar Convite por Email
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-xs sm:text-sm">
                   Envie um email com o link de cadastro para o cliente
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleEnviarConvite} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="nomeConvite">Nome do Cliente</Label>
+                <form onSubmit={handleEnviarConvite} className="space-y-3 sm:space-y-4">
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="nomeConvite" className="text-sm">Nome do Cliente</Label>
                     <Input
                       id="nomeConvite"
                       value={nomeConvite}
                       onChange={(e) => setNomeConvite(e.target.value)}
                       placeholder="Digite o nome"
+                      className="text-sm"
                       required
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="emailConvite">Email</Label>
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="emailConvite" className="text-sm">Email</Label>
                     <Input
                       id="emailConvite"
                       type="email"
                       value={emailConvite}
                       onChange={(e) => setEmailConvite(e.target.value)}
                       placeholder="cliente@exemplo.com"
+                      className="text-sm"
                       required
                     />
                   </div>
-                  <Button type="submit" className="w-full gap-2">
+                  <Button type="submit" className="w-full gap-2 h-10 sm:h-11">
                     <Mail className="h-4 w-4" />
-                    Enviar Convite
+                    <span className="text-sm sm:text-base">Enviar Convite</span>
                   </Button>
                 </form>
               </CardContent>
@@ -185,62 +199,68 @@ export default function ConviteClientes() {
           {/* Tab: Cadastro Direto */}
           <TabsContent value="direto">
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <UserPlus className="h-5 w-5" />
+              <CardHeader className="pb-3 sm:pb-6">
+                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                  <UserPlus className="h-4 w-4 sm:h-5 sm:w-5" />
                   Cadastro Direto
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-xs sm:text-sm">
                   Cadastre o cliente diretamente no sistema
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleCadastrarDireto} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="nome">Nome Completo *</Label>
+                <form onSubmit={handleCadastrarDireto} className="space-y-3 sm:space-y-4">
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="nome" className="text-sm">Nome Completo *</Label>
                     <Input
                       id="nome"
                       value={formData.nome}
                       onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
                       placeholder="Digite o nome completo"
+                      className="text-sm"
                       required
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email *</Label>
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="email" className="text-sm">Email *</Label>
                     <Input
                       id="email"
                       type="email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       placeholder="cliente@exemplo.com"
+                      className="text-sm"
                       required
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="telefone">Telefone</Label>
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="telefone" className="text-sm">Telefone</Label>
                     <Input
                       id="telefone"
                       value={formData.telefone}
                       onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
                       placeholder="(00) 00000-0000"
+                      className="text-sm"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="senha">Senha *</Label>
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="senha" className="text-sm">Senha *</Label>
                     <Input
                       id="senha"
                       type="password"
                       value={formData.senha}
                       onChange={(e) => setFormData({ ...formData, senha: e.target.value })}
                       placeholder="Mínimo 6 caracteres"
+                      className="text-sm"
                       required
                       minLength={6}
                     />
                   </div>
-                  <Button type="submit" className="w-full gap-2" disabled={loading}>
+                  <Button type="submit" className="w-full gap-2 h-10 sm:h-11" disabled={loading}>
                     <UserPlus className="h-4 w-4" />
-                    {loading ? 'Cadastrando...' : 'Cadastrar Cliente'}
+                    <span className="text-sm sm:text-base">
+                      {loading ? 'Cadastrando...' : 'Cadastrar Cliente'}
+                    </span>
                   </Button>
                 </form>
               </CardContent>
