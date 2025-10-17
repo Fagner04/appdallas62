@@ -257,7 +257,7 @@ export default function Clientes() {
                     <span className="text-sm">Novo Cliente</span>
                   </Button>
                 </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>
                     {editingCustomer ? 'Editar Cliente' : 'Cadastrar Novo Cliente'}
