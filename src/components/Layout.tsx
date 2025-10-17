@@ -72,6 +72,7 @@ const getMenuItems = (role?: string) => {
     { icon: BarChart3, label: 'Relatórios', path: '/relatorios' },
     { icon: FileText, label: 'Marketing', path: '/marketing' },
     { icon: Bell, label: 'Notificações', path: '/notificacoes' },
+    { icon: User, label: 'Perfil', path: '/configuracoes' },
   ];
 };
 
@@ -79,7 +80,6 @@ const getSettingsMenuItems = () => {
   return [
     { icon: UserCircle, label: 'Convite de Clientes', path: '/convite-clientes' },
     { icon: Shield, label: 'Controle de Clientes', path: '/controle-clientes' },
-    { icon: User, label: 'Perfil', path: '/configuracoes' },
   ];
 };
 
@@ -97,7 +97,7 @@ export const Layout = ({ children }: LayoutProps) => {
     console.log('Layout - Should show notification bell:', user?.role === 'customer' || user?.role === 'barber');
     
     // Auto-open settings menu if on a settings page
-    const settingsPaths = ['/convite-clientes', '/controle-clientes', '/configuracoes'];
+    const settingsPaths = ['/convite-clientes', '/controle-clientes'];
     if (settingsPaths.includes(location.pathname)) {
       setSettingsOpen(true);
     }
