@@ -97,6 +97,7 @@ export default function Agendamentos() {
         notes: editingAppointment.notes || '',
       });
     }
+  }, [editingAppointment]);
 
   useEffect(() => {
     if (user?.role === 'customer' && customers) {
