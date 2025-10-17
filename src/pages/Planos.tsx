@@ -94,14 +94,14 @@ export default function Planos() {
 
   return (
     <Layout>
-      <div className="space-y-6 animate-fade-in">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <div className="p-3 rounded-lg bg-primary/10">
-            <CreditCard className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+      <div className="space-y-4 sm:space-y-6 animate-fade-in">
+        <div className="flex items-start gap-3">
+          <div className="p-2 sm:p-3 rounded-lg bg-primary/10">
+            <CreditCard className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
           </div>
           <div className="flex-1">
-              <h1 className="text-2xl sm:text-4xl font-bold">Planos e Assinaturas</h1>
-            <p className="text-muted-foreground mt-1 text-sm sm:text-base">
+            <h1 className="text-xl sm:text-3xl font-bold">Planos e Assinaturas</h1>
+            <p className="text-muted-foreground mt-0.5 text-xs sm:text-sm">
               Gerencie seu plano e assinatura
             </p>
           </div>
@@ -110,110 +110,109 @@ export default function Planos() {
         {/* Status da Assinatura */}
         {!isLoadingStatus && subscriptionStatus && (
           <Card className="border-2">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5" />
-                Status da Sua Conta
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Clock className="h-4 w-4 sm:h-5 sm:w-5" />
+                Status da Conta
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
               {subscriptionStatus.isInTrial ? (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
-                    <div>
-                      <p className="font-semibold text-blue-900 dark:text-blue-100">
+                <div className="space-y-3">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 sm:p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <div className="flex-1">
+                      <p className="font-semibold text-sm sm:text-base text-blue-900 dark:text-blue-100">
                         Período de Teste Ativo
                       </p>
-                      <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                        Você está no período gratuito de avaliação
+                      <p className="text-xs sm:text-sm text-blue-700 dark:text-blue-300 mt-0.5">
+                        Período gratuito de avaliação
                       </p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                    <div className="flex items-center gap-2 sm:text-right">
+                      <p className="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400">
                         {subscriptionStatus.daysLeftInTrial}
                       </p>
-                      <p className="text-sm text-blue-700 dark:text-blue-300">
-                        {subscriptionStatus.daysLeftInTrial === 1 ? 'dia restante' : 'dias restantes'}
+                      <p className="text-xs sm:text-sm text-blue-700 dark:text-blue-300">
+                        {subscriptionStatus.daysLeftInTrial === 1 ? 'dia' : 'dias'}
                       </p>
                     </div>
                   </div>
                   {subscriptionStatus.daysLeftInTrial <= 3 && (
-                    <Alert className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950/30">
+                    <Alert className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950/30 p-3">
                       <AlertCircle className="h-4 w-4 text-yellow-600" />
-                      <AlertDescription className="text-yellow-800 dark:text-yellow-200">
-                        Seu período de teste está acabando! Assine um plano para continuar usando todas as funcionalidades.
+                      <AlertDescription className="text-xs sm:text-sm text-yellow-800 dark:text-yellow-200">
+                        Teste acabando! Assine para continuar.
                       </AlertDescription>
                     </Alert>
                   )}
                 </div>
               ) : subscriptionStatus.hasActiveSubscription ? (
-                <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-950/30 rounded-lg border border-green-200 dark:border-green-800">
-                  <div>
-                    <p className="font-semibold text-green-900 dark:text-green-100">
+                <div className="flex items-center justify-between p-3 sm:p-4 bg-green-50 dark:bg-green-950/30 rounded-lg border border-green-200 dark:border-green-800">
+                  <div className="flex-1">
+                    <p className="font-semibold text-sm sm:text-base text-green-900 dark:text-green-100">
                       Assinatura Ativa
                     </p>
-                    <p className="text-sm text-green-700 dark:text-green-300 mt-1">
-                      Você tem acesso completo a todas as funcionalidades
+                    <p className="text-xs sm:text-sm text-green-700 dark:text-green-300 mt-0.5">
+                      Acesso completo ativo
                     </p>
                   </div>
-                  <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
-                    <Check className="h-5 w-5" />
-                    <span className="font-semibold">Ativo</span>
+                  <div className="flex items-center gap-1.5 text-green-700 dark:text-green-300">
+                    <Check className="h-4 w-4 sm:h-5 sm:w-5" />
+                    <span className="text-sm font-semibold">Ativo</span>
                   </div>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-950/30 rounded-lg border border-red-200 dark:border-red-800">
-                    <div>
-                      <p className="font-semibold text-red-900 dark:text-red-100">
-                        Período de Teste Encerrado
-                      </p>
-                      <p className="text-sm text-red-700 dark:text-red-300 mt-1">
-                        Assine um plano para continuar usando
-                      </p>
-                    </div>
-                    <AlertCircle className="h-8 w-8 text-red-600" />
+                <div className="flex items-center justify-between p-3 sm:p-4 bg-red-50 dark:bg-red-950/30 rounded-lg border border-red-200 dark:border-red-800">
+                  <div className="flex-1">
+                    <p className="font-semibold text-sm sm:text-base text-red-900 dark:text-red-100">
+                      Teste Encerrado
+                    </p>
+                    <p className="text-xs sm:text-sm text-red-700 dark:text-red-300 mt-0.5">
+                      Assine para continuar
+                    </p>
                   </div>
+                  <AlertCircle className="h-6 w-6 sm:h-8 sm:w-8 text-red-600" />
                 </div>
               )}
             </CardContent>
           </Card>
         )}
 
-        <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto">
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto">
           {plans.map((plan) => (
             <Card 
               key={plan.name} 
               className={`relative ${plan.popular ? 'border-primary shadow-lg' : ''}`}
             >
               {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <Badge className="bg-primary text-primary-foreground">
+                <div className="absolute -top-2.5 left-1/2 -translate-x-1/2">
+                  <Badge className="bg-primary text-primary-foreground text-xs px-2 py-0.5">
                     Mais Popular
                   </Badge>
                 </div>
               )}
-              <CardHeader className="space-y-2">
-                <CardTitle className="text-xl sm:text-2xl">{plan.name}</CardTitle>
-                <CardDescription className="text-sm">{plan.description}</CardDescription>
-                <div className="mt-4">
-                  <span className="text-3xl sm:text-4xl font-bold">{plan.price}</span>
-                  <span className="text-muted-foreground text-sm sm:text-base">{plan.period}</span>
+              <CardHeader className="space-y-1.5 p-4 sm:p-6">
+                <CardTitle className="text-lg sm:text-xl">{plan.name}</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">{plan.description}</CardDescription>
+                <div className="mt-3 sm:mt-4">
+                  <span className="text-2xl sm:text-3xl font-bold">{plan.price}</span>
+                  <span className="text-muted-foreground text-xs sm:text-sm">{plan.period}</span>
                 </div>
               </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 sm:space-y-3">
+              <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+                <ul className="space-y-1.5 sm:space-y-2">
                   {plan.features.map((feature, index) => (
                     <li key={index} className="flex items-start gap-2">
-                      <Check className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0 mt-0.5" />
-                      <span className="text-xs sm:text-sm">{feature}</span>
+                      <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary shrink-0 mt-0.5" />
+                      <span className="text-xs sm:text-sm leading-tight">{feature}</span>
                     </li>
                   ))}
                 </ul>
               </CardContent>
-              <CardFooter>
+              <CardFooter className="p-4 sm:p-6">
                 <Button 
-                  className="w-full" 
+                  className="w-full text-sm sm:text-base" 
+                  size="sm"
                   variant={plan.popular ? "default" : "outline"}
                   onClick={() => handleSubscribe(plan.id, plan.name, plan.priceValue, plan.interval)}
                   disabled={loading === plan.id}
@@ -226,33 +225,33 @@ export default function Planos() {
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg sm:text-xl">Informações Adicionais</CardTitle>
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-base sm:text-lg">Informações</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2">
-              <div className="space-y-2">
-                <h3 className="font-semibold text-sm sm:text-base">Formas de Pagamento</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">
-                  Aceitamos cartão de crédito, débito e PIX. Pagamento 100% seguro.
+          <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+            <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
+              <div className="space-y-1">
+                <h3 className="font-semibold text-xs sm:text-sm">Formas de Pagamento</h3>
+                <p className="text-xs text-muted-foreground">
+                  Cartão, débito e PIX. 100% seguro.
                 </p>
               </div>
-              <div className="space-y-2">
-                <h3 className="font-semibold text-sm sm:text-base">Período de Teste</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">
-                  Todos os planos incluem 7 dias de teste gratuito, sem compromisso.
+              <div className="space-y-1">
+                <h3 className="font-semibold text-xs sm:text-sm">Período de Teste</h3>
+                <p className="text-xs text-muted-foreground">
+                  7 dias grátis, sem compromisso.
                 </p>
               </div>
-              <div className="space-y-2">
-                <h3 className="font-semibold text-sm sm:text-base">Cancelamento</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">
-                  Cancele a qualquer momento, sem multa ou taxas adicionais.
+              <div className="space-y-1">
+                <h3 className="font-semibold text-xs sm:text-sm">Cancelamento</h3>
+                <p className="text-xs text-muted-foreground">
+                  Cancele quando quiser, sem multas.
                 </p>
               </div>
-              <div className="space-y-2">
-                <h3 className="font-semibold text-sm sm:text-base">Suporte</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">
-                  Nossa equipe está disponível para ajudar no que precisar.
+              <div className="space-y-1">
+                <h3 className="font-semibold text-xs sm:text-sm">Suporte</h3>
+                <p className="text-xs text-muted-foreground">
+                  Estamos aqui para ajudar.
                 </p>
               </div>
             </div>
