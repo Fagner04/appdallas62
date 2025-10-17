@@ -39,6 +39,12 @@ export default function Login() {
     path: ['confirmPassword'],
   });
 
+  // Schema de login
+  const loginSchema = z.object({
+    email: z.string().trim().email({ message: 'Email inválido' }).max(255),
+    password: z.string().min(6, { message: 'Senha deve ter no mínimo 6 caracteres' }).max(72),
+  });
+
   // SEO: set page title
   useEffect(() => {
     document.title = "Login | BarberClick";
@@ -62,8 +68,14 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    const result = loginSchema.safeParse({ email, password });
+    if (!result.success) {
+      toast.error(result.error.errors[0]?.message || 'Dados inválidos');
+      setLoading(false);
+      return;
+    }
     try {
-      await login(email, password);
+      await login(result.data.email.trim().toLowerCase(), result.data.password);
     } catch (error) {
       console.error("Login failed:", error);
     } finally {
