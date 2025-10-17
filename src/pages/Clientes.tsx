@@ -31,7 +31,7 @@ export default function Clientes() {
     email: '',
     phone: '',
     notes: '',
-    createAccount: false,
+    createAccount: true,
     password: '',
   });
 
@@ -152,7 +152,7 @@ export default function Clientes() {
       email: '',
       phone: '',
       notes: '',
-      createAccount: false,
+      createAccount: true,
       password: '',
     });
   };
