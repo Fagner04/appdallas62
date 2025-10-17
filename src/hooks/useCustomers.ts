@@ -39,21 +39,45 @@ export const useCustomers = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
 
-      const { data: barbershop } = await supabase
+      // Try to get barbershop_id (as owner or as barber)
+      let barbershopId: string | null = null;
+
+      // First try as owner
+      const { data: ownedBarbershop } = await supabase
         .from('barbershops')
         .select('id')
         .eq('owner_id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (!barbershop) return [];
+      if (ownedBarbershop) {
+        barbershopId = ownedBarbershop.id;
+      } else {
+        // If not owner, try as barber
+        const { data: barber } = await supabase
+          .from('barbers')
+          .select('barbershop_id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (barber?.barbershop_id) {
+          barbershopId = barber.barbershop_id;
+        }
+      }
+
+      if (!barbershopId) return [];
 
       const { data, error } = await supabase
         .from('customers')
         .select('*')
-        .eq('barbershop_id', barbershop.id)
+        .eq('barbershop_id', barbershopId)
         .order('name');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching customers:', error);
+        throw error;
+      }
+      
+      console.log('Customers loaded:', data);
       return data as Customer[];
     },
   });
@@ -68,13 +92,32 @@ export const useCreateCustomer = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
-      const { data: barbershop } = await supabase
+      // Try to get barbershop_id (as owner or as barber)
+      let barbershopId: string | null = null;
+
+      // First try as owner
+      const { data: ownedBarbershop } = await supabase
         .from('barbershops')
         .select('id')
         .eq('owner_id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (!barbershop) throw new Error('Barbearia não encontrada');
+      if (ownedBarbershop) {
+        barbershopId = ownedBarbershop.id;
+      } else {
+        // If not owner, try as barber
+        const { data: barber } = await supabase
+          .from('barbers')
+          .select('barbershop_id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (barber?.barbershop_id) {
+          barbershopId = barber.barbershop_id;
+        }
+      }
+
+      if (!barbershopId) throw new Error('Barbearia não encontrada');
 
       let userId: string | undefined;
 
@@ -88,7 +131,7 @@ export const useCreateCustomer = () => {
           .maybeSingle();
 
         // Se já existe um cliente com user_id e na mesma barbearia, bloquear
-        if (existingCustomer?.user_id && existingCustomer?.barbershop_id === barbershop.id) {
+        if (existingCustomer?.user_id && existingCustomer?.barbershop_id === barbershopId) {
           throw new Error('Já existe uma conta para este email nesta barbearia');
         }
 
@@ -99,7 +142,7 @@ export const useCreateCustomer = () => {
             data: {
               full_name: data.name,
               phone: data.phone,
-              barbershop_id: barbershop.id, // CRÍTICO: Passar barbershop_id no metadata
+              barbershop_id: barbershopId, // CRÍTICO: Passar barbershop_id no metadata
             },
             emailRedirectTo: `${window.location.origin}/`,
           },
@@ -142,7 +185,7 @@ export const useCreateCustomer = () => {
                   phone: data.phone,
                   email: data.email,
                   notes: data.notes,
-                  barbershop_id: barbershop.id,
+                  barbershop_id: barbershopId,
                 })
                 .eq('id', data.id)
                 .select()
@@ -176,7 +219,7 @@ export const useCreateCustomer = () => {
         email: data.email,
         notes: data.notes,
         user_id: userId,
-        barbershop_id: barbershop.id,
+        barbershop_id: barbershopId,
       };
 
       const { data: customer, error } = await supabase
