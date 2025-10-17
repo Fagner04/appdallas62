@@ -1,6 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 export const useCustomerProfile = () => {
   const { user } = useAuth();
@@ -51,6 +52,38 @@ export const useCustomerProfile = () => {
     },
     enabled: !!user?.id,
     retry: 1,
+  });
+};
+
+export const useUpdateCustomerProfile = () => {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: { name: string; phone: string }) => {
+      if (!user?.id) throw new Error('User not authenticated');
+
+      const { data: customer, error } = await supabase
+        .from('customers')
+        .update({
+          name: data.name.trim(),
+          phone: data.phone.trim(),
+        })
+        .eq('user_id', user.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return customer;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['customer-profile'] });
+      toast.success('Dados atualizados com sucesso!');
+    },
+    onError: (error: any) => {
+      console.error('Erro ao atualizar dados:', error);
+      toast.error('Erro ao atualizar dados');
+    },
   });
 };
 
