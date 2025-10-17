@@ -45,29 +45,6 @@ const Index = () => {
             </p>
           </div>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
-            <Button
-              size="lg"
-              className="w-full sm:w-auto text-base sm:text-lg px-8 py-6 shadow-elegant hover-lift"
-              onClick={() => navigate("/login")}
-            >
-              Entrar
-            </Button>
-            <Button
-              size="lg"
-              variant="secondary"
-              className="w-full sm:w-auto text-base sm:text-lg px-8 py-6 hover-lift gap-2"
-              onClick={() => navigate("/login")}
-            >
-              <Store className="h-5 w-5" />
-              Cadastrar Nova Barbearia
-            </Button>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Já tem uma barbearia cadastrada? Faça login acima. <br />
-            É dono de barbearia e quer cadastrar? Clique no botão "Cadastrar Nova Barbearia"
-          </p>
 
           {/* Features Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-12 sm:pt-16">
@@ -87,6 +64,29 @@ const Index = () => {
           </div>
         </div>
       </div>
+
+      {/* Botão Flutuante de Login */}
+      <Button
+        onClick={() => navigate("/login")}
+        size="lg"
+        className="fixed bottom-6 right-6 h-16 w-16 rounded-full shadow-2xl hover:scale-110 transition-all duration-300 z-50 group gradient-primary"
+        title="Entrar no Sistema"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-7 w-7 text-white group-hover:translate-x-1 transition-transform duration-300"
+        >
+          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+          <polyline points="10 17 15 12 10 7" />
+          <line x1="15" y1="12" x2="3" y2="12" />
+        </svg>
+      </Button>
 
       {/* Footer */}
       <footer className="py-6 border-t border-border/50 bg-card/50">
