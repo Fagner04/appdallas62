@@ -865,6 +865,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_true_setting: {
+        Args: { _key: string }
+        Returns: boolean
+      }
       replace_template_variables: {
         Args: {
           appointment_date: string
