@@ -117,15 +117,28 @@ export const useCreateCustomer = () => {
           throw new Error('Erro ao criar conta: ID do usuário não retornado');
         }
 
-        // Aguardar um pouco para o trigger processar
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Aguardar mais tempo para o trigger processar (1.5 segundos)
+        await new Promise(resolve => setTimeout(resolve, 1500));
 
-        // Buscar o registro criado pelo trigger handle_new_user
-        const { data: autoCreatedCustomer } = await supabase
-          .from('customers')
-          .select('id, barbershop_id')
-          .eq('user_id', userId)
-          .maybeSingle();
+        // Tentar até 3 vezes buscar o registro criado pelo trigger
+        let autoCreatedCustomer = null;
+        for (let attempt = 0; attempt < 3; attempt++) {
+          const { data } = await supabase
+            .from('customers')
+            .select('id, barbershop_id')
+            .eq('user_id', userId)
+            .maybeSingle();
+          
+          if (data) {
+            autoCreatedCustomer = data;
+            break;
+          }
+          
+          // Aguardar mais 500ms antes de tentar novamente
+          if (attempt < 2) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+        }
 
         if (autoCreatedCustomer) {
           // Atualizar com os dados corretos incluindo barbershop_id
@@ -144,30 +157,60 @@ export const useCreateCustomer = () => {
 
           if (updateError) {
             console.error('Erro ao atualizar cliente:', updateError);
-            throw updateError;
+            throw new Error('Erro ao atualizar dados do cliente');
           }
           return updatedCustomer;
         }
 
-        // Se não encontrou registro criado pelo trigger, criar manualmente
-        const { data: newCustomer, error: insertError } = await supabase
-          .from('customers')
-          .insert({
-            user_id: userId,
-            name: data.name,
-            phone: data.phone,
-            email: data.email,
-            notes: data.notes,
-            barbershop_id: barbershop.id,
-          })
-          .select()
-          .single();
+        // Fallback: Se ainda não encontrou, criar manualmente
+        try {
+          const { data: newCustomer, error: insertError } = await supabase
+            .from('customers')
+            .insert({
+              user_id: userId,
+              name: data.name,
+              phone: data.phone,
+              email: data.email,
+              notes: data.notes,
+              barbershop_id: barbershop.id,
+            })
+            .select()
+            .single();
 
-        if (insertError) {
-          console.error('Erro ao inserir cliente:', insertError);
-          throw insertError;
+          if (insertError) {
+            // Se erro de duplicação, tentar buscar e atualizar
+            if (insertError.code === '23505') {
+              const { data: existingCustomer } = await supabase
+                .from('customers')
+                .select('id')
+                .eq('user_id', userId)
+                .maybeSingle();
+              
+              if (existingCustomer) {
+                const { data: updated, error: updateErr } = await supabase
+                  .from('customers')
+                  .update({
+                    name: data.name,
+                    phone: data.phone,
+                    email: data.email,
+                    notes: data.notes,
+                    barbershop_id: barbershop.id,
+                  })
+                  .eq('id', existingCustomer.id)
+                  .select()
+                  .single();
+                
+                if (updateErr) throw new Error('Erro ao atualizar cliente existente');
+                return updated;
+              }
+            }
+            throw insertError;
+          }
+          return newCustomer;
+        } catch (err: any) {
+          console.error('Erro final ao criar cliente:', err);
+          throw new Error('Não foi possível criar o registro do cliente');
         }
-        return newCustomer;
       }
 
       // Criar o registro do cliente
