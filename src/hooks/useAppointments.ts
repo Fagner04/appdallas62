@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getTodayBrasilia, getBrasiliaDate } from '@/lib/timezone';
@@ -44,6 +45,29 @@ export interface UpdateAppointmentData {
 
 // Get all appointments with filters
 export const useAppointments = (date?: string) => {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('appointments-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'appointments',
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['appointments', date] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [date, queryClient]);
+
   return useQuery({
     queryKey: ['appointments', date],
     queryFn: async () => {
