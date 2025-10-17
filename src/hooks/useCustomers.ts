@@ -80,16 +80,16 @@ export const useCreateCustomer = () => {
 
       // Se createAccount for true, criar conta no Supabase Auth
       if (data.createAccount && data.email && data.password) {
-        // Verificar se já existe um cliente com esse email
+        // Verificar se já existe um usuário com esse email
         const { data: existingCustomer } = await supabase
           .from('customers')
-          .select('id, user_id')
+          .select('id, user_id, barbershop_id')
           .eq('email', data.email)
-          .eq('barbershop_id', barbershop.id)
           .maybeSingle();
 
-        if (existingCustomer?.user_id) {
-          throw new Error('Já existe uma conta para este email');
+        // Se já existe um cliente com user_id e na mesma barbearia, bloquear
+        if (existingCustomer?.user_id && existingCustomer?.barbershop_id === barbershop.id) {
+          throw new Error('Já existe uma conta para este email nesta barbearia');
         }
 
         const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -105,7 +105,6 @@ export const useCreateCustomer = () => {
         });
 
         if (authError) {
-          // Melhor tratamento de erros de rate limit
           if (authError.message.includes('rate_limit') || authError.message.includes('rate limit')) {
             throw new Error('Muitas tentativas. Aguarde alguns segundos antes de tentar novamente.');
           }
@@ -118,16 +117,18 @@ export const useCreateCustomer = () => {
           throw new Error('Erro ao criar conta: ID do usuário não retornado');
         }
 
-        // O trigger handle_new_user cria automaticamente um registro de cliente
-        // Precisamos atualizar esse registro com o barbershop_id correto
+        // Aguardar um pouco para o trigger processar
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Buscar o registro criado pelo trigger handle_new_user
         const { data: autoCreatedCustomer } = await supabase
           .from('customers')
-          .select('id')
+          .select('id, barbershop_id')
           .eq('user_id', userId)
           .maybeSingle();
 
         if (autoCreatedCustomer) {
-          // Atualizar o registro criado pelo trigger com os dados corretos
+          // Atualizar com os dados corretos incluindo barbershop_id
           const { data: updatedCustomer, error: updateError } = await supabase
             .from('customers')
             .update({
@@ -135,33 +136,38 @@ export const useCreateCustomer = () => {
               phone: data.phone,
               email: data.email,
               notes: data.notes,
-              barbershop_id: barbershop.id, // CRÍTICO: Definir a barbearia correta
+              barbershop_id: barbershop.id,
             })
             .eq('id', autoCreatedCustomer.id)
             .select()
             .single();
 
-          if (updateError) throw updateError;
+          if (updateError) {
+            console.error('Erro ao atualizar cliente:', updateError);
+            throw updateError;
+          }
           return updatedCustomer;
         }
 
-        // Se já existe um cliente sem user_id, atualizar com o novo user_id
-        if (existingCustomer && !existingCustomer.user_id) {
-          const { data: updatedCustomer, error: updateError } = await supabase
-            .from('customers')
-            .update({
-              user_id: userId,
-              name: data.name,
-              phone: data.phone,
-              barbershop_id: barbershop.id,
-            })
-            .eq('id', existingCustomer.id)
-            .select()
-            .single();
+        // Se não encontrou registro criado pelo trigger, criar manualmente
+        const { data: newCustomer, error: insertError } = await supabase
+          .from('customers')
+          .insert({
+            user_id: userId,
+            name: data.name,
+            phone: data.phone,
+            email: data.email,
+            notes: data.notes,
+            barbershop_id: barbershop.id,
+          })
+          .select()
+          .single();
 
-          if (updateError) throw updateError;
-          return updatedCustomer;
+        if (insertError) {
+          console.error('Erro ao inserir cliente:', insertError);
+          throw insertError;
         }
+        return newCustomer;
       }
 
       // Criar o registro do cliente
