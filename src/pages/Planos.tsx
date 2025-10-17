@@ -8,49 +8,39 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 export default function Planos() {
   const plans = [
     {
-      name: 'Básico',
+      name: 'Plano Mensal',
       price: 'R$ 55',
       period: '/mês',
-      description: 'Ideal para barbearias pequenas',
+      description: 'Todas as funcionalidades',
       features: [
-        'Até 2 barbeiros',
-        'Agendamentos ilimitados',
-        'Gestão de clientes',
-        'Relatórios básicos',
-        'Suporte por email',
-      ],
-    },
-    {
-      name: 'Profissional',
-      price: 'R$ 100',
-      period: '/mês',
-      description: 'Para barbearias em crescimento',
-      features: [
-        'Até 5 barbeiros',
+        'Barbeiros ilimitados',
         'Agendamentos ilimitados',
         'Gestão completa de clientes',
         'Relatórios avançados',
         'Sistema de fidelidade',
         'Notificações automáticas',
+        'Marketing integrado',
         'Suporte prioritário',
+        'Customização avançada',
       ],
       popular: true,
     },
     {
-      name: 'Premium',
-      price: 'R$ 500',
+      name: 'Plano Anual',
+      price: 'R$ 555',
       period: '/ano',
-      description: 'Para grandes barbearias',
+      description: 'Todas as funcionalidades',
       features: [
         'Barbeiros ilimitados',
         'Agendamentos ilimitados',
         'Gestão completa de clientes',
-        'Relatórios personalizados',
-        'Sistema de fidelidade premium',
+        'Relatórios avançados',
+        'Sistema de fidelidade',
         'Notificações automáticas',
         'Marketing integrado',
-        'Suporte 24/7',
+        'Suporte prioritário',
         'Customização avançada',
+        'Economize 16% no valor anual',
       ],
     },
   ];
@@ -84,7 +74,7 @@ export default function Planos() {
           </AlertDescription>
         </Alert>
 
-        <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-3">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto">
           {plans.map((plan) => (
             <Card 
               key={plan.name} 
