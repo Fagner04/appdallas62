@@ -99,6 +99,7 @@ export const useCreateCustomer = () => {
             data: {
               full_name: data.name,
               phone: data.phone,
+              barbershop_id: barbershop.id, // CRÍTICO: Passar barbershop_id no metadata
             },
             emailRedirectTo: `${window.location.origin}/`,
           },
@@ -120,17 +121,37 @@ export const useCreateCustomer = () => {
         // Aguardar mais tempo para o trigger processar (1.5 segundos)
         await new Promise(resolve => setTimeout(resolve, 1500));
 
+        // O trigger agora cria o registro com barbershop_id correto
         // Tentar até 3 vezes buscar o registro criado pelo trigger
-        let autoCreatedCustomer = null;
+        let finalCustomer = null;
         for (let attempt = 0; attempt < 3; attempt++) {
           const { data } = await supabase
             .from('customers')
-            .select('id, barbershop_id')
+            .select('*')
             .eq('user_id', userId)
             .maybeSingle();
           
           if (data) {
-            autoCreatedCustomer = data;
+            finalCustomer = data;
+            // Se barbershop_id ainda não estiver definido, atualizar
+            if (!data.barbershop_id) {
+              const { data: updated, error: updateErr } = await supabase
+                .from('customers')
+                .update({
+                  name: data.name,
+                  phone: data.phone,
+                  email: data.email,
+                  notes: data.notes,
+                  barbershop_id: barbershop.id,
+                })
+                .eq('id', data.id)
+                .select()
+                .single();
+              
+              if (!updateErr && updated) {
+                finalCustomer = updated;
+              }
+            }
             break;
           }
           
@@ -140,104 +161,12 @@ export const useCreateCustomer = () => {
           }
         }
 
-        if (autoCreatedCustomer) {
-          // Atualizar com os dados corretos incluindo barbershop_id
-          const { data: updatedCustomer, error: updateError } = await supabase
-            .from('customers')
-            .update({
-              name: data.name,
-              phone: data.phone,
-              email: data.email,
-              notes: data.notes,
-              barbershop_id: barbershop.id,
-            })
-            .eq('id', autoCreatedCustomer.id)
-            .select()
-            .single();
-
-          if (updateError) {
-            console.error('Erro ao atualizar cliente:', updateError);
-            throw new Error('Erro ao atualizar dados do cliente');
-          }
-          return updatedCustomer;
+        if (finalCustomer) {
+          return finalCustomer;
         }
 
-        // Fallback: Se ainda não encontrou, criar manualmente
-        try {
-          // Antes de tentar criar, verificar se já existe pelo user_id
-          const { data: existingByUserId } = await supabase
-            .from('customers')
-            .select('id, barbershop_id')
-            .eq('user_id', userId)
-            .maybeSingle();
-          
-          if (existingByUserId) {
-            // Encontrou! Atualizar com os dados corretos
-            const { data: updated, error: updateErr } = await supabase
-              .from('customers')
-              .update({
-                name: data.name,
-                phone: data.phone,
-                email: data.email,
-                notes: data.notes,
-                barbershop_id: barbershop.id,
-              })
-              .eq('id', existingByUserId.id)
-              .select()
-              .single();
-            
-            if (updateErr) throw new Error('Erro ao atualizar cliente existente');
-            return updated;
-          }
-
-          // Se realmente não existe, criar
-          const { data: newCustomer, error: insertError } = await supabase
-            .from('customers')
-            .insert({
-              user_id: userId,
-              name: data.name,
-              phone: data.phone,
-              email: data.email,
-              notes: data.notes,
-              barbershop_id: barbershop.id,
-            })
-            .select()
-            .single();
-
-          if (insertError) {
-            // Se erro de duplicação (race condition), buscar e atualizar
-            if (insertError.code === '23505') {
-              const { data: existing } = await supabase
-                .from('customers')
-                .select('id')
-                .eq('user_id', userId)
-                .single();
-              
-              if (existing) {
-                const { data: updated, error: updateErr } = await supabase
-                  .from('customers')
-                  .update({
-                    name: data.name,
-                    phone: data.phone,
-                    email: data.email,
-                    notes: data.notes,
-                    barbershop_id: barbershop.id,
-                  })
-                  .eq('id', existing.id)
-                  .select()
-                  .single();
-                
-                if (updateErr) throw new Error('Erro ao atualizar cliente após duplicação');
-                return updated;
-              }
-            }
-            throw insertError;
-          }
-          return newCustomer;
-        } catch (err: any) {
-          console.error('Erro final ao processar cliente:', err);
-          throw new Error(`Erro ao processar cliente: ${err.message || 'Erro desconhecido'}`);
-        }
+        // Se chegou aqui, algo deu errado - informar claramente
+        throw new Error('O registro do cliente foi criado mas não pôde ser localizado. Por favor, recarregue a página.');
       }
 
       // Criar o registro do cliente
