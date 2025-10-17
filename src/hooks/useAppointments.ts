@@ -108,20 +108,22 @@ export const useAvailableTimeSlots = (date: string, barberId: string, serviceDur
         console.error('Error fetching working hours:', hoursError);
       }
 
-      // Se o dia está fechado ou não há horários configurados, usar horários padrão
-      let workStart = 8 * 60; // 08:00
-      let workEnd = 20 * 60;  // 20:00
-      
-      if (workingHours) {
-        if (!(workingHours as any).is_open) {
-          return []; // Dia fechado
-        }
-        // Usar horários configurados
-        const [startHour, startMin] = (workingHours as any).start_time.split(':').map(Number);
-        const [endHour, endMin] = (workingHours as any).end_time.split(':').map(Number);
-        workStart = startHour * 60 + startMin;
-        workEnd = endHour * 60 + endMin;
+      // Se não há horários configurados, retornar vazio
+      if (!workingHours) {
+        console.warn('No working hours configured for day:', dayOfWeek);
+        return [];
       }
+
+      // Se o dia está fechado, retornar vazio
+      if (!(workingHours as any).is_open) {
+        return [];
+      }
+
+      // Usar horários configurados
+      const [startHour, startMin] = (workingHours as any).start_time.split(':').map(Number);
+      const [endHour, endMin] = (workingHours as any).end_time.split(':').map(Number);
+      const workStart = startHour * 60 + startMin;
+      const workEnd = endHour * 60 + endMin;
 
       // Fetch service durations for existing appointments
       const serviceIds = appointments?.map(apt => apt.service_id) || [];
