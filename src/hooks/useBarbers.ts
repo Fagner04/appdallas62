@@ -190,16 +190,46 @@ export const useClientBarbers = () => {
         .eq('user_id', user.id)
         .maybeSingle();
 
-      if (!customer?.barbershop_id) {
-        console.log('Cliente sem barbearia associada');
-        return [];
+      // Garantir que temos um barbershop_id; se não, tentar auto associar
+      let barbershopId = (customer?.barbershop_id as string | null) ?? null;
+
+      if (!barbershopId) {
+        console.log('Cliente sem barbearia associada - tentando auto associar');
+        // Tentar auto-associar se existir apenas 1 barbearia ativa
+        const { data: shops, error: shopsErr } = await supabase
+          .from('barbershops')
+          .select('id')
+          .eq('is_active', true);
+
+        if (shopsErr) {
+          console.error('Erro ao buscar barbearias:', shopsErr);
+          return [];
+        }
+
+        if (shops && shops.length === 1) {
+          const targetShopId = shops[0].id as string;
+          const { error: updateErr } = await supabase
+            .from('customers')
+            .update({ barbershop_id: targetShopId })
+            .eq('user_id', user.id);
+
+          if (updateErr) {
+            console.error('Erro ao associar cliente à barbearia:', updateErr);
+            return [];
+          }
+
+          barbershopId = targetShopId;
+        } else {
+          // Ambíguo (0 ou várias barbearias) - retornar vazio até o admin associar
+          return [];
+        }
       }
 
       // Buscar barbeiros ativos da barbearia do cliente
       const { data, error } = await supabase
         .from('barbers')
         .select('*')
-        .eq('barbershop_id', customer.barbershop_id)
+        .eq('barbershop_id', barbershopId as string)
         .eq('is_active', true)
         .order('name');
 
