@@ -73,6 +73,19 @@ export default function Agendamentos() {
     serviceDuration
   );
 
+  // Debug logs
+  console.log('Agendamentos Form Debug:', {
+    date: formData.date,
+    barber_id: formData.barber_id,
+    service_id: formData.service_id,
+    serviceDuration,
+    availableSlots,
+    isLoadingSlots,
+    barbersCount: barbers?.length,
+    servicesCount: services?.length,
+    userRole: user?.role
+  });
+
   useEffect(() => {
     if (editingAppointment) {
       setFormData({
