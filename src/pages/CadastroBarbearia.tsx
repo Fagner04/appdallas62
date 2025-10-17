@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { Scissors, ArrowLeft, Copy, Check } from "lucide-react";
 import { useCreateBarbershop } from "@/hooks/useBarbershops";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-
+import { z } from "zod";
 export default function CadastroBarbearia() {
   const navigate = useNavigate();
   const { isAuthenticated, register } = useAuth();
@@ -28,6 +28,23 @@ export default function CadastroBarbearia() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  const accountSchema = z.object({
+    ownerName: z.string().trim().min(2, { message: 'Informe seu nome completo' }).max(100),
+    ownerEmail: z.string().trim().email({ message: 'Email inválido' }).max(255),
+    password: z.string().min(6, { message: 'A senha deve ter no mínimo 6 caracteres' }).max(72),
+    confirmPassword: z.string(),
+  }).refine((data) => data.password === data.confirmPassword, {
+    message: 'As senhas não coincidem',
+    path: ['confirmPassword'],
+  });
+
+  const shopSchema = z.object({
+    name: z.string().trim().min(2, { message: 'Nome da barbearia é obrigatório' }).max(100),
+    slug: z.string().trim().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, { message: 'Slug inválido. Use apenas minúsculas, números e traços' }),
+    phone: z.string().trim().max(30).optional().or(z.literal('')),
+    email: z.union([z.string().trim().email({ message: 'Email da barbearia inválido' }).max(255), z.literal('')]).optional(),
+    address: z.string().trim().max(255).optional().or(z.literal('')),
+  });
   const generateSlug = (text: string) => {
     return text
       .toLowerCase()
@@ -46,57 +63,59 @@ export default function CadastroBarbearia() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!name || !slug) {
-      toast.error('Nome e slug da barbearia são obrigatórios');
+
+    // Normalizar entradas
+    const shopInput = {
+      name: name.trim(),
+      slug: slug.trim(),
+      phone: (phone || '').trim(),
+      email: (email || '').trim(),
+      address: (address || '').trim(),
+    };
+
+    const shopResult = shopSchema.safeParse(shopInput);
+    if (!shopResult.success) {
+      toast.error(shopResult.error.errors[0]?.message || 'Dados da barbearia inválidos');
       return;
     }
 
-    // Se não estiver autenticado, validar campos de cadastro
     if (!isAuthenticated) {
-      if (!ownerName || !ownerEmail || !password) {
-        toast.error('Preencha todos os campos obrigatórios');
-        return;
-      }
-
-      if (password !== confirmPassword) {
-        toast.error('As senhas não coincidem');
-        return;
-      }
-
-      if (password.length < 6) {
-        toast.error('A senha deve ter no mínimo 6 caracteres');
+      const accountInput = {
+        ownerName: ownerName.trim(),
+        ownerEmail: ownerEmail.trim(),
+        password,
+        confirmPassword,
+      };
+      const accountResult = accountSchema.safeParse(accountInput);
+      if (!accountResult.success) {
+        toast.error(accountResult.error.errors[0]?.message || 'Dados da conta inválidos');
         return;
       }
 
       try {
-        // Criar conta primeiro
-        await register(ownerEmail, password, ownerName);
+        await register(accountResult.data.ownerEmail, accountResult.data.password, accountResult.data.ownerName);
         toast.success('Conta criada! Criando sua barbearia...');
-        
-        // Aguardar um pouco para garantir que a autenticação foi processada
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      } catch (error: any) {
-        toast.error(error.message || 'Erro ao criar conta');
+        await new Promise((r) => setTimeout(r, 800));
+      } catch (err: any) {
+        toast.error(err?.message || 'Erro ao criar conta');
         return;
       }
     }
 
     try {
       await createBarbershop.mutateAsync({
-        name,
-        slug,
-        phone: phone || ownerEmail,
-        email: email || ownerEmail,
-        address,
+        name: shopResult.data.name,
+        slug: shopResult.data.slug,
+        phone: shopResult.data.phone || undefined,
+        email: shopResult.data.email || (!isAuthenticated ? ownerEmail.trim() : undefined),
+        address: shopResult.data.address || undefined,
       });
 
-      const link = `${window.location.origin}/cadastro/${slug}`;
+      const link = `${window.location.origin}/cadastro/${shopResult.data.slug}`;
       setGeneratedLink(link);
       toast.success('Barbearia criada! Compartilhe o link com seus clientes.');
-    } catch (error: any) {
-      console.error('Erro ao criar barbearia:', error);
-      toast.error(error.message || 'Erro ao criar barbearia');
+    } catch (err: any) {
+      toast.error(err?.message || 'Erro ao criar barbearia');
     }
   };
 
