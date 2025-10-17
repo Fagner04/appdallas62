@@ -164,6 +164,33 @@ export const useCreateCustomer = () => {
 
         // Fallback: Se ainda não encontrou, criar manualmente
         try {
+          // Antes de tentar criar, verificar se já existe pelo user_id
+          const { data: existingByUserId } = await supabase
+            .from('customers')
+            .select('id, barbershop_id')
+            .eq('user_id', userId)
+            .maybeSingle();
+          
+          if (existingByUserId) {
+            // Encontrou! Atualizar com os dados corretos
+            const { data: updated, error: updateErr } = await supabase
+              .from('customers')
+              .update({
+                name: data.name,
+                phone: data.phone,
+                email: data.email,
+                notes: data.notes,
+                barbershop_id: barbershop.id,
+              })
+              .eq('id', existingByUserId.id)
+              .select()
+              .single();
+            
+            if (updateErr) throw new Error('Erro ao atualizar cliente existente');
+            return updated;
+          }
+
+          // Se realmente não existe, criar
           const { data: newCustomer, error: insertError } = await supabase
             .from('customers')
             .insert({
@@ -178,15 +205,15 @@ export const useCreateCustomer = () => {
             .single();
 
           if (insertError) {
-            // Se erro de duplicação, tentar buscar e atualizar
+            // Se erro de duplicação (race condition), buscar e atualizar
             if (insertError.code === '23505') {
-              const { data: existingCustomer } = await supabase
+              const { data: existing } = await supabase
                 .from('customers')
                 .select('id')
                 .eq('user_id', userId)
-                .maybeSingle();
+                .single();
               
-              if (existingCustomer) {
+              if (existing) {
                 const { data: updated, error: updateErr } = await supabase
                   .from('customers')
                   .update({
@@ -196,11 +223,11 @@ export const useCreateCustomer = () => {
                     notes: data.notes,
                     barbershop_id: barbershop.id,
                   })
-                  .eq('id', existingCustomer.id)
+                  .eq('id', existing.id)
                   .select()
                   .single();
                 
-                if (updateErr) throw new Error('Erro ao atualizar cliente existente');
+                if (updateErr) throw new Error('Erro ao atualizar cliente após duplicação');
                 return updated;
               }
             }
@@ -208,8 +235,8 @@ export const useCreateCustomer = () => {
           }
           return newCustomer;
         } catch (err: any) {
-          console.error('Erro final ao criar cliente:', err);
-          throw new Error('Não foi possível criar o registro do cliente');
+          console.error('Erro final ao processar cliente:', err);
+          throw new Error(`Erro ao processar cliente: ${err.message || 'Erro desconhecido'}`);
         }
       }
 
