@@ -38,6 +38,7 @@ export default function Notificacoes() {
   const [editingTemplate, setEditingTemplate] = useState<NotificationTemplate | undefined>();
   const [isNewTemplate, setIsNewTemplate] = useState(false);
   
+  const [isTemplatesOpen, setIsTemplatesOpen] = useState(true);
   const [isWhatsAppOpen, setIsWhatsAppOpen] = useState(false);
   const { settings: notificationSettings, updateSettings } = useNotificationSettings(user?.id);
   const [whatsappPhone, setWhatsappPhone] = useState('');
@@ -290,25 +291,43 @@ export default function Notificacoes() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-elegant">
-          <CardHeader className="px-4 sm:px-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                  Templates de Notificações
-                </CardTitle>
-                <CardDescription className="text-sm mt-1">
-                  Crie e gerencie templates para envio rápido
-                </CardDescription>
-              </div>
-              <Button onClick={handleCreateTemplate} size="sm" className="h-10 sm:h-9 text-sm">
-                <Plus className="h-4 w-4 mr-2" />
-                Novo
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="px-4 sm:px-6">
+        <Collapsible open={isTemplatesOpen} onOpenChange={setIsTemplatesOpen}>
+          <Card className="shadow-elegant">
+            <CardHeader className="px-4 sm:px-6">
+              <CollapsibleTrigger className="w-full">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-center justify-between w-full sm:w-auto">
+                    <div className="text-left">
+                      <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                        <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                        Templates de Notificações
+                        <ChevronDown 
+                          className={`h-5 w-5 transition-transform duration-200 ${
+                            isTemplatesOpen ? 'rotate-180' : ''
+                          }`}
+                        />
+                      </CardTitle>
+                      <CardDescription className="text-sm mt-1">
+                        Crie e gerencie templates para envio rápido
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCreateTemplate();
+                    }} 
+                    size="sm" 
+                    className="h-10 sm:h-9 text-sm w-full sm:w-auto"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Novo
+                  </Button>
+                </div>
+              </CollapsibleTrigger>
+            </CardHeader>
+            <CollapsibleContent>
+              <CardContent className="px-4 sm:px-6">
             {templates?.length === 0 ? (
               <div className="text-center py-16 px-4">
                 <div className="relative inline-block mb-6">
@@ -402,8 +421,10 @@ export default function Notificacoes() {
                 ))}
               </div>
             )}
-          </CardContent>
-        </Card>
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
 
         <Collapsible open={isWhatsAppOpen} onOpenChange={setIsWhatsAppOpen}>
           <Card className="shadow-elegant">
