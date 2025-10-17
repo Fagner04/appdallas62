@@ -1,17 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Send, Users, Plus, Edit, Trash2, FileText } from 'lucide-react';
+import { Send, Users, Plus, Edit, Trash2, FileText, MessageSquare, ChevronDown, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Separator } from '@/components/ui/separator';
+import { WhatsAppQRConnect } from '@/components/WhatsAppQRConnect';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useNotificationTemplates, NotificationTemplate } from '@/hooks/useNotificationTemplates';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNotificationSettings } from '@/hooks/useNotificationSettings';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { NotificationTemplateEditor } from '@/components/NotificationTemplateEditor';
@@ -32,6 +37,20 @@ export default function Notificacoes() {
   const [isTemplateEditorOpen, setIsTemplateEditorOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<NotificationTemplate | undefined>();
   const [isNewTemplate, setIsNewTemplate] = useState(false);
+  
+  const [isWhatsAppOpen, setIsWhatsAppOpen] = useState(false);
+  const { settings: notificationSettings, updateSettings } = useNotificationSettings(user?.id);
+  const [whatsappPhone, setWhatsappPhone] = useState('');
+  const [whatsappToken, setWhatsappToken] = useState('');
+  const [whatsappPhoneId, setWhatsappPhoneId] = useState('');
+
+  useEffect(() => {
+    if (notificationSettings) {
+      setWhatsappPhone(notificationSettings.whatsapp_phone || '');
+      setWhatsappToken(notificationSettings.whatsapp_token || '');
+      setWhatsappPhoneId(notificationSettings.whatsapp_phone_id || '');
+    }
+  }, [notificationSettings]);
 
   const handleTemplateSelect = (templateId: string) => {
     setSelectedTemplate(templateId);
@@ -350,6 +369,152 @@ export default function Notificacoes() {
             )}
           </CardContent>
         </Card>
+
+        <Collapsible open={isWhatsAppOpen} onOpenChange={setIsWhatsAppOpen}>
+          <Card className="shadow-elegant">
+            <CardHeader className="px-4 sm:px-6">
+              <CollapsibleTrigger className="w-full">
+                <CardTitle className="flex items-center justify-between w-full text-lg sm:text-xl">
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                    Notificações WhatsApp
+                  </div>
+                  <ChevronDown 
+                    className={`h-5 w-5 transition-transform duration-200 ${
+                      isWhatsAppOpen ? 'rotate-180' : ''
+                    }`}
+                  />
+                </CardTitle>
+              </CollapsibleTrigger>
+              <CardDescription className="text-left text-sm">
+                Configure o recebimento de notificações via WhatsApp
+              </CardDescription>
+            </CardHeader>
+            <CollapsibleContent>
+              <CardContent className="px-4 sm:px-6 space-y-4">
+                <div className="bg-muted/50 p-3 rounded-md text-sm">
+                  <p className="font-medium mb-1">📱 Como funciona:</p>
+                  <p className="text-muted-foreground">Ao ativar, você receberá notificações importantes sobre seus agendamentos diretamente no WhatsApp.</p>
+                </div>
+
+                <div className="flex items-center justify-between p-3 rounded-lg border border-border">
+                  <div className="flex-1">
+                    <Label htmlFor="whatsapp-enabled" className="font-medium cursor-pointer">
+                      Ativar Notificações WhatsApp
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      Receba confirmações e lembretes no WhatsApp
+                    </p>
+                  </div>
+                  <Switch
+                    id="whatsapp-enabled"
+                    checked={notificationSettings?.whatsapp_enabled || false}
+                    onCheckedChange={(checked) => {
+                      updateSettings.mutate({ whatsapp_enabled: checked });
+                    }}
+                  />
+                </div>
+
+                {notificationSettings?.whatsapp_enabled && (
+                  <>
+                    <div className="rounded-lg bg-muted/50 p-4 space-y-2 text-sm">
+                      <p className="font-medium">Como configurar:</p>
+                      <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+                        <li>Acesse <a href="https://developers.facebook.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Meta for Developers</a></li>
+                        <li>Crie um aplicativo e adicione o produto WhatsApp Business</li>
+                        <li>Configure um número de telefone de teste ou conecte seu número</li>
+                        <li>Copie o Token de Acesso e o Phone Number ID</li>
+                      </ol>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <Separator className="flex-1" />
+                      <span className="text-xs text-muted-foreground">Configuração Rápida</span>
+                      <Separator className="flex-1" />
+                    </div>
+
+                    <div className="flex justify-center">
+                      <WhatsAppQRConnect
+                        onCredentialsScanned={(token, phoneId) => {
+                          setWhatsappToken(token);
+                          setWhatsappPhoneId(phoneId);
+                          toast.success('Credenciais carregadas via QR code!');
+                        }}
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <Separator className="flex-1" />
+                      <span className="text-xs text-muted-foreground">Ou configure manualmente</span>
+                      <Separator className="flex-1" />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="whatsapp-token">Token de Acesso</Label>
+                      <Input
+                        id="whatsapp-token"
+                        type="password"
+                        placeholder="EAAxxxxxxxxxxxxxxxxxxxxxxxx"
+                        value={whatsappToken}
+                        onChange={(e) => setWhatsappToken(e.target.value)}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="whatsapp-phone-id">Phone Number ID</Label>
+                      <Input
+                        id="whatsapp-phone-id"
+                        placeholder="123456789012345"
+                        value={whatsappPhoneId}
+                        onChange={(e) => setWhatsappPhoneId(e.target.value)}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="whatsapp-phone">Seu Número do WhatsApp (opcional)</Label>
+                      <Input
+                        id="whatsapp-phone"
+                        type="tel"
+                        placeholder="+5562999999999"
+                        value={whatsappPhone}
+                        onChange={(e) => setWhatsappPhone(e.target.value)}
+                        className="font-mono"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Número associado à sua conta WhatsApp Business
+                      </p>
+                    </div>
+                    
+                    <Button
+                      onClick={() => {
+                        if (whatsappToken && whatsappPhoneId) {
+                          updateSettings.mutate({ 
+                            whatsapp_token: whatsappToken,
+                            whatsapp_phone_id: whatsappPhoneId,
+                            whatsapp_phone: whatsappPhone || null
+                          });
+                        } else {
+                          toast.error('Por favor, preencha o Token e o Phone Number ID');
+                        }
+                      }}
+                      disabled={updateSettings.isPending}
+                      className="w-full"
+                    >
+                      {updateSettings.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Salvando...
+                        </>
+                      ) : (
+                        'Salvar Configurações WhatsApp'
+                      )}
+                    </Button>
+                  </>
+                )}
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
 
         <NotificationTemplateEditor
           isOpen={isTemplateEditorOpen}
