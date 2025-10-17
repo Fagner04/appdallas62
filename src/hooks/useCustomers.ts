@@ -20,6 +20,8 @@ export interface CreateCustomerData {
   phone: string;
   email?: string;
   notes?: string;
+  createAccount?: boolean;
+  password?: string;
 }
 
 export interface UpdateCustomerData {
@@ -50,23 +52,63 @@ export const useCreateCustomer = () => {
 
   return useMutation({
     mutationFn: async (data: CreateCustomerData) => {
+      let userId: string | undefined;
+
+      // Se createAccount for true, criar conta no Supabase Auth
+      if (data.createAccount && data.email && data.password) {
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: data.email,
+          password: data.password,
+          options: {
+            data: {
+              full_name: data.name,
+              phone: data.phone,
+            },
+          },
+        });
+
+        if (authError) {
+          throw new Error(`Erro ao criar conta: ${authError.message}`);
+        }
+
+        userId = authData.user?.id;
+
+        if (!userId) {
+          throw new Error('Erro ao criar conta: ID do usuário não retornado');
+        }
+      }
+
+      // Criar o registro do cliente
+      const customerData = {
+        name: data.name,
+        phone: data.phone,
+        email: data.email,
+        notes: data.notes,
+        user_id: userId,
+      };
+
       const { data: customer, error } = await supabase
         .from('customers')
-        .insert([data])
+        .insert([customerData])
         .select()
         .single();
 
       if (error) throw error;
       return customer;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['customers'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
-      toast.success('Cliente cadastrado com sucesso!');
+      
+      if (variables.createAccount) {
+        toast.success('Cliente e conta de acesso cadastrados com sucesso!');
+      } else {
+        toast.success('Cliente cadastrado com sucesso!');
+      }
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Erro ao cadastrar cliente:', error);
-      toast.error('Erro ao cadastrar cliente');
+      toast.error(error?.message || 'Erro ao cadastrar cliente');
     },
   });
 };

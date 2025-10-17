@@ -58,12 +58,16 @@ const Index = () => {
               size="lg"
               variant="secondary"
               className="w-full sm:w-auto text-base sm:text-lg px-8 py-6 hover-lift gap-2"
-              onClick={() => navigate("/cadastro-barbearia")}
+              onClick={() => navigate("/login")}
             >
               <Store className="h-5 w-5" />
-              Cadastrar Barbearia
+              Cadastrar Nova Barbearia
             </Button>
           </div>
+          <p className="text-sm text-muted-foreground">
+            Já tem uma barbearia cadastrada? Faça login acima. <br />
+            É dono de barbearia e quer cadastrar? Clique no botão "Cadastrar Nova Barbearia"
+          </p>
 
           {/* Features Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-12 sm:pt-16">

@@ -9,9 +9,10 @@ import { useCreateBarbershop } from "@/hooks/useBarbershops";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { z } from "zod";
+
 export default function CadastroBarbearia() {
   const navigate = useNavigate();
-  const { isAuthenticated, register } = useAuth();
+  const { isAuthenticated } = useAuth();
   const createBarbershop = useCreateBarbershop();
   
   const [name, setName] = useState("");
@@ -21,22 +22,6 @@ export default function CadastroBarbearia() {
   const [address, setAddress] = useState("");
   const [generatedLink, setGeneratedLink] = useState("");
   const [copied, setCopied] = useState(false);
-  
-  // Campos para criar conta
-  const [ownerName, setOwnerName] = useState("");
-  const [ownerEmail, setOwnerEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-
-  const accountSchema = z.object({
-    ownerName: z.string().trim().min(2, { message: 'Informe seu nome completo' }).max(100),
-    ownerEmail: z.string().trim().email({ message: 'Email inválido' }).max(255),
-    password: z.string().min(6, { message: 'A senha deve ter no mínimo 6 caracteres' }).max(72),
-    confirmPassword: z.string(),
-  }).refine((data) => data.password === data.confirmPassword, {
-    message: 'As senhas não coincidem',
-    path: ['confirmPassword'],
-  });
 
   const shopSchema = z.object({
     name: z.string().trim().min(2, { message: 'Nome da barbearia é obrigatório' }).max(100),
@@ -45,6 +30,7 @@ export default function CadastroBarbearia() {
     email: z.union([z.string().trim().email({ message: 'Email da barbearia inválido' }).max(255), z.literal('')]).optional(),
     address: z.string().trim().max(255).optional().or(z.literal('')),
   });
+
   const generateSlug = (text: string) => {
     return text
       .toLowerCase()
@@ -64,7 +50,12 @@ export default function CadastroBarbearia() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Normalizar entradas
+    if (!isAuthenticated) {
+      toast.error('Você precisa fazer login primeiro');
+      navigate(`/login?next=${encodeURIComponent('/cadastro-barbearia')}`);
+      return;
+    }
+
     const shopInput = {
       name: name.trim(),
       slug: slug.trim(),
@@ -79,58 +70,12 @@ export default function CadastroBarbearia() {
       return;
     }
 
-    if (!isAuthenticated) {
-      // Validar dados da conta
-      const accountInput = {
-        ownerName: ownerName.trim(),
-        ownerEmail: ownerEmail.trim(),
-        password,
-        confirmPassword,
-      };
-
-      // Verificação adicional antes de validar com zod
-      if (!accountInput.ownerName) {
-        toast.error('Por favor, informe seu nome completo');
-        return;
-      }
-
-      if (!accountInput.ownerEmail) {
-        toast.error('Por favor, informe seu email');
-        return;
-      }
-
-      if (!password) {
-        toast.error('Por favor, informe uma senha');
-        return;
-      }
-
-      if (!confirmPassword) {
-        toast.error('Por favor, confirme sua senha');
-        return;
-      }
-
-      const accountResult = accountSchema.safeParse(accountInput);
-      if (!accountResult.success) {
-        toast.error(accountResult.error.errors[0]?.message || 'Dados da conta inválidos');
-        return;
-      }
-
-      try {
-        await register(accountResult.data.ownerName, accountResult.data.ownerEmail, accountResult.data.password);
-        toast.success('Conta criada! Criando sua barbearia...');
-        await new Promise((r) => setTimeout(r, 1000));
-      } catch (err: any) {
-        toast.error(err?.message || 'Erro ao criar conta. Tente novamente.');
-        return;
-      }
-    }
-
     try {
       await createBarbershop.mutateAsync({
         name: shopResult.data.name,
         slug: shopResult.data.slug,
         phone: shopResult.data.phone || undefined,
-        email: shopResult.data.email || (!isAuthenticated ? ownerEmail.trim() : undefined),
+        email: shopResult.data.email || undefined,
         address: shopResult.data.address || undefined,
       });
 
@@ -216,67 +161,6 @@ export default function CadastroBarbearia() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {!isAuthenticated && (
-              <>
-                <div className="pb-4 border-b">
-                  <h3 className="font-semibold text-lg mb-1">Seus Dados</h3>
-                  <p className="text-sm text-muted-foreground">Crie sua conta para gerenciar a barbearia</p>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="ownerName">Seu Nome Completo *</Label>
-                  <Input
-                    id="ownerName"
-                    placeholder="João Silva"
-                    value={ownerName}
-                    onChange={(e) => setOwnerName(e.target.value)}
-                    required={!isAuthenticated}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="ownerEmail">Seu Email *</Label>
-                  <Input
-                    id="ownerEmail"
-                    type="email"
-                    placeholder="seu@email.com"
-                    value={ownerEmail}
-                    onChange={(e) => setOwnerEmail(e.target.value)}
-                    required={!isAuthenticated}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="password">Senha *</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Mínimo 6 caracteres"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required={!isAuthenticated}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirmar Senha *</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    placeholder="Digite a senha novamente"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required={!isAuthenticated}
-                  />
-                </div>
-
-                <div className="pt-4 border-b">
-                  <h3 className="font-semibold text-lg mb-1">Dados da Barbearia</h3>
-                  <p className="text-sm text-muted-foreground">Informações do seu negócio</p>
-                </div>
-              </>
-            )}
-            
             <div className="space-y-2">
               <Label htmlFor="name">Nome da Barbearia *</Label>
               <Input

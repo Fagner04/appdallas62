@@ -23,6 +23,8 @@ export default function Clientes() {
     email: '',
     phone: '',
     notes: '',
+    createAccount: false,
+    password: '',
   });
 
   const { data: customers, isLoading } = useCustomers();
@@ -37,6 +39,8 @@ export default function Clientes() {
         email: editingCustomer.email || '',
         phone: editingCustomer.phone,
         notes: editingCustomer.notes || '',
+        createAccount: false,
+        password: '',
       });
     }
   }, [editingCustomer]);
@@ -44,13 +48,34 @@ export default function Clientes() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validar se criação de conta foi solicitada
+    if (formData.createAccount && !editingCustomer) {
+      if (!formData.email) {
+        toast.error('Email é obrigatório para criar conta');
+        return;
+      }
+      if (!formData.password || formData.password.length < 6) {
+        toast.error('Senha deve ter no mínimo 6 caracteres');
+        return;
+      }
+    }
+
     if (editingCustomer) {
       await updateCustomer.mutateAsync({
         id: editingCustomer.id,
-        data: formData,
+        data: {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          notes: formData.notes,
+        },
       });
     } else {
-      await createCustomer.mutateAsync(formData);
+      await createCustomer.mutateAsync({
+        ...formData,
+        createAccount: formData.createAccount,
+        password: formData.createAccount ? formData.password : undefined,
+      });
     }
 
     handleDialogClose();
@@ -82,6 +107,8 @@ export default function Clientes() {
       email: '',
       phone: '',
       notes: '',
+      createAccount: false,
+      password: '',
     });
   };
 
@@ -124,7 +151,7 @@ export default function Clientes() {
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Nome Completo</Label>
+                    <Label htmlFor="name">Nome Completo *</Label>
                     <Input
                       id="name"
                       value={formData.name}
@@ -133,16 +160,17 @@ export default function Clientes() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">Email {formData.createAccount && '*'}</Label>
                     <Input
                       id="email"
                       type="email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      required={formData.createAccount}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Telefone</Label>
+                    <Label htmlFor="phone">Telefone *</Label>
                     <Input
                       id="phone"
                       value={formData.phone}
@@ -159,6 +187,39 @@ export default function Clientes() {
                       placeholder="Adicione observações sobre o cliente"
                     />
                   </div>
+
+                  {!editingCustomer && (
+                    <>
+                      <div className="flex items-center space-x-2 pt-2 border-t">
+                        <Switch
+                          id="createAccount"
+                          checked={formData.createAccount}
+                          onCheckedChange={(checked) => setFormData({ ...formData, createAccount: checked })}
+                        />
+                        <Label htmlFor="createAccount" className="cursor-pointer">
+                          Criar conta de acesso para o cliente
+                        </Label>
+                      </div>
+
+                      {formData.createAccount && (
+                        <div className="space-y-2 p-4 bg-muted rounded-lg">
+                          <Label htmlFor="password">Senha de Acesso *</Label>
+                          <Input
+                            id="password"
+                            type="password"
+                            value={formData.password}
+                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                            placeholder="Mínimo 6 caracteres"
+                            required={formData.createAccount}
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            O cliente poderá fazer login e agendar horários pelo app
+                          </p>
+                        </div>
+                      )}
+                    </>
+                  )}
+
                   <Button type="submit" className="w-full" disabled={createCustomer.isPending || updateCustomer.isPending}>
                     {editingCustomer ? 'Atualizar Cliente' : 'Cadastrar Cliente'}
                   </Button>
