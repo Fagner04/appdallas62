@@ -38,7 +38,7 @@ export default function Notificacoes() {
   const [editingTemplate, setEditingTemplate] = useState<NotificationTemplate | undefined>();
   const [isNewTemplate, setIsNewTemplate] = useState(false);
   
-  const [isTemplatesOpen, setIsTemplatesOpen] = useState(true);
+  const [isTemplatesOpen, setIsTemplatesOpen] = useState(false);
   const [isWhatsAppOpen, setIsWhatsAppOpen] = useState(false);
   const { settings: notificationSettings, updateSettings } = useNotificationSettings(user?.id);
   const [whatsappPhone, setWhatsappPhone] = useState('');
