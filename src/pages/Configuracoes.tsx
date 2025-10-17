@@ -63,6 +63,8 @@ export default function Configuracoes() {
 
   const { settings: notificationSettings, updateSettings } = useNotificationSettings(authUser?.id);
   const [whatsappPhone, setWhatsappPhone] = useState('');
+  const [whatsappToken, setWhatsappToken] = useState('');
+  const [whatsappPhoneId, setWhatsappPhoneId] = useState('');
 
   useEffect(() => {
     if (workingHours.length > 0) {
@@ -79,8 +81,10 @@ export default function Configuracoes() {
   }, [workingHours]);
 
   useEffect(() => {
-    if (notificationSettings?.whatsapp_phone) {
-      setWhatsappPhone(notificationSettings.whatsapp_phone);
+    if (notificationSettings) {
+      setWhatsappPhone(notificationSettings.whatsapp_phone || '');
+      setWhatsappToken(notificationSettings.whatsapp_token || '');
+      setWhatsappPhoneId(notificationSettings.whatsapp_phone_id || '');
     }
   }, [notificationSettings]);
 
@@ -503,26 +507,66 @@ export default function Configuracoes() {
                     </div>
 
                     {notificationSettings?.whatsapp_enabled && (
-                      <div className="space-y-2">
-                        <Label htmlFor="whatsapp-phone">Número do WhatsApp</Label>
-                        <Input
-                          id="whatsapp-phone"
-                          type="tel"
-                          placeholder="+5562999999999"
-                          value={whatsappPhone}
-                          onChange={(e) => setWhatsappPhone(e.target.value)}
-                          className="font-mono"
-                        />
-                        <p className="text-xs text-muted-foreground">
-                          Formato: +55 seguido do DDD e número (ex: +5562999999999)
-                        </p>
+                      <>
+                        <div className="rounded-lg bg-muted/50 p-4 space-y-2 text-sm">
+                          <p className="font-medium">Como configurar:</p>
+                          <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
+                            <li>Acesse <a href="https://developers.facebook.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Meta for Developers</a></li>
+                            <li>Crie um aplicativo e adicione o produto WhatsApp Business</li>
+                            <li>Configure um número de telefone de teste ou conecte seu número</li>
+                            <li>Copie o Token de Acesso e o Phone Number ID abaixo</li>
+                          </ol>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="whatsapp-token">Token de Acesso</Label>
+                          <Input
+                            id="whatsapp-token"
+                            type="password"
+                            placeholder="EAAxxxxxxxxxxxxxxxxxxxxxxxx"
+                            value={whatsappToken}
+                            onChange={(e) => setWhatsappToken(e.target.value)}
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="whatsapp-phone-id">Phone Number ID</Label>
+                          <Input
+                            id="whatsapp-phone-id"
+                            placeholder="123456789012345"
+                            value={whatsappPhoneId}
+                            onChange={(e) => setWhatsappPhoneId(e.target.value)}
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="whatsapp-phone">Seu Número do WhatsApp (opcional)</Label>
+                          <Input
+                            id="whatsapp-phone"
+                            type="tel"
+                            placeholder="+5562999999999"
+                            value={whatsappPhone}
+                            onChange={(e) => setWhatsappPhone(e.target.value)}
+                            className="font-mono"
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            Número associado à sua conta WhatsApp Business
+                          </p>
+                        </div>
+                        
                         <Button
                           onClick={() => {
-                            if (whatsappPhone) {
-                              updateSettings.mutate({ whatsapp_phone: whatsappPhone });
+                            if (whatsappToken && whatsappPhoneId) {
+                              updateSettings.mutate({ 
+                                whatsapp_token: whatsappToken,
+                                whatsapp_phone_id: whatsappPhoneId,
+                                whatsapp_phone: whatsappPhone || null
+                              });
+                            } else {
+                              toast.error('Por favor, preencha o Token e o Phone Number ID');
                             }
                           }}
-                          disabled={!whatsappPhone || updateSettings.isPending}
+                          disabled={updateSettings.isPending}
                           className="w-full"
                         >
                           {updateSettings.isPending ? (
@@ -531,10 +575,10 @@ export default function Configuracoes() {
                               Salvando...
                             </>
                           ) : (
-                            'Salvar Número'
+                            'Salvar Configurações WhatsApp'
                           )}
                         </Button>
-                      </div>
+                      </>
                     )}
                   </CardContent>
                 </CollapsibleContent>

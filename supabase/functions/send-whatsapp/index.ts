@@ -30,61 +30,53 @@ serve(async (req) => {
     // Check if user has WhatsApp enabled
     const { data: settings } = await supabaseClient
       .from('notification_settings')
-      .select('whatsapp_enabled, whatsapp_phone')
+      .select('whatsapp_enabled, whatsapp_phone, whatsapp_token, whatsapp_phone_id')
       .eq('user_id', userId)
       .single();
 
-    if (!settings?.whatsapp_enabled || !settings?.whatsapp_phone) {
+    if (!settings?.whatsapp_enabled || !settings?.whatsapp_token || !settings?.whatsapp_phone_id) {
       return new Response(
-        JSON.stringify({ error: 'WhatsApp not enabled for this user' }),
+        JSON.stringify({ error: 'WhatsApp not configured for this user' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const twilioAccountSid = Deno.env.get('TWILIO_ACCOUNT_SID');
-    const twilioAuthToken = Deno.env.get('TWILIO_AUTH_TOKEN');
-    const twilioWhatsAppNumber = Deno.env.get('TWILIO_WHATSAPP_NUMBER') || 'whatsapp:+14155238886';
+    // Format phone number (remove + and any non-digit characters)
+    const formattedPhone = to.replace(/\D/g, '');
 
-    if (!twilioAccountSid || !twilioAuthToken) {
-      console.error('Twilio credentials not configured');
-      return new Response(
-        JSON.stringify({ error: 'WhatsApp service not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Send WhatsApp message via Twilio
-    const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`;
-    const auth = btoa(`${twilioAccountSid}:${twilioAuthToken}`);
-
-    const formData = new URLSearchParams();
-    formData.append('From', twilioWhatsAppNumber);
-    formData.append('To', `whatsapp:${to}`);
-    formData.append('Body', message);
-
-    const twilioResponse = await fetch(twilioUrl, {
+    // Send WhatsApp message via WhatsApp Business Cloud API
+    const whatsappUrl = `https://graph.facebook.com/v18.0/${settings.whatsapp_phone_id}/messages`;
+    
+    const whatsappResponse = await fetch(whatsappUrl, {
       method: 'POST',
       headers: {
-        'Authorization': `Basic ${auth}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Bearer ${settings.whatsapp_token}`,
+        'Content-Type': 'application/json',
       },
-      body: formData,
+      body: JSON.stringify({
+        messaging_product: 'whatsapp',
+        to: formattedPhone,
+        type: 'text',
+        text: {
+          body: message
+        }
+      }),
     });
 
-    const twilioData = await twilioResponse.json();
+    const whatsappData = await whatsappResponse.json();
 
-    if (!twilioResponse.ok) {
-      console.error('Twilio error:', twilioData);
+    if (!whatsappResponse.ok) {
+      console.error('WhatsApp API error:', whatsappData);
       return new Response(
-        JSON.stringify({ error: 'Failed to send WhatsApp message', details: twilioData }),
-        { status: twilioResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Failed to send WhatsApp message', details: whatsappData }),
+        { status: whatsappResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('WhatsApp message sent successfully:', twilioData.sid);
+    console.log('WhatsApp message sent successfully:', whatsappData.messages?.[0]?.id);
 
     return new Response(
-      JSON.stringify({ success: true, sid: twilioData.sid }),
+      JSON.stringify({ success: true, messageId: whatsappData.messages?.[0]?.id }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {

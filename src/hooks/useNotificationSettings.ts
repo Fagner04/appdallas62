@@ -13,6 +13,8 @@ export interface NotificationSettings {
   marketing_enabled: boolean;
   whatsapp_enabled: boolean;
   whatsapp_phone: string | null;
+  whatsapp_token: string | null;
+  whatsapp_phone_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -49,6 +51,8 @@ export const useNotificationSettings = (userId?: string) => {
             marketing_enabled: false,
             whatsapp_enabled: false,
             whatsapp_phone: null,
+            whatsapp_token: null,
+            whatsapp_phone_id: null,
           })
           .select()
           .single();
