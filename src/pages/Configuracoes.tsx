@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { User, Clock, Lock, Loader2, ChevronDown, LogOut, CreditCard, Store, Copy, Check, UserCircle, Shield, Calendar as CalendarIcon, DollarSign, Ban, Eye, Trash2 } from 'lucide-react';
+import { User, Clock, Lock, Loader2, ChevronDown, LogOut, CreditCard, Store, Copy, Check, Shield, Calendar as CalendarIcon, DollarSign, Ban, Eye, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useWorkingHours, useUpdateWorkingHours } from '@/hooks/useWorkingHours';
 import { usePasswordChange } from '@/hooks/usePasswordChange';
@@ -38,14 +38,6 @@ export default function Configuracoes() {
   const { isFeatureEnabled, toggleFeature } = useClientFeatures();
 
   const [copiedId, setCopiedId] = useState(false);
-  const [copiedLink, setCopiedLink] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState('');
-  const [clientData, setClientData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    password: '',
-  });
 
   const [hours, setHours] = useState<Record<number, { isOpen: boolean; start: string; end: string }>>({
     1: { isOpen: true, start: '09:00', end: '18:00' },
@@ -125,34 +117,6 @@ export default function Configuracoes() {
     }
   };
 
-  const copyRegistrationLink = () => {
-    if (barbershop?.slug) {
-      const link = `${window.location.origin}/cadastro/${barbershop.slug}`;
-      navigator.clipboard.writeText(link);
-      setCopiedLink(true);
-      toast.success('Link copiado!');
-      setTimeout(() => setCopiedLink(false), 2000);
-    }
-  };
-
-  const handleSendInvite = () => {
-    if (!inviteEmail) {
-      toast.error('Digite um email válido');
-      return;
-    }
-    toast.info('Função de envio de email em desenvolvimento');
-    setInviteEmail('');
-  };
-
-  const handleDirectRegister = () => {
-    if (!clientData.name || !clientData.email || !clientData.phone || !clientData.password) {
-      toast.error('Preencha todos os campos');
-      return;
-    }
-    toast.success('Cliente cadastrado com sucesso!');
-    setClientData({ name: '', email: '', phone: '', password: '' });
-  };
-
   const clientFeatures = [
     {
       id: 'online_booking',
@@ -205,14 +169,10 @@ export default function Configuracoes() {
         </div>
 
         <Tabs defaultValue="perfil" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsList className="grid w-full grid-cols-2 mb-8">
             <TabsTrigger value="perfil" className="flex items-center gap-2">
               <User className="h-4 w-4" />
               Perfil
-            </TabsTrigger>
-            <TabsTrigger value="convites" className="flex items-center gap-2">
-              <UserCircle className="h-4 w-4" />
-              Convites
             </TabsTrigger>
             <TabsTrigger value="controle" className="flex items-center gap-2">
               <Shield className="h-4 w-4" />
@@ -535,128 +495,6 @@ export default function Configuracoes() {
                 >
                   Sair
                 </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* ABA CONVITES */}
-          <TabsContent value="convites" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <UserCircle className="h-5 w-5" />
-                  Convite de Clientes
-                </CardTitle>
-                <CardDescription>
-                  Crie acesso ao app do cliente enviando um link ou cadastrando diretamente
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Tabs defaultValue="link" className="w-full">
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="link">Link de Cadastro</TabsTrigger>
-                    <TabsTrigger value="email">Enviar por Email</TabsTrigger>
-                    <TabsTrigger value="cadastro">Cadastro Direto</TabsTrigger>
-                  </TabsList>
-
-                  <TabsContent value="link" className="space-y-4 mt-4">
-                    {barbershop ? (
-                      <>
-                        <div className="bg-gradient-to-br from-primary/5 to-primary/10 p-6 rounded-lg border border-primary/20">
-                          <p className="text-sm font-medium mb-2">Link para Cadastro de Clientes</p>
-                          <div className="flex gap-2">
-                            <Input 
-                              value={`${window.location.origin}/cadastro/${barbershop.slug}`}
-                              readOnly
-                              className="font-mono text-sm"
-                            />
-                            <Button 
-                              onClick={copyRegistrationLink}
-                              variant="outline"
-                              size="sm"
-                            >
-                              {copiedLink ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                            </Button>
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-2">
-                            Compartilhe este link com seus clientes para que eles possam criar uma conta
-                          </p>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="text-center py-8">
-                        <p className="text-muted-foreground">Nenhuma barbearia cadastrada</p>
-                      </div>
-                    )}
-                  </TabsContent>
-
-                  <TabsContent value="email" className="space-y-4 mt-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="invite-email">Email do Cliente</Label>
-                      <Input 
-                        id="invite-email"
-                        type="email"
-                        placeholder="cliente@email.com"
-                        value={inviteEmail}
-                        onChange={(e) => setInviteEmail(e.target.value)}
-                      />
-                    </div>
-                    <Button onClick={handleSendInvite} className="w-full">
-                      Enviar Convite
-                    </Button>
-                    <div className="bg-yellow-50 dark:bg-yellow-950/20 p-3 rounded-md text-sm border border-yellow-200 dark:border-yellow-900">
-                      <p className="text-yellow-900 dark:text-yellow-100">
-                        ⚠️ Função em desenvolvimento. Configure um serviço de email para enviar convites.
-                      </p>
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="cadastro" className="space-y-4 mt-4">
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="client-name">Nome Completo</Label>
-                        <Input 
-                          id="client-name"
-                          placeholder="João da Silva"
-                          value={clientData.name}
-                          onChange={(e) => setClientData(prev => ({ ...prev, name: e.target.value }))}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="client-email">Email</Label>
-                        <Input 
-                          id="client-email"
-                          type="email"
-                          placeholder="joao@email.com"
-                          value={clientData.email}
-                          onChange={(e) => setClientData(prev => ({ ...prev, email: e.target.value }))}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="client-phone">Telefone</Label>
-                        <Input 
-                          id="client-phone"
-                          placeholder="(11) 99999-9999"
-                          value={clientData.phone}
-                          onChange={(e) => setClientData(prev => ({ ...prev, phone: e.target.value }))}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="client-password">Senha Inicial</Label>
-                        <Input 
-                          id="client-password"
-                          type="password"
-                          placeholder="Mínimo 6 caracteres"
-                          value={clientData.password}
-                          onChange={(e) => setClientData(prev => ({ ...prev, password: e.target.value }))}
-                        />
-                      </div>
-                      <Button onClick={handleDirectRegister} className="w-full">
-                        Cadastrar Cliente
-                      </Button>
-                    </div>
-                  </TabsContent>
-                </Tabs>
               </CardContent>
             </Card>
           </TabsContent>
