@@ -60,7 +60,21 @@ export const useClientFeatures = () => {
       const settings: Record<string, boolean> = {};
       data?.forEach(setting => {
         const key = setting.key.replace('client_', '');
-        settings[key] = setting.value === true || setting.value === 'true';
+        // O value é jsonb, converter para boolean de forma explícita
+        const value = setting.value;
+        
+        // Se for boolean direto, usar o valor
+        if (typeof value === 'boolean') {
+          settings[key] = value;
+        }
+        // Se for string, verificar se é 'true' ou 'false'
+        else if (typeof value === 'string') {
+          settings[key] = value === 'true';
+        }
+        // Caso contrário, usar o valor como está (conversão implícita)
+        else {
+          settings[key] = Boolean(value);
+        }
       });
       
       // Preencher com valores padrão para chaves não encontradas
