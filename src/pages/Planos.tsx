@@ -4,13 +4,53 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CreditCard, Check, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useState } from "react";
 
 export default function Planos() {
+  const [loading, setLoading] = useState<string | null>(null);
+
+  const handleSubscribe = async (planId: string, planName: string, price: number, interval: string) => {
+    try {
+      setLoading(planId);
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Você precisa estar logado para assinar um plano");
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke('mercadopago-checkout', {
+        body: { 
+          planId,
+          planName,
+          price,
+          interval,
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      }
+    } catch (error) {
+      console.error('Error creating checkout:', error);
+      toast.error("Erro ao processar pagamento. Tente novamente.");
+    } finally {
+      setLoading(null);
+    }
+  };
+
   const plans = [
     {
+      id: 'monthly',
       name: 'Plano Mensal',
       price: 'R$ 55',
+      priceValue: 55,
       period: '/mês',
+      interval: 'monthly',
       description: 'Todas as funcionalidades',
       features: [
         'Barbeiros ilimitados',
@@ -26,9 +66,12 @@ export default function Planos() {
       popular: true,
     },
     {
+      id: 'yearly',
       name: 'Plano Anual',
       price: 'R$ 555',
+      priceValue: 555,
       period: '/ano',
+      interval: 'yearly',
       description: 'Todas as funcionalidades',
       features: [
         'Barbeiros ilimitados',
@@ -53,26 +96,12 @@ export default function Planos() {
             <CreditCard className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
           </div>
           <div className="flex-1">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
               <h1 className="text-2xl sm:text-4xl font-bold">Planos e Assinaturas</h1>
-              <Badge variant="secondary" className="text-xs">
-                Em Desenvolvimento
-              </Badge>
-            </div>
             <p className="text-muted-foreground mt-1 text-sm sm:text-base">
               Gerencie seu plano e assinatura
             </p>
           </div>
         </div>
-
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Funcionalidade em Desenvolvimento</AlertTitle>
-          <AlertDescription>
-            Esta funcionalidade está sendo desenvolvida e estará disponível em breve.
-            Em caso de dúvidas sobre planos, entre em contato com nosso suporte.
-          </AlertDescription>
-        </Alert>
 
         <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto">
           {plans.map((plan) => (
@@ -108,10 +137,11 @@ export default function Planos() {
               <CardFooter>
                 <Button 
                   className="w-full" 
-                  variant={plan.popular ? 'default' : 'outline'}
-                  disabled
+                  variant={plan.popular ? "default" : "outline"}
+                  onClick={() => handleSubscribe(plan.id, plan.name, plan.priceValue, plan.interval)}
+                  disabled={loading === plan.id}
                 >
-                  Em breve
+                  {loading === plan.id ? 'Processando...' : 'Assinar Agora'}
                 </Button>
               </CardFooter>
             </Card>

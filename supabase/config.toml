@@ -8,3 +8,9 @@ verify_jwt = true
 
 [functions.send-whatsapp]
 verify_jwt = true
+
+[functions.mercadopago-checkout]
+verify_jwt = true
+
+[functions.mercadopago-webhook]
+verify_jwt = false
