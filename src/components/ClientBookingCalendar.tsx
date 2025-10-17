@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -111,6 +111,24 @@ export function ClientBookingCalendar({ onSuccess }: ClientBookingCalendarProps 
     barbersCount: barbers.length,
     servicesCount: services.length
   });
+
+  // Auto-selecionar quando existir apenas 1 opção
+  useEffect(() => {
+    if (!selectedService && services.length === 1) {
+      setSelectedService(services[0].id);
+    }
+  }, [services, selectedService]);
+
+  useEffect(() => {
+    if (!selectedBarber && barbers.length === 1) {
+      setSelectedBarber(barbers[0].id);
+    }
+  }, [barbers, selectedBarber]);
+
+  // Resetar horário ao mudar barber/serviço/data
+  useEffect(() => {
+    setSelectedTime('');
+  }, [selectedBarber, selectedService, formattedDate]);
 
   // Buscar todos os horários bloqueados do barbeiro para marcar no calendário
   const { data: allBlockedTimes = [] } = useBlockedTimes(selectedBarber);
