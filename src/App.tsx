@@ -26,6 +26,7 @@ import HistoricoCliente from "./pages/HistoricoCliente";
 import Marketing from "./pages/Marketing";
 import Planos from "./pages/Planos";
 import Ajuda from "./pages/Ajuda";
+import ConviteClientes from "./pages/ConviteClientes";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -199,6 +200,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             {user?.role === 'customer' ? <Ajuda /> : <Navigate to="/dashboard" replace />}
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/convite-clientes"
+        element={
+          <ProtectedRoute>
+            <ConviteClientes />
           </ProtectedRoute>
         }
       />
