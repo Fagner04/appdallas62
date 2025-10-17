@@ -36,12 +36,24 @@ export const useReportStats = (period: Period) => {
   return useQuery({
     queryKey: ['report-stats', period],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return { revenue: 0, totalAppointments: 0, averageTicket: 0, occupancyRate: 0 };
+
+      const { data: barbershop } = await supabase
+        .from('barbershops')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single();
+
+      if (!barbershop) return { revenue: 0, totalAppointments: 0, averageTicket: 0, occupancyRate: 0 };
+
       const { start, end } = getDateRange(period);
 
       // Get total revenue
       const { data: transactions } = await supabase
         .from('transactions')
         .select('amount, type')
+        .eq('barbershop_id', barbershop.id)
         .eq('type', 'income')
         .gte('transaction_date', start)
         .lte('transaction_date', end);
@@ -52,6 +64,7 @@ export const useReportStats = (period: Period) => {
       const { count: totalAppointments } = await supabase
         .from('appointments')
         .select('*', { count: 'exact', head: true })
+        .eq('barbershop_id', barbershop.id)
         .gte('appointment_date', start)
         .lte('appointment_date', end)
         .in('status', ['completed', 'confirmed']);
@@ -63,6 +76,7 @@ export const useReportStats = (period: Period) => {
       const { data: appointments } = await supabase
         .from('appointments')
         .select('appointment_date, appointment_time')
+        .eq('barbershop_id', barbershop.id)
         .gte('appointment_date', start)
         .lte('appointment_date', end)
         .in('status', ['completed', 'confirmed']);
@@ -86,6 +100,17 @@ export const useTopServices = (period: Period) => {
   return useQuery({
     queryKey: ['top-services', period],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data: barbershop } = await supabase
+        .from('barbershops')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single();
+
+      if (!barbershop) return [];
+
       const { start, end } = getDateRange(period);
 
       const { data: appointments } = await supabase
@@ -94,6 +119,7 @@ export const useTopServices = (period: Period) => {
           service_id,
           service:services(name, price)
         `)
+        .eq('barbershop_id', barbershop.id)
         .gte('appointment_date', start)
         .lte('appointment_date', end)
         .in('status', ['completed', 'confirmed']);
@@ -142,6 +168,17 @@ export const useTopClients = (period: Period) => {
   return useQuery({
     queryKey: ['top-clients', period],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data: barbershop } = await supabase
+        .from('barbershops')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single();
+
+      if (!barbershop) return [];
+
       const { start, end } = getDateRange(period);
 
       const { data: appointments } = await supabase
@@ -151,6 +188,7 @@ export const useTopClients = (period: Period) => {
           customer:customers(name),
           service:services(price)
         `)
+        .eq('barbershop_id', barbershop.id)
         .gte('appointment_date', start)
         .lte('appointment_date', end)
         .in('status', ['completed', 'confirmed']);
@@ -191,11 +229,23 @@ export const useHourlyDistribution = (period: Period) => {
   return useQuery({
     queryKey: ['hourly-distribution', period],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data: barbershop } = await supabase
+        .from('barbershops')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single();
+
+      if (!barbershop) return [];
+
       const { start, end } = getDateRange(period);
 
       const { data: appointments } = await supabase
         .from('appointments')
         .select('appointment_time')
+        .eq('barbershop_id', barbershop.id)
         .gte('appointment_date', start)
         .lte('appointment_date', end)
         .in('status', ['completed', 'confirmed']);

@@ -32,6 +32,18 @@ export const useTransactions = (date?: string) => {
   return useQuery({
     queryKey: ['transactions', filterDate],
     queryFn: async () => {
+      // Buscar barbershop_id do usuário
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data: barbershop } = await supabase
+        .from('barbershops')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single();
+
+      if (!barbershop) return [];
+
       const { data, error } = await supabase
         .from('transactions')
         .select(`
@@ -42,6 +54,7 @@ export const useTransactions = (date?: string) => {
           ),
           barber:barbers(name)
         `)
+        .eq('barbershop_id', barbershop.id)
         .eq('transaction_date', filterDate)
         .order('created_at', { ascending: false });
 
@@ -57,9 +70,22 @@ export const useTransactionStats = (date?: string) => {
   return useQuery({
     queryKey: ['transaction-stats', filterDate],
     queryFn: async () => {
+      // Buscar barbershop_id do usuário
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return { income: 0, expenses: 0, balance: 0, incomeCount: 0, expenseCount: 0 };
+
+      const { data: barbershop } = await supabase
+        .from('barbershops')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single();
+
+      if (!barbershop) return { income: 0, expenses: 0, balance: 0, incomeCount: 0, expenseCount: 0 };
+
       const { data, error } = await supabase
         .from('transactions')
         .select('type, amount')
+        .eq('barbershop_id', barbershop.id)
         .eq('transaction_date', filterDate);
 
       if (error) throw error;
@@ -91,12 +117,22 @@ export const useCreateTransaction = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
+      // Buscar barbershop_id do usuário
+      const { data: barbershop } = await supabase
+        .from('barbershops')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single();
+
+      if (!barbershop) throw new Error('Barbearia não encontrada');
+
       const { data, error } = await supabase
         .from('transactions')
         .insert([{
           ...transaction,
           transaction_date: transaction.transaction_date || getTodayBrasilia(),
           created_by: user.id,
+          barbershop_id: barbershop.id,
         }])
         .select()
         .single();

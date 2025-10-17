@@ -47,6 +47,17 @@ export const useAppointments = (date?: string) => {
   return useQuery({
     queryKey: ['appointments', date],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data: barbershop } = await supabase
+        .from('barbershops')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single();
+
+      if (!barbershop) return [];
+
       let query = supabase
         .from('appointments')
         .select(`
@@ -56,6 +67,7 @@ export const useAppointments = (date?: string) => {
           barber:barbers(id, name),
           loyalty_coupons!loyalty_coupons_redeemed_appointment_id_fkey(id, code, is_redeemed)
         `)
+        .eq('barbershop_id', barbershop.id)
         .order('appointment_time', { ascending: true });
 
       if (date) {
@@ -216,9 +228,20 @@ export const useCreateAppointment = () => {
 
   return useMutation({
     mutationFn: async (data: CreateAppointmentData) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      const { data: barbershop } = await supabase
+        .from('barbershops')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single();
+
+      if (!barbershop) throw new Error('Barbearia não encontrada');
+
       const { data: appointment, error } = await supabase
         .from('appointments')
-        .insert([data])
+        .insert([{ ...data, barbershop_id: barbershop.id }])
         .select()
         .single();
 
@@ -246,6 +269,7 @@ export const useCreateAppointment = () => {
         const { data: barbers } = await supabase
           .from('barbers')
           .select('user_id')
+          .eq('barbershop_id', barbershop.id)
           .eq('is_active', true)
           .not('user_id', 'is', null);
         

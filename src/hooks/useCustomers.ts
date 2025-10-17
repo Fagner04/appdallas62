@@ -36,9 +36,21 @@ export const useCustomers = () => {
   return useQuery({
     queryKey: ['customers'],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data: barbershop } = await supabase
+        .from('barbershops')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single();
+
+      if (!barbershop) return [];
+
       const { data, error } = await supabase
         .from('customers')
         .select('*')
+        .eq('barbershop_id', barbershop.id)
         .order('name');
 
       if (error) throw error;
@@ -52,6 +64,18 @@ export const useCreateCustomer = () => {
 
   return useMutation({
     mutationFn: async (data: CreateCustomerData) => {
+      // Buscar barbershop_id do usuário
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      const { data: barbershop } = await supabase
+        .from('barbershops')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single();
+
+      if (!barbershop) throw new Error('Barbearia não encontrada');
+
       let userId: string | undefined;
 
       // Se createAccount for true, criar conta no Supabase Auth
@@ -85,6 +109,7 @@ export const useCreateCustomer = () => {
         email: data.email,
         notes: data.notes,
         user_id: userId,
+        barbershop_id: barbershop.id,
       };
 
       const { data: customer, error } = await supabase

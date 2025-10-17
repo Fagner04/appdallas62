@@ -6,23 +6,37 @@ export const useDashboardStats = () => {
   return useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return { appointmentsToday: 0, totalCustomers: 0, revenue: 0 };
+
+      const { data: barbershop } = await supabase
+        .from('barbershops')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single();
+
+      if (!barbershop) return { appointmentsToday: 0, totalCustomers: 0, revenue: 0 };
+
       const today = getTodayBrasilia();
 
       // Get today's appointments count
       const { count: appointmentsToday } = await supabase
         .from('appointments')
         .select('*', { count: 'exact', head: true })
+        .eq('barbershop_id', barbershop.id)
         .eq('appointment_date', today);
 
       // Get total customers
       const { count: totalCustomers } = await supabase
         .from('customers')
-        .select('*', { count: 'exact', head: true });
+        .select('*', { count: 'exact', head: true })
+        .eq('barbershop_id', barbershop.id);
 
       // Get today's revenue
       const { data: transactions } = await supabase
         .from('transactions')
         .select('amount')
+        .eq('barbershop_id', barbershop.id)
         .eq('type', 'income')
         .eq('transaction_date', today);
 
@@ -41,6 +55,17 @@ export const useTodayAppointments = () => {
   return useQuery({
     queryKey: ['today-appointments'],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data: barbershop } = await supabase
+        .from('barbershops')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single();
+
+      if (!barbershop) return [];
+
       const today = getTodayBrasilia();
 
       const { data, error } = await supabase
@@ -50,6 +75,7 @@ export const useTodayAppointments = () => {
           customer:customers(name),
           service:services(name)
         `)
+        .eq('barbershop_id', barbershop.id)
         .eq('appointment_date', today)
         .order('appointment_time');
 
