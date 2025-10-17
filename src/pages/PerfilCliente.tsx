@@ -467,15 +467,27 @@ export default function PerfilCliente() {
           </CardContent>
         </Card>
 
-        {/* Botão Flutuante para Cadastrar Barbearia */}
-        <Button
-          onClick={() => navigate('/cadastro-barbearia')}
-          size="lg"
-          className="fixed bottom-6 right-6 h-16 w-16 rounded-full shadow-2xl hover:scale-110 transition-all duration-300 z-50 group gradient-primary"
-          title="Cadastrar Barbearia"
-        >
-          <Store className="h-7 w-7 text-white group-hover:rotate-12 transition-transform duration-300" />
-        </Button>
+        {/* Cadastrar Barbearia */}
+        <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-1.5 rounded-lg bg-primary/10">
+                <Store className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">Cadastrar Barbearia</p>
+                <p className="text-xs text-muted-foreground">Configure seu negócio</p>
+              </div>
+            </div>
+            <Button
+              onClick={() => navigate('/cadastro-barbearia')}
+              size="sm"
+              className="transition-smooth"
+            >
+              Cadastrar
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </Layout>
   );
