@@ -120,6 +120,90 @@ export default function PerfilCliente() {
           </div>
         </div>
 
+        {/* Dados do Cliente */}
+        <Card className="shadow-elegant border-primary/10">
+          <CardHeader className="bg-gradient-to-r from-primary/5 to-transparent">
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <User className="h-5 w-5 text-primary" />
+              </div>
+              Informações Pessoais
+            </CardTitle>
+            <CardDescription>
+              Seus dados cadastrados no sistema
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-6">
+            {profileLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            ) : profile ? (
+              <div className="grid gap-6 md:grid-cols-2">
+                {/* Nome */}
+                <div className="flex items-start gap-4 p-4 rounded-xl border bg-gradient-to-br from-card to-muted/5">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <User className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-muted-foreground">Nome</p>
+                    <p className="text-base font-semibold truncate">{profile.name}</p>
+                  </div>
+                </div>
+
+                {/* Email */}
+                {profile.email && (
+                  <div className="flex items-start gap-4 p-4 rounded-xl border bg-gradient-to-br from-card to-muted/5">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <Mail className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-muted-foreground">Email</p>
+                      <p className="text-base font-semibold truncate">{profile.email}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Telefone */}
+                {profile.phone && (
+                  <div className="flex items-start gap-4 p-4 rounded-xl border bg-gradient-to-br from-card to-muted/5">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <Phone className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-muted-foreground">Telefone</p>
+                      <p className="text-base font-semibold">{profile.phone}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Pontos de Fidelidade */}
+                <div className="flex items-start gap-4 p-4 rounded-xl border bg-gradient-to-br from-primary/5 to-primary/10">
+                  <div className="p-2 rounded-lg bg-primary/20">
+                    <Store className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-muted-foreground">Pontos de Fidelidade</p>
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-2xl font-bold text-primary">{profile.loyalty_points || 0}</p>
+                      <p className="text-sm text-muted-foreground">/ 10 pontos</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {profile.loyalty_points >= 10 
+                        ? '🎉 Você pode resgatar um cupom!' 
+                        : `Faltam ${10 - (profile.loyalty_points || 0)} pontos para um cupom grátis`}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>Nenhum dado encontrado</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Configurações de Notificações */}
         <Card className="shadow-elegant border-primary/10">
           <Collapsible open={isNotificationsOpen} onOpenChange={setIsNotificationsOpen}>
