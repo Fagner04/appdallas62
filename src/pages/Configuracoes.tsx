@@ -619,12 +619,7 @@ export default function Configuracoes() {
                     <CreditCard className="h-4 w-4 text-primary" />
                   </div>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium">Planos e Assinaturas</p>
-                      <Badge variant="secondary" className="text-xs">
-                        Em Desenvolvimento
-                      </Badge>
-                    </div>
+                    <p className="text-sm font-medium">Planos e Assinaturas</p>
                     <p className="text-xs text-muted-foreground">Gerencie seu plano e pagamentos</p>
                   </div>
                 </div>
@@ -632,6 +627,7 @@ export default function Configuracoes() {
                   variant="outline"
                   size="sm"
                   className="transition-smooth"
+                  onClick={() => navigate('/planos')}
                 >
                   Ver Planos
                 </Button>
