@@ -854,15 +854,26 @@ export type Database = {
         Returns: boolean
       }
       replace_template_variables: {
-        Args: {
-          appointment_date: string
-          appointment_time: string
-          barber_name: string
-          customer_name: string
-          hours_text?: string
-          service_name: string
-          template_text: string
-        }
+        Args:
+          | {
+              appointment_date: string
+              appointment_time: string
+              barber_name: string
+              barbershop_name?: string
+              customer_name: string
+              hours_text?: string
+              service_name: string
+              template_text: string
+            }
+          | {
+              appointment_date: string
+              appointment_time: string
+              barber_name: string
+              customer_name: string
+              hours_text?: string
+              service_name: string
+              template_text: string
+            }
         Returns: string
       }
     }
