@@ -19,9 +19,10 @@ export function BarberScheduleView() {
 
   const { data: barbers = [], isLoading: barbersLoading } = useBarbers();
   
-  // If user is a barber, default to their ID
+  // If user is a barber, get their barber ID from the barbers table
   const isBarber = user?.role === 'barber';
-  const defaultBarberId = isBarber ? user?.id : '';
+  const userAsBarber = barbers.find(b => b.user_id === user?.id);
+  const defaultBarberId = userAsBarber?.id || '';
 
   const formattedDate = selectedDate ? formatBrasiliaDate(selectedDate, 'yyyy-MM-dd') : '';
   const barberId = selectedBarber || defaultBarberId;

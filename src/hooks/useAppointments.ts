@@ -74,13 +74,32 @@ export const useAppointments = (date?: string) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
 
-      const { data: barbershop } = await supabase
+      // Try to get barbershop_id (as owner or as barber)
+      let barbershopId: string | null = null;
+
+      // First try as owner
+      const { data: ownedBarbershop } = await supabase
         .from('barbershops')
         .select('id')
         .eq('owner_id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (!barbershop) return [];
+      if (ownedBarbershop) {
+        barbershopId = ownedBarbershop.id;
+      } else {
+        // If not owner, try as barber
+        const { data: barber } = await supabase
+          .from('barbers')
+          .select('barbershop_id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (barber?.barbershop_id) {
+          barbershopId = barber.barbershop_id;
+        }
+      }
+
+      if (!barbershopId) return [];
 
       let query = supabase
         .from('appointments')
@@ -91,7 +110,7 @@ export const useAppointments = (date?: string) => {
           barber:barbers(id, name),
           loyalty_coupons!loyalty_coupons_redeemed_appointment_id_fkey(id, code, is_redeemed)
         `)
-        .eq('barbershop_id', barbershop.id)
+        .eq('barbershop_id', barbershopId)
         .order('appointment_time', { ascending: true });
 
       if (date) {

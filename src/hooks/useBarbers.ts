@@ -36,18 +36,37 @@ export const useBarbers = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
-      const { data: barbershop } = await supabase
+      // Try to get barbershop_id (as owner or as barber)
+      let barbershopId: string | null = null;
+
+      // First try as owner
+      const { data: ownedBarbershop } = await supabase
         .from('barbershops')
         .select('id')
         .eq('owner_id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (!barbershop) return [];
+      if (ownedBarbershop) {
+        barbershopId = ownedBarbershop.id;
+      } else {
+        // If not owner, try as barber
+        const { data: barber } = await supabase
+          .from('barbers')
+          .select('barbershop_id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (barber?.barbershop_id) {
+          barbershopId = barber.barbershop_id;
+        }
+      }
+
+      if (!barbershopId) return [];
 
       const { data, error } = await supabase
         .from('barbers')
         .select('*')
-        .eq('barbershop_id', barbershop.id)
+        .eq('barbershop_id', barbershopId)
         .eq('is_active', true)
         .order('created_at');
 
@@ -64,18 +83,37 @@ export const useAllBarbers = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
-      const { data: barbershop } = await supabase
+      // Try to get barbershop_id (as owner or as barber)
+      let barbershopId: string | null = null;
+
+      // First try as owner
+      const { data: ownedBarbershop } = await supabase
         .from('barbershops')
         .select('id')
         .eq('owner_id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (!barbershop) return [];
+      if (ownedBarbershop) {
+        barbershopId = ownedBarbershop.id;
+      } else {
+        // If not owner, try as barber
+        const { data: barber } = await supabase
+          .from('barbers')
+          .select('barbershop_id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (barber?.barbershop_id) {
+          barbershopId = barber.barbershop_id;
+        }
+      }
+
+      if (!barbershopId) return [];
 
       const { data, error } = await supabase
         .from('barbers')
         .select('*')
-        .eq('barbershop_id', barbershop.id)
+        .eq('barbershop_id', barbershopId)
         .order('created_at');
 
       if (error) throw error;
@@ -97,7 +135,7 @@ export const useCreateBarber = () => {
         .from('barbershops')
         .select('id')
         .eq('owner_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (barbershopError || !barbershop) {
         throw new Error('Barbearia não encontrada. Cadastre sua barbearia primeiro.');
