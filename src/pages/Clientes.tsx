@@ -13,8 +13,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCustomers, useCreateCustomer, useUpdateCustomer, useDeleteCustomer, Customer } from '@/hooks/useCustomers';
 import { useMyBarbershop } from '@/hooks/useBarbershops';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function Clientes() {
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [customerToDelete, setCustomerToDelete] = useState<string | null>(null);
@@ -49,6 +52,30 @@ export default function Clientes() {
   const linkConvite = barbershop?.slug 
     ? `${window.location.origin}/cadastro/${barbershop.slug}`
     : '';
+
+  // Atualização em tempo real da lista de clientes
+  useEffect(() => {
+    const channel = supabase
+      .channel('customers-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Escutar INSERT, UPDATE e DELETE
+          schema: 'public',
+          table: 'customers'
+        },
+        (payload) => {
+          console.log('Customer change detected:', payload);
+          // Invalidar a query para recarregar os dados
+          queryClient.invalidateQueries({ queryKey: ['customers'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   useEffect(() => {
     if (editingCustomer) {
