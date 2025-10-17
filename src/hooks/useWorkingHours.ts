@@ -23,9 +23,22 @@ export const useWorkingHours = () => {
   return useQuery({
     queryKey: ['working-hours'],
     queryFn: async () => {
+      // Buscar barbershop_id do usuário
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data: barbershop } = await supabase
+        .from('barbershops')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single();
+
+      if (!barbershop) return [];
+
       const { data, error } = await supabase
         .from('working_hours' as any)
         .select('*')
+        .eq('barbershop_id', barbershop.id)
         .order('day_of_week', { ascending: true });
 
       if (error) throw error;
@@ -39,13 +52,26 @@ export const useUpdateWorkingHours = () => {
 
   return useMutation({
     mutationFn: async (workingHours: UpdateWorkingHoursData[]) => {
+      // Buscar barbershop_id do usuário
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      const { data: barbershop } = await supabase
+        .from('barbershops')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single();
+
+      if (!barbershop) throw new Error('Barbearia não encontrada');
+
       // Atualizar ou inserir cada horário
       const promises = workingHours.map(async (hours) => {
         const { data: existing } = await supabase
           .from('working_hours' as any)
           .select('id')
           .eq('day_of_week', hours.day_of_week)
-          .single();
+          .eq('barbershop_id', barbershop.id)
+          .maybeSingle();
 
         if (existing) {
           return supabase
@@ -60,7 +86,10 @@ export const useUpdateWorkingHours = () => {
         } else {
           return supabase
             .from('working_hours' as any)
-            .insert([hours]);
+            .insert([{
+              ...hours,
+              barbershop_id: barbershop.id
+            }]);
         }
       });
 

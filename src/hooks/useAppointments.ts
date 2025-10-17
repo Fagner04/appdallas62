@@ -94,6 +94,18 @@ export const useAvailableTimeSlots = (date: string, barberId: string, serviceDur
 
       if (blockedError) throw blockedError;
 
+      // Fetch barber's barbershop to get working hours
+      const { data: barber } = await supabase
+        .from('barbers')
+        .select('barbershop_id')
+        .eq('id', barberId)
+        .single();
+
+      if (!barber?.barbershop_id) {
+        console.warn('Barber has no barbershop');
+        return [];
+      }
+
       // Fetch working hours for the day of week
       const dateObj = new Date(date + 'T00:00:00');
       const dayOfWeek = dateObj.getDay();
@@ -102,6 +114,7 @@ export const useAvailableTimeSlots = (date: string, barberId: string, serviceDur
         .from('working_hours' as any)
         .select('*')
         .eq('day_of_week', dayOfWeek)
+        .eq('barbershop_id', barber.barbershop_id)
         .maybeSingle();
 
       if (hoursError) {
